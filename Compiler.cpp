@@ -283,6 +283,10 @@ bool Compiler::parseWord(Line::iterator& word_it, std::string word) {
     return false;
 }
 
+// Virtual destructor to prevent compiler warnings
+Compiler::Statement::~Statement() {
+}
+
 // If statement constructor just sets statement type
 Compiler::IfStatement::IfStatement() {
     type = IF_STATEMENT;

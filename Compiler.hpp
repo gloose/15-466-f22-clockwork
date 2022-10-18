@@ -47,8 +47,10 @@ struct Compiler {
     };
 
     struct Statement {
-        virtual void execute();
         StatementType type;
+
+        virtual ~Statement();
+        virtual void execute();
     };
 
     struct ActionStatement : Statement {
