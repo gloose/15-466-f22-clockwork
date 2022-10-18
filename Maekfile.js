@@ -146,8 +146,7 @@ const game_names = [
 ];
 
 const compiler_names = [
-	maek.CPP('Compiler.cpp'),
-	maek.CPP('data_path.cpp')
+	maek.CPP('Compiler.cpp')
 ];
 
 const common_names = [

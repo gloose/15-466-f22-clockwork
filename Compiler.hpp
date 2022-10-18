@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include <vector>
 #include <list>
+#include <string>
 
 struct Compiler {
     enum Action {
