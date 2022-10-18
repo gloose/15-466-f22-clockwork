@@ -25,7 +25,7 @@ const NEST_LIBS = `../nest-libs/${maek.OS}`;
 //set compile flags (these can also be overridden per-task using the "options" parameter):
 if (maek.OS === "windows") {
 	maek.options.CPPFlags.push(
-		`/O2`, //optimize
+		//`/O2`, //optimize
 		//include paths for nest libraries:
 		`/I${NEST_LIBS}/SDL2/include`,
 		`/I${NEST_LIBS}/glm/include`,
@@ -145,6 +145,11 @@ const game_names = [
 	maek.CPP('load_opus.cpp')
 ];
 
+const compiler_names = [
+	maek.CPP('Compiler.cpp'),
+	maek.CPP('data_path.cpp')
+];
+
 const common_names = [
 	maek.CPP('data_path.cpp'),
 	maek.CPP('PathFont.cpp'),
@@ -181,13 +186,14 @@ const freetype_test_names = [
 // exeFileBase: name of executable file to produce
 //returns exeFile: exeFileBase + a platform-dependant suffix (e.g., '.exe' on windows)
 const game_exe = maek.LINK([...game_names, ...common_names], 'dist/game');
+const compiler_exe = maek.LINK([...compiler_names, ...common_names], 'dist/compiler');
 const show_meshes_exe = maek.LINK([...show_meshes_names, ...common_names], 'scenes/show-meshes');
 const show_scene_exe = maek.LINK([...show_scene_names, ...common_names], 'scenes/show-scene');
 
 const freetype_test_exe = maek.LINK([...freetype_test_names], 'freetype-test');
 
 //set the default target to the game (and copy the readme files):
-maek.TARGETS = [game_exe, show_meshes_exe, show_scene_exe, freetype_test_exe, ...copies];
+maek.TARGETS = [game_exe, compiler_exe, show_meshes_exe, show_scene_exe, freetype_test_exe, ...copies];
 
 //the '[targets =] RULE(targets, prerequisites[, recipe])' rule defines a Makefile-style task
 // targets: array of targets the task produces (can include both files and ':abstract targets')
