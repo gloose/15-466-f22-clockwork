@@ -105,7 +105,7 @@ Compiler::ActionStatement* Compiler::parseActionStatement(Program& program, Prog
 
     if (parseObject(word_it, &out->object)
      && parseWord(word_it, ".")
-     && parseAction(word_it, out->object, &out->action)
+     && parseAction(word_it, out->object, &out->func, &out->duration)
      && parseWord(word_it, "(")
      && parseObject(word_it, &out->target)
      && parseWord(word_it, ")")) {
@@ -177,10 +177,13 @@ bool Compiler::parseObject(Line::iterator& word_it, Object** out) {
 
 // Attempts to parse a word as the name of a legal action for the given object.
 // Advances the word iterator if successful.
-bool Compiler::parseAction(Line::iterator& word_it, Object* obj, ActionFunction* out) {
+bool Compiler::parseAction(Line::iterator& word_it, Object* obj, ActionFunction* out_func, float* out_dur) {
     auto act = obj->actions.find(*word_it);
     if (act != obj->actions.end()) {
-        *out = act->second;
+        *out_func = act->second.func;
+        if (out_dur != nullptr) {
+            *out_dur = act->second.duration;
+        }
         std::advance(word_it, 1);
         return true;
     }
@@ -290,6 +293,7 @@ Compiler::Statement::~Statement() {
 // If statement constructor just sets statement type
 Compiler::IfStatement::IfStatement() {
     type = IF_STATEMENT;
+    duration = 0.25f;
 }
 
 // Action statement constructor just sets statement type
@@ -297,20 +301,45 @@ Compiler::ActionStatement::ActionStatement() {
     type = ACTION_STATEMENT;
 }
 
-// Statement superclass cannot be executed
+// Statement superclass doesn't implement next
+Compiler::Statement* Compiler::Statement::next() {
+    assert(false && "Statement::next must be overridden by child class");
+    return nullptr;
+}
+
+// Statement superclass doesn't implement execute
 void Compiler::Statement::execute() {
     assert(false && "Statement::execute must be overridden by child class");
 }
 
+// Action statement only returns itself
+Compiler::Statement* Compiler::ActionStatement::next() {
+    if (current_line == 0) {
+        current_line++;
+        return this;
+    }
+    return nullptr;
+}
+
 // Execute action statement by calling the action function with arguments object, target
 void Compiler::ActionStatement::execute() {
-    action(object, target);
+    func(object, target);
 }
 
 // Exeecute an if statement by checking if its condition is true,
 // then executing all statements contained within it if so.
+Compiler::Statement* Compiler::IfStatement::next() {
+    if (current_line == 0) {
+        current_line++;
+        return this;
+    } else if (truth && current_line - 1 < statements.size()) {
+        return statements[current_line++ - 1]->next();
+    }
+
+    return nullptr;
+}
+
 void Compiler::IfStatement::execute() {
-    bool truth = false;
     if (condition.comparator == "=") {
         truth = *condition.left == *condition.right;
     } else if (condition.comparator == "<") {
@@ -320,19 +349,34 @@ void Compiler::IfStatement::execute() {
     } else {
         std::cout << "Invalid comparator " << condition.comparator << " in if statement" << std::endl;
     }
-
-    if (truth) {
-        for (size_t i = 0; i < statements.size(); i++) {
-            statements[i]->execute();
-        }
-    }
 }
 
 // Execute an executable by executing all of its statements
 void Compiler::Executable::execute() {
-    for (size_t i = 0; i < statements.size(); i++) {
-        statements[i]->execute();
+    Statement* statement;
+    while (true) {
+        statement = next();
+        if (statement) {
+            statement->execute();
+        } else {
+            break;
+        }
     }
+}
+
+// Get the next statement to be executed
+Compiler::Statement* Compiler::Executable::next() {
+    Statement* statement = nullptr;
+    while (current_line < statements.size()) {
+        statement = statements[current_line]->next();
+        if (statement == nullptr) {
+            current_line++;
+        } else {
+            break;
+        }
+    }
+
+    return statement;
 }
 
 // Add object to compiler's object map
@@ -344,9 +388,13 @@ void Compiler::addObject(Object* obj) {
 Compiler::Object::Object(std::string name) : name(name) {
 }
 
+// Construct action with function and duration
+Compiler::Action::Action(ActionFunction func, float duration) : func(func), duration(duration) {
+}
+
 // Add action to object's map of valid actions
-void Compiler::Object::addAction(std::string action_name, ActionFunction func) {
-    actions.emplace(action_name, func);
+void Compiler::Object::addAction(std::string action_name, ActionFunction func, float duration) {
+    actions.emplace(action_name, Action(func, duration));
 }
 
 // Add property to object's map of properties
@@ -386,8 +434,8 @@ int main(int argc, char** argv) {
 
     { // Create the warrior object
         Compiler::Object* obj = new Compiler::Object("warrior");
-        obj->addAction("attack", &attackFunction);
-        obj->addAction("defend", &defendFunction);
+        obj->addAction("attack", &attackFunction, 1);
+        obj->addAction("defend", &defendFunction, 0.5);
         obj->addProperty("health", 10);
         compiler.addObject(obj);
     }
