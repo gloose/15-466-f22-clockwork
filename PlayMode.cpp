@@ -144,9 +144,82 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	glBindTexture(GL_TEXTURE_2D, data_stream->tile_tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, char_width * num_chars, char_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	turn_time = 0.0f;
+	player_done = true;
+	enemy_done = true;
+	turn = Turn::PLAYER;
+	init_compiler();
 }
 
 PlayMode::~PlayMode() {
+}
+
+void PlayMode::init_compiler() {
+	Compiler::Object *warrior = new Compiler::Object("WARRIOR");
+	warrior->addAction("ATTACK", attack_function, 1.0f);
+	warrior->addAction("DEFEND", defend_function, 1.0f);
+	warrior->addProperty("HEALTH_MAX", 100);
+	warrior->addProperty("HEALTH", 100);
+	warrior->addProperty("DEFENSE", 2);
+	warrior->addProperty("ALIVE", 1);
+
+	Compiler::Object *wizard = new Compiler::Object("WIZARD");
+	wizard->addAction("FREEZE", freeze_function, 1.5f);
+	wizard->addAction("BURN", burn_function, 1.5f);
+	wizard->addProperty("HEALTH_MAX", 200);
+	wizard->addProperty("HEALTH", 200);
+	wizard->addProperty("DEFENSE", 1);
+	wizard->addProperty("ALIVE", 1);
+	wizard->addProperty("DEFENDED", 0); // Defended by the warrior
+
+	Compiler::Object *archer = new Compiler::Object("ARCHER");
+	archer->addAction("SHOOT", shoot_function, 0.5f);
+	archer->addProperty("HEALTH_MAX", 50);
+	archer->addProperty("HEALTH", 50);
+	archer->addProperty("DEFENSE", 1);
+	archer->addProperty("ALIVE", 1);
+	archer->addProperty("DEFENDED", 0);
+	archer->addProperty("ARROWS", 20);
+
+	Compiler::Object *healer = new Compiler::Object("HEALER");
+	healer->addAction("HEAL", heal_function, 1.0f);
+	healer->addProperty("HEALTH_MAX", 50);
+	healer->addProperty("HEALTH", 50);
+	healer->addProperty("DEFENSE", 1);
+	healer->addProperty("ALIVE", 1);
+	healer->addProperty("DEFENDED", 0);
+
+	Compiler::Object *fargoth = new Compiler::Object("FARGOTH");
+	fargoth->addAction("ATTACK", attack_function, 1.0f);
+	fargoth->addAction("DEFEND", defend_function, 1.0f);
+	fargoth->addProperty("HEALTH_MAX", 150);
+	fargoth->addProperty("HEALTH", 150);
+	fargoth->addProperty("DEFENSE", 1);
+	fargoth->addProperty("ALIVE", 1);
+	fargoth->addProperty("PRESENT", 1);
+
+	Compiler::Object *rupol = new Compiler::Object("RUPOL");
+	rupol->addAction("ATTACK", attack_function, 1.0f);
+	rupol->addAction("DEFEND", defend_function, 1.0f);
+	rupol->addProperty("HEALTH_MAX", 150);
+	rupol->addProperty("HEALTH", 150);
+	rupol->addProperty("DEFENSE", 1);
+	rupol->addProperty("ALIVE", 1);
+	rupol->addProperty("PRESENT", 1);
+
+	player_compiler.addObject(warrior);
+	enemy_compiler.addObject(warrior);
+	player_compiler.addObject(wizard);
+	enemy_compiler.addObject(wizard);
+	player_compiler.addObject(archer);
+	enemy_compiler.addObject(archer);
+	player_compiler.addObject(healer);
+	enemy_compiler.addObject(healer);
+	player_compiler.addObject(fargoth);
+	enemy_compiler.addObject(fargoth);
+	player_compiler.addObject(rupol);
+	enemy_compiler.addObject(rupol);
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -209,7 +282,60 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	return false;
 }
 
+void PlayMode::execute_player_statement(float time_left) {
+	float time = player_statement->duration;
+	if (time_left >= time) {
+		player_statement->execute();
+		player_statement = player_exe->next();
+		if (player_statement == nullptr) {
+			player_done = true;
+		} else {
+			execute_player_statement(time_left - time);
+		}
+	} else {
+		player_statement->duration -= time_left;
+	}
+}
+
+void PlayMode::execute_enemy_statement(float time_left) {
+	float time = enemy_statement->duration;
+	if (time_left >= time) {
+		enemy_statement->execute();
+		enemy_statement = player_exe->next();
+		if (enemy_statement == nullptr) {
+			enemy_done = true;
+		} else {
+			execute_enemy_statement(time_left - time);
+		}
+	} else {
+		enemy_statement->duration -= time_left;
+	}
+}
+
+void PlayMode::take_turn() {
+	if (turn == Turn::PLAYER) {
+		execute_player_statement(1.0f);
+		if (!enemy_done) {
+			turn = Turn::ENEMY;
+		}
+	} else {
+		execute_enemy_statement(1.0f);
+		// If both are done, we want to switch control to the player for the next turn
+		if (enemy_done || !player_done) {
+			turn = Turn::PLAYER;
+		}
+	}
+}
+
 void PlayMode::update(float elapsed) {
+	if (!player_done || !enemy_done) {
+		if (turn_time <= 0.0f) {
+			take_turn();
+			turn_time = 1.0f;
+		} else {
+			turn_time -= elapsed;
+		}
+	}
 
 	//slowly rotates through [0,1):
 	wobble += elapsed / 10.0f;

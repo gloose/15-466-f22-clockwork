@@ -467,6 +467,7 @@ void defendFunction(Compiler::Object* obj, Compiler::Object* target) {
     std::cout << "Object " << obj->name << " defends target " << target->name << std::endl;
 }
 
+/*
 // Compile the code in code.txt, then execute it.
 int main(int argc, char** argv) {
     Compiler compiler = Compiler();
@@ -488,3 +489,4 @@ int main(int argc, char** argv) {
         delete exe;
     }
 }
+*/
