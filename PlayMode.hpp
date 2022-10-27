@@ -8,6 +8,7 @@
 #include <hb-ft.h>
 #include <freetype/freetype.h>
 #include <freetype/fttypes.h>
+#include "Compiler.hpp"
 
 #include <vector>
 #include <deque>
@@ -123,6 +124,24 @@ struct PlayMode : Mode {
 	//camera:
 	Scene::Camera *camera = nullptr;
 
+	// David
+	enum Turn {
+		PLAYER,
+		ENEMY
+	} turn;
+	float turn_time;
+	bool player_done;
+	bool enemy_done;
+	void take_turn();
+	void init_compiler();
+	void execute_player_statement(float time_left);
+	void execute_enemy_statement(float time_left);
+	Compiler player_compiler;
+	Compiler enemy_compiler;
+	Compiler::Executable *player_exe;
+	Compiler::Statement *player_statement;
+	Compiler::Executable *enemy_exe;
+	Compiler::Statement *enemy_statement;
 
 	// Helper functions
 	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color);
