@@ -156,57 +156,57 @@ PlayMode::~PlayMode() {
 }
 
 void PlayMode::init_compiler() {
-	Compiler::Object warrior;
-	warrior.name = "WARRIOR";
-	warrior.addAction("ATTACK");
-	warrior.addAction("DEFEND");
-	warrior.addProperty("HEALTH", 100);
-	warrior.addProperty("DEFENSE", 2);
-	warrior.addProperty("ALIVE", 1);
+	Compiler::Object *warrior = new Compiler::Object("WARRIOR");
+	warrior->addAction("ATTACK", attack_function, 1.0f);
+	warrior->addAction("DEFEND", defend_function, 1.0f);
+	warrior->addProperty("HEALTH_MAX", 100);
+	warrior->addProperty("HEALTH", 100);
+	warrior->addProperty("DEFENSE", 2);
+	warrior->addProperty("ALIVE", 1);
 
-	Compiler::Object wizard;
-	wizard.name = "WIZARD";
-	wizard.addAction("FREEZE");
-	wizard.addAction("BURN");
-	wizard.addProperty("HEALTH", 200);
-	wizard.addProperty("DEFENSE", 1);
-	wizard.addProperty("ALIVE", 1);
-	wizard.addProperty("DEFENDED", 0); // Defended by the warrior
+	Compiler::Object *wizard = new Compiler::Object("WIZARD");
+	wizard->addAction("FREEZE", freeze_function, 1.5f);
+	wizard->addAction("BURN", burn_function, 1.5f);
+	wizard->addProperty("HEALTH_MAX", 200);
+	wizard->addProperty("HEALTH", 200);
+	wizard->addProperty("DEFENSE", 1);
+	wizard->addProperty("ALIVE", 1);
+	wizard->addProperty("DEFENDED", 0); // Defended by the warrior
 
-	Compiler::Object archer;
-	archer.name = "ARCHER";
-	archer.addAction("SHOOT");
-	archer.addProperty("HEALTH", 50);
-	archer.addProperty("DEFENSE", 0.5);
-	archer.addProperty("ALIVE", 1);
-	archer.addProperty("DEFENDED", 0);
-	archer.addProperty("ARROWS", 20);
+	Compiler::Object *archer = new Compiler::Object("ARCHER");
+	archer->addAction("SHOOT", shoot_function, 0.5f);
+	archer->addProperty("HEALTH_MAX", 50);
+	archer->addProperty("HEALTH", 50);
+	archer->addProperty("DEFENSE", 1);
+	archer->addProperty("ALIVE", 1);
+	archer->addProperty("DEFENDED", 0);
+	archer->addProperty("ARROWS", 20);
 
-	Compiler::Object healer;
-	healer.name = "HEALER";
-	healer.addAction("HEAL");
-	healer.addAction("STRENGTHEN"); // Increase attack
-	healer.addAction("HARDEN"); // Increase defense
-	healer.addProperty("HEALTH", 50);
-	warrior.addProperty("DEFENSE", 0.5);
-	healer.addProperty("ALIVE", 1);
-	healer.addProperty("DEFENDED", 0);
+	Compiler::Object *healer = new Compiler::Object("HEALER");
+	healer->addAction("HEAL", heal_function, 1.0f);
+	healer->addProperty("HEALTH_MAX", 50);
+	healer->addProperty("HEALTH", 50);
+	healer->addProperty("DEFENSE", 1);
+	healer->addProperty("ALIVE", 1);
+	healer->addProperty("DEFENDED", 0);
 
-	Compiler::Object fargoth;
-	fargoth.name = "FARGOTH";
-	fargoth.addAction("ATTACK");
-	fargoth.addAction("DEFEND");
-	fargoth.addProperty("HEALTH", 150);
-	fargoth.addProperty("DEFENSE", 1);
-	fargoth.addProperty("PRESENT", 1);
+	Compiler::Object *fargoth = new Compiler::Object("FARGOTH");
+	fargoth->addAction("ATTACK", attack_function, 1.0f);
+	fargoth->addAction("DEFEND", defend_function, 1.0f);
+	fargoth->addProperty("HEALTH_MAX", 150);
+	fargoth->addProperty("HEALTH", 150);
+	fargoth->addProperty("DEFENSE", 1);
+	fargoth->addProperty("ALIVE", 1);
+	fargoth->addProperty("PRESENT", 1);
 
-	Compiler::Object rupol;
-	rupol.name = "RUPOL";
-	rupol.addAction("ATTACK");
-	rupol.addAction("DEFEND");
-	rupol.addProperty("HEALTH", 150);
-	rupol.addProperty("DEFENSE", 1);
-	rupol.addProperty("PRESENT", 1);
+	Compiler::Object *rupol = new Compiler::Object("RUPOL");
+	rupol->addAction("ATTACK", attack_function, 1.0f);
+	rupol->addAction("DEFEND", defend_function, 1.0f);
+	rupol->addProperty("HEALTH_MAX", 150);
+	rupol->addProperty("HEALTH", 150);
+	rupol->addProperty("DEFENSE", 1);
+	rupol->addProperty("ALIVE", 1);
+	rupol->addProperty("PRESENT", 1);
 
 	player_compiler.addObject(warrior);
 	enemy_compiler.addObject(warrior);
@@ -282,7 +282,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	return false;
 }
 
-void PlayMode::execute_line_player(float time_left) {
+void PlayMode::execute_player_statement(float time_left) {
 	float time = player_statement->duration;
 	if (time_left >= time) {
 		player_statement->execute();
@@ -290,14 +290,14 @@ void PlayMode::execute_line_player(float time_left) {
 		if (player_statement == nullptr) {
 			player_done = true;
 		} else {
-			execute_line_player(time_left - time);
+			execute_player_statement(time_left - time);
 		}
 	} else {
 		player_statement->duration -= time_left;
 	}
 }
 
-void PlayMode::execute_line_enemy(float time_left) {
+void PlayMode::execute_enemy_statement(float time_left) {
 	float time = enemy_statement->duration;
 	if (time_left >= time) {
 		enemy_statement->execute();
@@ -305,7 +305,7 @@ void PlayMode::execute_line_enemy(float time_left) {
 		if (enemy_statement == nullptr) {
 			enemy_done = true;
 		} else {
-			execute_line_enemy(time_left - time);
+			execute_enemy_statement(time_left - time);
 		}
 	} else {
 		enemy_statement->duration -= time_left;
@@ -314,12 +314,12 @@ void PlayMode::execute_line_enemy(float time_left) {
 
 void PlayMode::take_turn() {
 	if (turn == Turn::PLAYER) {
-		execute_line_player(1.0f);
+		execute_player_statement(1.0f);
 		if (!enemy_done) {
 			turn = Turn::ENEMY;
 		}
 	} else {
-		execute_line_enemy(1.0f);
+		execute_enemy_statement(1.0f);
 		// If both are done, we want to switch control to the player for the next turn
 		if (enemy_done || !player_done) {
 			turn = Turn::PLAYER;
