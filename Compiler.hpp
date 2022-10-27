@@ -31,6 +31,8 @@ struct Compiler {
     typedef std::list<std::string> Line;
     typedef std::list<Line> Program;
 
+    static const size_t MAX_LINE_SIZE = 1024;
+
     enum ConditionType {
         CONJUNCTION,
         DISJUNCTION
@@ -72,7 +74,6 @@ struct Compiler {
     struct IfStatement : Statement {
         Condition condition;
         std::vector<Statement*> statements;
-        size_t current_line = 0;
         bool truth = false;
 
         IfStatement();
@@ -100,6 +101,11 @@ struct Compiler {
     bool parsePropertyValue(Line::iterator& word_it, int** out);
     bool parseProperty(Line::iterator& word_it, Object* obj, int** out);
     bool parseComparator(Line::iterator& word_it, std::string* out);
+    Executable* compile(Program program);
     Executable* compile(std::string filename);
+    Executable* compile(std::vector<std::string> lines);
     void addObject(Object* obj);
+    Program readProgram(std::string filename);
+    Program readProgram(std::vector<std::string> lines);
+    static std::string formatCase(std::string str);
 };

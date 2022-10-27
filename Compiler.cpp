@@ -5,62 +5,79 @@
 #include <cassert>
 #include <iterator>
 #include <memory>
+#include <algorithm>
 
 // Constructor doesn't do anything at the moment
 Compiler::Compiler() {
 }
 
-// Reads code from filename and compiles it into an Executable struct.
-// If compilation fails, prints some error message and returns nullptr.
-Compiler::Executable* Compiler::compile(std::string filename) {
-    // Open file at dist/filename
-    std::ifstream ifile(data_path(filename), std::ios::binary);
-    
+// Read a vector of strings into the Program format that can be compiled
+Compiler::Program Compiler::readProgram(std::vector<std::string> lines) {
     // Vector of vectors of strings, each vector represents a line of text words
     Program program;
 
-    { // Read all lines of text from file into program
-        Line line;
-        std::string word;
+    Line line;
+    std::string word;
 
-        // Appends a word to the line
-        auto addWord = [&]() {
-            if (word.size() > 0) {
-                line.push_back(word);
-                word.clear();
-            }
-        };
+    // Appends a word to the line
+    auto addWord = [&]() {
+        if (word.size() > 0) {
+            line.push_back(word);
+            word.clear();
+        }
+    };
 
-        // Appends a line to the program
-        auto addLine = [&]() {
-            addWord();
-            if (line.size() > 0) {
-                program.push_back(line);
-                line.clear();
-            }
-        };
+    // Appends a line to the program
+    auto addLine = [&]() {
+        addWord();
+        if (line.size() > 0) {
+            program.push_back(line);
+            line.clear();
+        }
+    };
 
-        // Parse text into words and lines
-        char c;
-        while (ifile.get(c)) {
+    // Parse text into words and lines
+    for (size_t i = 0; i < lines.size(); i++) {
+        for (size_t j = 0; j < lines[i].size(); j++) {
+            char c = (char)toupper(lines[i][j]);
+
             if (c == ' ' || c == '\t') {
                 addWord();
             } else if (c == '.' || c == '(' || c == ')') {
                 addWord();
                 word = c;
                 addWord();
-            } else if (c == '\n' || c == '\r') {
-                if (c == '\r') {
-                    assert(ifile.get() == '\n' && "Expected \\r\\n");
-                }
-                addLine();
             } else {
                 word = word + c;
             }
         }
         addLine();
     }
+    addLine();
 
+    return program;
+}
+
+// Read a file into the Program format that can be compiled
+Compiler::Program Compiler::readProgram(std::string filename) {
+    // Open file at dist/filename
+    std::ifstream ifile(data_path(filename), std::ios::binary);
+
+    // Read the file into a line vector
+    std::vector<std::string> lines;
+    char line[MAX_LINE_SIZE];
+    while (ifile.getline(line, MAX_LINE_SIZE)) {
+        std::string str(line);
+        lines.push_back(str);
+    }
+
+    // Pass the lines to the usual readProgram function
+    return readProgram(lines);
+}
+
+// Compiles a program into an Executable struct.
+// If compilation fails, prints some error message and returns nullptr.
+Compiler::Executable* Compiler::compile(Program program) {
     // Compile the executable
     Executable* exe = new Executable();
     auto it = program.begin();
@@ -74,6 +91,16 @@ Compiler::Executable* Compiler::compile(std::string filename) {
         }
     }
     return exe;
+}
+
+// Overload to compile from a text file
+Compiler::Executable* Compiler::compile(std::string filename) {
+    return compile(readProgram(filename));
+}
+
+// Overload to compile from a vector of strings
+Compiler::Executable* Compiler::compile(std::vector<std::string> lines) {
+    return compile(readProgram(lines));
 }
 
 // Parses an if statement or an action statement at the current line.
@@ -95,6 +122,14 @@ Compiler::Statement* Compiler::parseStatement(Program& program, Program::iterato
 
     // If all else failed, return nullptr
     return nullptr;
+}
+
+std::string Compiler::formatCase(std::string str) {
+    auto upperChar = [](char c) {
+        return (char)toupper(c);
+    };
+    std::transform(str.begin(), str.end(), str.begin(), upperChar);
+    return str;
 }
 
 // Parses a line of the form "object1.action(object2)".
@@ -127,7 +162,7 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
     IfStatement* out = new IfStatement();
 
     // Check if the first line matches the if statement format
-    if (parseWord(word_it, "if")
+    if (parseWord(word_it, "IF")
      && parseWord(word_it, "(")
      && parseCondition(word_it, &out->condition)
      && parseWord(word_it, ")")) {
@@ -138,7 +173,7 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
             size_t line_num = std::distance(program.begin(), line_it) + 1;
 
             // On end, return successfully
-            if (parseWord(word_it, "end")) {
+            if (parseWord(word_it, "END")) {
                 std::advance(line_it, 1);
                 return out;
             }
@@ -155,7 +190,7 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
             }
         }
 
-        std::cout << "If statement must be closed with and end" << std::endl;
+        std::cout << "If statement must be closed with an end" << std::endl;
     }
 
     line_it = old_it;
@@ -326,8 +361,8 @@ void Compiler::ActionStatement::execute() {
     func(object, target);
 }
 
-// Exeecute an if statement by checking if its condition is true,
-// then executing all statements contained within it if so.
+// First call returns the if line itself.
+// If true, subsequent calls return statements in order
 Compiler::Statement* Compiler::IfStatement::next() {
     if (current_line == 0) {
         current_line++;
@@ -339,6 +374,7 @@ Compiler::Statement* Compiler::IfStatement::next() {
     return nullptr;
 }
 
+// Execute just the conditional line and set the truth value
 void Compiler::IfStatement::execute() {
     if (condition.comparator == "=") {
         truth = *condition.left == *condition.right;
@@ -385,7 +421,7 @@ void Compiler::addObject(Object* obj) {
 }
 
 // Construct object with name
-Compiler::Object::Object(std::string name) : name(name) {
+Compiler::Object::Object(std::string name) : name(formatCase(name)) {
 }
 
 // Construct action with function and duration
@@ -394,17 +430,20 @@ Compiler::Action::Action(ActionFunction func, float duration) : func(func), dura
 
 // Add action to object's map of valid actions
 void Compiler::Object::addAction(std::string action_name, ActionFunction func, float duration) {
+    action_name = formatCase(action_name);
     actions.emplace(action_name, Action(func, duration));
 }
 
 // Add property to object's map of properties
 void Compiler::Object::addProperty(std::string property_name, int default_value) {
+    property_name = formatCase(property_name);
     properties.emplace(property_name, new int(default_value));
 }
 
 // Returns a reference to the property named property_name
 // If the object has no such property, create one with default value 0
 int& Compiler::Object::property(std::string property_name) {
+    property_name = formatCase(property_name);
     auto prop = properties.find(property_name);
     if (prop == properties.end()) {
         addProperty(property_name, 0);
