@@ -649,7 +649,7 @@ void PlayMode::move_up(){
 	}
 	else{
 		line_index = line_index - 1;
-		cur_cursor_pos = (int)text_buffer[line_index].size();
+		cur_cursor_pos = text_buffer[line_index].size();
 	}
 	text_buffer[line_index].insert(cur_cursor_pos,"|");
 }
@@ -658,7 +658,7 @@ void PlayMode::move_down(){
 	if(line_index < (text_buffer.size() - 1)){
 		text_buffer[line_index].erase(cur_cursor_pos,1);
 		line_index = line_index + 1;
-		cur_cursor_pos = (int)text_buffer[line_index].size();
+		cur_cursor_pos = text_buffer[line_index].size();
 		text_buffer[line_index].insert(cur_cursor_pos,"|");
 	}
 }
@@ -707,7 +707,7 @@ void PlayMode::render(){
 	int x = 20;
 	int y = ScreenHeight - 20;
 	glm::u8vec4 pen_color = default_line_color;
-	for(int i = 0; i < text_buffer.size(); i++){
+	for(size_t i = 0; i < text_buffer.size(); i++){
 		if(i == execution_line_index){
 			pen_color = execute_line_color;
 		} else if(i == line_index){

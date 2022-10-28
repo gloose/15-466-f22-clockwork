@@ -150,8 +150,8 @@ struct PlayMode : Mode {
 	void drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip);
 
 	//begin of the text rendering
-	int line_index = 0;
-	int cur_cursor_pos = 0; 
+	size_t line_index = 0;
+	size_t cur_cursor_pos = 0; 
 	std::vector< std::string > text_buffer; 
 	int execution_line_index = -1; 
 	int max_line_length = 400;
