@@ -479,27 +479,3 @@ void attackFunction(Compiler::Object* obj, Compiler::Object* target) {
 void defendFunction(Compiler::Object* obj, Compiler::Object* target) {
     std::cout << "Object " << obj->name << " defends target " << target->name << std::endl;
 }
-
-/*
-// Compile the code in code.txt, then execute it.
-int main(int argc, char** argv) {
-    Compiler compiler = Compiler();
-
-    { // Create the warrior object
-        Compiler::Object* obj = new Compiler::Object("warrior");
-        obj->addAction("attack", &attackFunction, 1);
-        obj->addAction("defend", &defendFunction, 0.5);
-        obj->addProperty("health", 10);
-        compiler.addObject(obj);
-    }
-
-    // Compile the code in code.txt
-    Compiler::Executable* exe = compiler.compile("code.txt");
-
-    // If compilation succeeded, execute it
-    if (exe != nullptr) {
-        exe->execute();
-        delete exe;
-    }
-}
-*/
