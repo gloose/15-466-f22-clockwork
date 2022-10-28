@@ -68,6 +68,9 @@ Compiler::Program Compiler::readProgram(std::string filename) {
     char line[MAX_LINE_SIZE];
     while (ifile.getline(line, MAX_LINE_SIZE)) {
         std::string str(line);
+        if (str[str.size() - 1] == '\r') {
+            str = str.substr(0, str.size() - 1);
+        }
         lines.push_back(str);
     }
 
