@@ -124,7 +124,7 @@ struct PlayMode : Mode {
 
 	//music coming from the tip of the leg (as a demonstration):
 	std::shared_ptr< Sound::PlayingSample > leg_tip_loop;
-
+	
 	//camera:
 	Scene::Camera *camera = nullptr;
 
@@ -153,11 +153,11 @@ struct PlayMode : Mode {
 
 	//begin of the text rendering
 	int line_index = 0;
-	int cur_cursor_pos = 0;
-	std::vector< std::string > text_buffer;
-	int execution_line_index = -1;
+	int cur_cursor_pos = 0; 
+	std::vector< std::string > text_buffer; 
+	int execution_line_index = -1; 
 	int max_line_length = 400;
-	std::string cur_str;
+	std::string cur_str; 
 	void move_up();
 	void move_down();
 	void move_right();
