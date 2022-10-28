@@ -1,4 +1,6 @@
 #include "Compiler.hpp"
+#include <iostream>
+#include <random>
 
 void attack_function(Compiler::Object* user, Compiler::Object* target);
 void defend_function(Compiler::Object* user, Compiler::Object* target);
