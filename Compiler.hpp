@@ -55,6 +55,7 @@ struct Compiler {
         StatementType type;
         size_t current_line = 0;
         float duration = 1.f;
+        size_t line_num = 0;
 
         virtual ~Statement();
         virtual Statement* next();

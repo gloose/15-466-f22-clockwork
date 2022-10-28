@@ -30,10 +30,8 @@ Compiler::Program Compiler::readProgram(std::vector<std::string> lines) {
     // Appends a line to the program
     auto addLine = [&]() {
         addWord();
-        if (line.size() > 0) {
-            program.push_back(line);
-            line.clear();
-        }
+        program.push_back(line);
+        line.clear();
     };
 
     // Parse text into words and lines
@@ -85,12 +83,16 @@ Compiler::Executable* Compiler::compile(Program program) {
     Executable* exe = new Executable();
     auto it = program.begin();
     while (it != program.end()) {
-        size_t line_num = std::distance(program.begin(), it) + 1;
-        exe->statements.push_back(parseStatement(program, it));
-        if (exe->statements.back() == nullptr) {
-            std::cout << "Failed to parse statement on line " << line_num << std::endl;
-            delete exe;
-            return nullptr;
+        if (it->size() > 0) {
+            size_t line_num = std::distance(program.begin(), it) + 1;
+            exe->statements.push_back(parseStatement(program, it));
+            if (exe->statements.back() == nullptr) {
+                std::cout << "Failed to parse statement on line " << line_num << std::endl;
+                delete exe;
+                return nullptr;
+            }
+        } else {
+            it++;
         }
     }
     return exe;
@@ -110,16 +112,20 @@ Compiler::Executable* Compiler::compile(std::vector<std::string> lines) {
 // Advances the line iterator if successful
 Compiler::Statement* Compiler::parseStatement(Program& program, Program::iterator& line_it) {
     Statement* out;
-    
+
+    size_t line_num = std::distance(program.begin(), line_it) + 1;
+
     // Attempt to parse the line as an if statement
     out = parseIfStatement(program, line_it);
     if (out != nullptr) {
+        out->line_num = line_num;
         return out;
     }
     
     // Attempt to parse the line as an action statement
     out = parseActionStatement(program, line_it);
     if (out != nullptr) {
+        out->line_num = line_num;
         return out;
     }
 
@@ -172,24 +178,28 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
         // If so, parse all subsequent lines into out->statements until end is reached
         std::advance(line_it, 1);
         while (line_it != program.end()) {
-            word_it = line_it->begin();
-            size_t line_num = std::distance(program.begin(), line_it) + 1;
+            if (line_it->size() > 0) {
+                word_it = line_it->begin();
+                size_t line_num = std::distance(program.begin(), line_it) + 1;
 
-            // On end, return successfully
-            if (parseWord(word_it, "END")) {
-                std::advance(line_it, 1);
-                return out;
-            }
+                // On end, return successfully
+                if (parseWord(word_it, "END")) {
+                    std::advance(line_it, 1);
+                    return out;
+                }
 
-            // Otherwise, parse next statement
-            out->statements.push_back(parseStatement(program, line_it));
+                // Otherwise, parse next statement
+                out->statements.push_back(parseStatement(program, line_it));
 
-            // If the parse failed, print error message and return failure
-            if (out->statements.back() == nullptr) {
-                std::cout << "Failed to parse statement on line " << line_num << std::endl;
-                delete out;
-                line_it = old_it;
-                return nullptr;
+                // If the parse failed, print error message and return failure
+                if (out->statements.back() == nullptr) {
+                    std::cout << "Failed to parse statement on line " << line_num << std::endl;
+                    delete out;
+                    line_it = old_it;
+                    return nullptr;
+                }
+            } else {
+                line_it++;
             }
         }
 
