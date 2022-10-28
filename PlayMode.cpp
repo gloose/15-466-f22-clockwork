@@ -150,6 +150,14 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	enemy_done = true;
 	turn = Turn::PLAYER;
 	init_compiler();
+
+	// Temporary
+	player_exe = player_compiler.compile("player-test.txt");
+	player_statement = player_exe->next();
+	enemy_exe = enemy_compiler.compile("enemy-test.txt");
+	enemy_statement = enemy_exe->next();
+	player_done = false;
+	enemy_done = false;
 }
 
 PlayMode::~PlayMode() {
@@ -285,6 +293,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 void PlayMode::execute_player_statement(float time_left) {
 	float time = player_statement->duration;
 	if (time_left >= time) {
+		std::cout << "Executing statement.\n";
 		player_statement->execute();
 		player_statement = player_exe->next();
 		if (player_statement == nullptr) {
@@ -300,8 +309,9 @@ void PlayMode::execute_player_statement(float time_left) {
 void PlayMode::execute_enemy_statement(float time_left) {
 	float time = enemy_statement->duration;
 	if (time_left >= time) {
+		std::cout << "Executing statement.\n";
 		enemy_statement->execute();
-		enemy_statement = player_exe->next();
+		enemy_statement = enemy_exe->next();
 		if (enemy_statement == nullptr) {
 			enemy_done = true;
 		} else {
@@ -314,11 +324,13 @@ void PlayMode::execute_enemy_statement(float time_left) {
 
 void PlayMode::take_turn() {
 	if (turn == Turn::PLAYER) {
+		std::cout << "Player taking turn.\n";
 		execute_player_statement(1.0f);
 		if (!enemy_done) {
 			turn = Turn::ENEMY;
 		}
 	} else {
+		std::cout << "Enemy taking turn.\n";
 		execute_enemy_statement(1.0f);
 		// If both are done, we want to switch control to the player for the next turn
 		if (enemy_done || !player_done) {
