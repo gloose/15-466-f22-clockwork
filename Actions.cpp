@@ -27,6 +27,7 @@ bool check_freeze(Compiler::Object* user) {
 }
 
 void attack_function(Compiler::Object* user, Compiler::Object* target) {
+	std::cout << user->name << " attacked " << target->name;
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
 		return;
 	}
@@ -68,6 +69,7 @@ void burn_function(Compiler::Object* user, Compiler::Object* target) {
 }
 
 void heal_function(Compiler::Object* user, Compiler::Object* target) {
+	std::cout << user->name << " healed " << target->name;
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
 		return;
 	}

@@ -17,6 +17,9 @@
 
 #include <random>
 
+#define MAX_LINE_LENGTH 50
+#define MAX_LINES 20
+
 Load< PlayMode::PPUTileProgram > tile_program(LoadTagEarly); //will 'new PPUTileProgram()' by default
 Load< PlayMode::PPUDataStream > data_stream(LoadTagDefault);
 
@@ -151,13 +154,9 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	turn = Turn::PLAYER;
 	init_compiler();
 
-	// Temporary
-	player_exe = player_compiler.compile("player-test.txt");
-	player_statement = player_exe->next();
-	enemy_exe = enemy_compiler.compile("enemy-test.txt");
-	enemy_statement = enemy_exe->next();
-	player_done = false;
-	enemy_done = false;
+	code.push_back("");
+	code_line = 0;
+	line_pos = 0;
 }
 
 PlayMode::~PlayMode() {
@@ -231,62 +230,322 @@ void PlayMode::init_compiler() {
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
+	if (!player_done || !enemy_done) {
+		return false;
+	}
 
 	if (evt.type == SDL_KEYDOWN) {
 		if (evt.key.keysym.sym == SDLK_ESCAPE) {
 			SDL_SetRelativeMouseMode(SDL_FALSE);
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_a) {
-			left.downs += 1;
-			left.pressed = true;
-			return true;
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'A');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_b) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'B');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_c) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'C');
+				line_pos++;
+				return true;
+			}
 		} else if (evt.key.keysym.sym == SDLK_d) {
-			right.downs += 1;
-			right.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_w) {
-			up.downs += 1;
-			up.pressed = true;
-			return true;
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'D');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_e) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'E');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_f) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'F');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_g) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'G');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_h) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'H');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_i) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'I');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_j) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'J');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_k) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'K');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_l) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'L');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_m) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'M');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_n) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'N');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_o) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'O');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_p) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'P');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_q) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'Q');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_r) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'R');
+				line_pos++;
+				return true;
+			}
 		} else if (evt.key.keysym.sym == SDLK_s) {
-			down.downs += 1;
-			down.pressed = true;
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'S');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_t) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'T');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_u) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'U');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_v) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'V');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_w) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'W');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_x) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'X');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_y) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'Y');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_z) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, 'Z');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_1) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '1');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_2) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '2');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_3) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '3');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_4) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '4');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_5) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '5');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_6) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '6');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_7) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '7');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_8) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '8');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_9) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				if (shifts > 0) {
+					code[code_line].insert(code[code_line].begin() + line_pos, '(');
+				} else {
+					code[code_line].insert(code[code_line].begin() + line_pos, '9');
+				}
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_0) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				if (shifts > 0) {
+					code[code_line].insert(code[code_line].begin() + line_pos, ')');
+				} else {
+					code[code_line].insert(code[code_line].begin() + line_pos, '0');
+				}
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_PERIOD) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				if (shifts > 0) {
+					code[code_line].insert(code[code_line].begin() + line_pos, '>');
+				}
+				else {
+					code[code_line].insert(code[code_line].begin() + line_pos, '.');
+				}
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_COMMA && shifts > 0) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '<');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_EQUALS) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, '=');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+			if (code[code_line].size() < MAX_LINE_LENGTH) {
+				code[code_line].insert(code[code_line].begin() + line_pos, ' ');
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_BACKSPACE) {
+			if (line_pos > 0) {
+				code[code_line].erase(line_pos - 1, 1);
+				line_pos--;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_LEFT) {
+			if (line_pos > 0) {
+				line_pos--;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_RIGHT) {
+			if (line_pos < code[code_line].size()) {
+				line_pos++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_UP) {
+			if (code_line > 0) {
+				code_line--;
+				if (line_pos > code[code_line].size()) {
+					line_pos = (int)code[code_line].size();
+				}
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_DOWN) {
+			if (code_line < code.size() - 1) {
+				code_line++;
+				return true;
+			}
+		} else if (evt.key.keysym.sym == SDLK_RSHIFT || evt.key.keysym.sym == SDLK_LSHIFT) {
+			shifts++;
 			return true;
+		} else if (evt.key.keysym.sym == SDLK_RETURN) {
+			if (shifts == 0 && code.size() < MAX_LINES && line_pos == code[code_line].size()) {
+				code.insert(code.begin() + code_line + 1, "");
+				code_line++;
+				line_pos = 0;
+				return true;
+			} else if (shifts > 0) {
+				std::cout << "Submitted!\n";
+				player_exe = player_compiler.compile(code);
+				player_statement = player_exe->next();
+				enemy_exe = enemy_compiler.compile("enemy-test.txt");
+				enemy_statement = enemy_exe->next();
+				player_done = false;
+				enemy_done = false;
+				return true;
+			}
 		}
 	} else if (evt.type == SDL_KEYUP) {
-		if (evt.key.keysym.sym == SDLK_a) {
-			left.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_d) {
-			right.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_w) {
-			up.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_s) {
-			down.pressed = false;
-			return true;
-		}
-	} else if (evt.type == SDL_MOUSEBUTTONDOWN) {
-		if (SDL_GetRelativeMouseMode() == SDL_FALSE) {
-			SDL_SetRelativeMouseMode(SDL_TRUE);
-			return true;
-		}
-	} else if (evt.type == SDL_MOUSEMOTION) {
-		if (SDL_GetRelativeMouseMode() == SDL_TRUE) {
-			glm::vec2 motion = glm::vec2(
-				evt.motion.xrel / float(window_size.y),
-				-evt.motion.yrel / float(window_size.y)
-			);
-			camera->transform->rotation = glm::normalize(
-				camera->transform->rotation
-				* glm::angleAxis(-motion.x * camera->fovy, glm::vec3(0.0f, 1.0f, 0.0f))
-				* glm::angleAxis(motion.y * camera->fovy, glm::vec3(1.0f, 0.0f, 0.0f))
-			);
+		if (evt.key.keysym.sym == SDLK_RSHIFT || evt.key.keysym.sym == SDLK_LSHIFT) {
+			shifts--;
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -567,9 +826,9 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 
-	scene.draw(*camera);
+	// scene.draw(*camera);
 
-	{ //use DrawLines to overlay some text:
+	{ //use DrawLines to overlay the cursor:
 		glDisable(GL_DEPTH_TEST);
 		float aspect = float(drawable_size.x) / float(drawable_size.y);
 		DrawLines lines(glm::mat4(
@@ -580,23 +839,20 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		));
 
 		constexpr float H = 0.09f;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
+		lines.draw_text("l",
 			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
 			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
-		float ofs = 2.0f / drawable_size.y;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+			glm::u8vec4(0xFF, 0xFF, 0xFF, 0xFF));
 	}
 
 	// Draw text using proper text rendering
 	int x = 20;
 	int y = ScreenHeight - 20;
-	int w = 400;
-	y -= drawText("Here's some example text rendering. It supports line wrapping when the length of the line exceeds a chosen width.", glm::vec2(x, y), w);
-	y -= drawText("It also supports drawing text in different colors. Not different fonts or font sizes, but we could probably change that in the future.", glm::vec2(x, y), w, alt_color);
+	int w = 500;
+	drawText("|", glm::vec2(x + line_pos * font_size / 2, y - code_line * font_size), w);
+	for (size_t i = 0; i < code.size(); i++) {
+		drawText(code[i], glm::vec2(x, y - font_size * i), w);
+	}
 
 	GL_ERRORS();
 }

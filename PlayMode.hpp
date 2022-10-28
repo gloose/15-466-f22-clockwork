@@ -143,6 +143,12 @@ struct PlayMode : Mode {
 	Compiler::Executable *enemy_exe;
 	Compiler::Statement *enemy_statement;
 
+	// David Text Test
+	int shifts;
+	std::vector<std::string> code;
+	int code_line;
+	int line_pos;
+
 	// Helper functions
 	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color);
 	void drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip);
