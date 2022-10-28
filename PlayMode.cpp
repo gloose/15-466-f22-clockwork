@@ -144,9 +144,6 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	glBindTexture(GL_TEXTURE_2D, data_stream->tile_tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, char_width * num_chars, char_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//push first string to text buffer
-	text_buffer.push_back("|");
 }
 
 PlayMode::~PlayMode() {
@@ -161,181 +158,20 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if (evt.key.keysym.sym == SDLK_a) {
 			left.downs += 1;
 			left.pressed = true;
-			insert("A");
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_d) {
 			right.downs += 1;
 			right.pressed = true;
-			insert("D");
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_w) {
 			up.downs += 1;
 			up.pressed = true;
-			insert("W");
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_s) {
 			down.downs += 1;
 			down.pressed = true;
-			insert("S");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_RETURN){
-			enter.downs += 1; 
-			enter.pressed = true;
-			if(shift.pressed){
-				std::cout << "this shoud submit" << std::endl;
-			}
-			else{
-				line_break();
-			}
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_DOWN){
-			move_down();
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_UP){
-			move_up();
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_LEFT){
-			move_left();
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_RIGHT){
-			move_right();
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_b){
-			insert("B");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_c){
-			insert("C");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_e){
-			insert("E");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_f){
-			insert("F");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_g){
-			insert("G");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_h){
-			insert("H");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_i){
-			insert("I");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_j){
-			insert("J");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_k){
-			insert("K");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_l){
-			insert("L");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_m){
-			insert("M");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_n){
-			insert("N");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_o){
-			insert("O");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_p){
-			insert("P");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_q){
-			insert("Q");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_r){
-			insert("R");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_t){
-			insert("T");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_u){
-			insert("U");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_v){
-			insert("V");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_x){
-			insert("X");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_y){
-			insert("Y");
-			return true;
-		}else if(evt.key.keysym.sym == SDLK_z){
-			insert("Z");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_DELETE || evt.key.keysym.sym == SDLK_BACKSPACE){
-			delete_text();
-		} else if(evt.key.keysym.sym == SDLK_0){
-			if(shift.pressed){
-				insert(")");
-			}
-			else{
-				insert("0");
-			}
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_1){
-			insert("1");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_2){
-			insert("2");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_3){
-			insert("3");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_4){
-			insert("4");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_5){
-			insert("5");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_6){
-			insert("6");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_7){
-			insert("7");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_8){
-			insert("8");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_9){
-			if(shift.pressed){
-				insert("(");
-			}
-			else{
-				insert("9");
-			}
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_SPACE){
-			insert(" ");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_SPACE){
-			insert(" ");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_PERIOD){
-			if(shift.pressed){
-				insert(">");
-			}
-			else{
-				insert(".");
-			}
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_EQUALS){
-			insert("=");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_COMMA){
-			if(shift.pressed){
-				insert("<");
-			}
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_LSHIFT || evt.key.keysym.sym == SDLK_RSHIFT){
-			shift.downs += 1;
-			shift.pressed = true;
-			return true;
-		} 
-
+		}
 	} else if (evt.type == SDL_KEYUP) {
 		if (evt.key.keysym.sym == SDLK_a) {
 			left.pressed = false;
@@ -348,10 +184,6 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_s) {
 			down.pressed = false;
-			return true;
-		}
-		else if (evt.key.keysym.sym == SDLK_LSHIFT || evt.key.keysym.sym == SDLK_RSHIFT) {
-			shift.pressed = false;
 			return true;
 		}
 	} else if (evt.type == SDL_MOUSEBUTTONDOWN) {
@@ -436,7 +268,6 @@ void PlayMode::update(float elapsed) {
 }
 
 
-
 int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color) {
 	std::vector< PPUDataStream::Vertex > triangle_strip;
 
@@ -516,88 +347,12 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 			
 		}
 	}
+
 	drawTriangleStrip(triangle_strip);
+	
 	return (int)(line_num * font_size);
 }
 
-void PlayMode::move_up(){
-	text_buffer[line_index].erase(cur_cursor_pos,1);
-	if(line_index == 0){
-		line_index = 0;
-	}
-	else{
-		line_index = line_index - 1;
-		cur_cursor_pos = text_buffer[line_index].size();
-	}
-	text_buffer[line_index].insert(cur_cursor_pos,"|");
-}
-
-void PlayMode::move_down(){
-	if(line_index < (text_buffer.size() - 1)){
-		text_buffer[line_index].erase(cur_cursor_pos,1);
-		line_index = line_index + 1;
-		cur_cursor_pos = text_buffer[line_index].size();
-		text_buffer[line_index].insert(cur_cursor_pos,"|");
-	}
-}
-
-void PlayMode::move_right(){
-	if(cur_cursor_pos < text_buffer[line_index].length() - 1){
-		text_buffer[line_index].erase(cur_cursor_pos,1);
-		cur_cursor_pos = cur_cursor_pos + 1;
-		text_buffer[line_index].insert(cur_cursor_pos,"|");
-	}
-}
-
-void PlayMode::move_left(){
-	text_buffer[line_index].erase(cur_cursor_pos,1);
-	if(cur_cursor_pos == 0){
-		cur_cursor_pos = 0;
-	}
-	else{
-		cur_cursor_pos = cur_cursor_pos - 1;
-	}
-	text_buffer[line_index].insert(cur_cursor_pos,"|");
-}
-
-void PlayMode::line_break(){
-	text_buffer[line_index].erase(cur_cursor_pos,1);
-	text_buffer.push_back("|");
-	cur_cursor_pos = 0; 
-	line_index = line_index + 1;
-}
-
-void PlayMode::delete_text(){
-	if(cur_cursor_pos != 0){
-		text_buffer[line_index].erase(cur_cursor_pos - 1, 1);
-		cur_cursor_pos = cur_cursor_pos - 1;
-	}
-}
-
-void PlayMode::insert(std::string cur_letter){
-	text_buffer[line_index].erase(cur_cursor_pos,1);
-	text_buffer[line_index].insert(cur_cursor_pos,cur_letter);
-	cur_cursor_pos = cur_cursor_pos + 1; 
-	text_buffer[line_index].insert(cur_cursor_pos,"|");
-}
-
-void PlayMode::render(){
-	int x = 20;
-	int y = ScreenHeight - 20;
-	glm::u8vec4 pen_color = default_line_color;
-	for(int i = 0; i < text_buffer.size(); i++){
-		if(i == execution_line_index){
-			pen_color = execute_line_color;
-		} else if(i == line_index){
-			pen_color = cur_line_color;
-		}
-		else{
-			pen_color = default_line_color;
-		}
-		y -= drawText(text_buffer[i], glm::vec2(x, y), max_line_length, pen_color);
-	}
-}
-//TODO: render text end
 
 void PlayMode::drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip) {
 	// Upload vertex buffer
@@ -698,7 +453,13 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
 	}
 
-	render();
+	// Draw text using proper text rendering
+	int x = 20;
+	int y = ScreenHeight - 20;
+	int w = 400;
+	y -= drawText("Here's some example text rendering. It supports line wrapping when the length of the line exceeds a chosen width.", glm::vec2(x, y), w);
+	y -= drawText("It also supports drawing text in different colors. Not different fonts or font sizes, but we could probably change that in the future.", glm::vec2(x, y), w, alt_color);
+
 	GL_ERRORS();
 }
 

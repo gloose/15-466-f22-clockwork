@@ -91,10 +91,6 @@ struct PlayMode : Mode {
 	static inline glm::u8vec4 default_color = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
 	static inline glm::u8vec4 alt_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
 
-	static inline glm::u8vec4 cur_line_color = glm::u8vec4(0xc0, 0xc0, 0xc0, 0xff);
-	static inline glm::u8vec4 execute_line_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
-	static inline glm::u8vec4 default_line_color = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
-
 	int scroll_x = 0;
 	int scroll_y = 0;
 
@@ -105,7 +101,7 @@ struct PlayMode : Mode {
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up, enter, shift;
+	} left, right, down, up;
 
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
@@ -131,21 +127,4 @@ struct PlayMode : Mode {
 	// Helper functions
 	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color);
 	void drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip);
-
-	//begin of the text rendering
-	int line_index = 0;
-	int cur_cursor_pos = 0; 
-	std::vector< std::string > text_buffer; 
-	int execution_line_index = -1; 
-	int max_line_length = 400;
-	std::string cur_str; 
-	void move_up();
-	void move_down();
-	void move_right();
-	void move_left();
-	void line_break();
-	void delete_text();
-	void insert(std::string cur_letter);
-	void render();
-	//end of the text rendering
 };
