@@ -84,10 +84,10 @@ Compiler::Executable* Compiler::compile(Program program) {
     auto it = program.begin();
     while (it != program.end()) {
         if (it->size() > 0) {
-            size_t line_num = std::distance(program.begin(), it) + 1;
+            size_t line_num = std::distance(program.begin(), it);
             exe->statements.push_back(parseStatement(program, it));
             if (exe->statements.back() == nullptr) {
-                std::cout << "Failed to parse statement on line " << line_num << std::endl;
+                std::cout << "Failed to parse statement on line " << (line_num + 1) << std::endl;
                 delete exe;
                 return nullptr;
             }
@@ -113,7 +113,7 @@ Compiler::Executable* Compiler::compile(std::vector<std::string> lines) {
 Compiler::Statement* Compiler::parseStatement(Program& program, Program::iterator& line_it) {
     Statement* out;
 
-    size_t line_num = std::distance(program.begin(), line_it) + 1;
+    size_t line_num = std::distance(program.begin(), line_it);
 
     // Attempt to parse the line as an if statement
     out = parseIfStatement(program, line_it);
@@ -180,7 +180,7 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
         while (line_it != program.end()) {
             if (line_it->size() > 0) {
                 word_it = line_it->begin();
-                size_t line_num = std::distance(program.begin(), line_it) + 1;
+                size_t line_num = std::distance(program.begin(), line_it);
 
                 // On end, return successfully
                 if (parseWord(word_it, "END")) {
@@ -193,7 +193,7 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
 
                 // If the parse failed, print error message and return failure
                 if (out->statements.back() == nullptr) {
-                    std::cout << "Failed to parse statement on line " << line_num << std::endl;
+                    std::cout << "Failed to parse statement on line " << (line_num + 1) << std::endl;
                     delete out;
                     line_it = old_it;
                     return nullptr;

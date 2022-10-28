@@ -151,11 +151,11 @@ struct PlayMode : Mode {
 
 	//begin of the text rendering
 	size_t line_index = 0;
-	size_t cur_cursor_pos = 0; 
-	std::vector< std::string > text_buffer; 
-	int execution_line_index = -1; 
-	int max_line_length = 400;
-	std::string cur_str; 
+	size_t cur_cursor_pos = 0;
+	std::vector< std::string > text_buffer;
+	size_t execution_line_index = 0;
+	size_t max_line_length = 400;
+	std::string cur_str;
 	void move_up();
 	void move_down();
 	void move_right();

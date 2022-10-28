@@ -724,7 +724,7 @@ void PlayMode::render(){
 	int y = ScreenHeight - 20;
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < text_buffer.size(); i++){
-		if(i == execution_line_index){
+		if(!player_done && i == execution_line_index){
 			pen_color = execute_line_color;
 		} else if(i == line_index){
 			pen_color = cur_line_color;
