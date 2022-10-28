@@ -649,7 +649,7 @@ void PlayMode::move_up(){
 	}
 	else{
 		line_index = line_index - 1;
-		cur_cursor_pos = text_buffer[line_index].size();
+		cur_cursor_pos = (int)text_buffer[line_index].size();
 	}
 	text_buffer[line_index].insert(cur_cursor_pos,"|");
 }
@@ -658,7 +658,7 @@ void PlayMode::move_down(){
 	if(line_index < (text_buffer.size() - 1)){
 		text_buffer[line_index].erase(cur_cursor_pos,1);
 		line_index = line_index + 1;
-		cur_cursor_pos = text_buffer[line_index].size();
+		cur_cursor_pos = (int)text_buffer[line_index].size();
 		text_buffer[line_index].insert(cur_cursor_pos,"|");
 	}
 }
