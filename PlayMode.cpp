@@ -151,7 +151,9 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	turn_time = 0.0f;
 	player_done = true;
 	enemy_done = true;
+	turn_done = true;
 	turn = Turn::PLAYER;
+	shifts = 0;
 	init_compiler();
 
 	code.push_back("");
@@ -230,7 +232,7 @@ void PlayMode::init_compiler() {
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
-	if (!player_done || !enemy_done) {
+	if (!turn_done) {
 		return false;
 	}
 
@@ -496,6 +498,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				code[code_line].erase(line_pos - 1, 1);
 				line_pos--;
 				return true;
+			} else if (code_line > 0) {
+				code.erase(code.begin() + code_line);
+				code_line--;
+				line_pos = (int)code[code_line].size();
+				return true;
 			}
 		} else if (evt.key.keysym.sym == SDLK_LEFT) {
 			if (line_pos > 0) {
@@ -537,6 +544,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				enemy_statement = enemy_exe->next();
 				player_done = false;
 				enemy_done = false;
+				turn_done = false;
 				return true;
 			}
 		}
@@ -599,12 +607,25 @@ void PlayMode::take_turn() {
 }
 
 void PlayMode::update(float elapsed) {
-	if (!player_done || !enemy_done) {
-		if (turn_time <= 0.0f) {
-			take_turn();
-			turn_time = 1.0f;
+	if (!turn_done) {
+		if (!player_done || !enemy_done) {
+			if (turn_time <= 0.0f) {
+				take_turn();
+				turn_time = 1.0f;
+			} else {
+				turn_time -= elapsed;
+			}
 		} else {
-			turn_time -= elapsed;
+			if (turn_time <= 0.0f) {
+				shifts = 0;
+				turn_done = true;
+				code.clear();
+				code.push_back("");
+				code_line = 0;
+				line_pos = 0;
+			} else {
+				turn_time -= elapsed;
+			}
 		}
 	}
 
@@ -665,7 +686,7 @@ void PlayMode::update(float elapsed) {
 }
 
 
-int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color) {
+int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color, bool cursor_line) {
 	std::vector< PPUDataStream::Vertex > triangle_strip;
 
 	//helper to put a single tile somewhere on the screen:
@@ -685,6 +706,10 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 	const char* text_c_str = text.c_str();
 	size_t start_line = 0;
 	size_t line_num = 0;
+
+	if (start_line == text.size() && cursor_line) {
+		drawText("|", position, width);
+	}
 
 	while (start_line < text.size()) {
 		line_num++;
@@ -709,6 +734,9 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 		double current_y = position.y - line_num * font_size;
 		for (size_t i = 0; i < len; i++)
 		{
+			if (cursor_line && i == line_pos) {
+				drawText("|", glm::vec2(current_x - 5., current_y + font_size), width);
+			}
 			// Line break if next word would overflow
 			if (text[start_line + i] == ' ') {
 				double cx = current_x + pos[i].x_advance / 64.;
@@ -742,6 +770,9 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 				break;
 			}
 			
+		}
+		if (cursor_line && line_pos == text.size()) {
+			drawText("|", glm::vec2(current_x - 5., current_y + font_size), width);
 		}
 	}
 
@@ -849,9 +880,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	int x = 20;
 	int y = ScreenHeight - 20;
 	int w = 500;
-	drawText("|", glm::vec2(x + line_pos * font_size / 2, y - code_line * font_size), w);
 	for (size_t i = 0; i < code.size(); i++) {
-		drawText(code[i], glm::vec2(x, y - font_size * i), w);
+		drawText(code[i], glm::vec2(x, y - font_size * i), w, glm::u8vec4(0xFF, 0xFF, 0xFF, 0xFF), i == code_line);
 	}
 
 	GL_ERRORS();

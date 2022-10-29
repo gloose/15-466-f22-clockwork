@@ -132,6 +132,7 @@ struct PlayMode : Mode {
 	float turn_time;
 	bool player_done;
 	bool enemy_done;
+	bool turn_done;
 	void take_turn();
 	void init_compiler();
 	void execute_player_statement(float time_left);
@@ -150,6 +151,6 @@ struct PlayMode : Mode {
 	int line_pos;
 
 	// Helper functions
-	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color);
+	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
 	void drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip);
 };
