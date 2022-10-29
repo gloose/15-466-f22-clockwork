@@ -220,6 +220,14 @@ void PlayMode::init_compiler() {
 	rupol->addProperty("ALIVE", 1);
 	rupol->addProperty("PRESENT", 1);
 
+	player_units.push_back(warrior);
+	player_units.push_back(wizard);
+	player_units.push_back(healer);
+	player_units.push_back(archer);
+	
+	enemy_units.push_back(fargoth);
+	enemy_units.push_back(rupol);
+
 	player_compiler.addObject(warrior);
 	enemy_compiler.addObject(warrior);
 	player_compiler.addObject(wizard);
@@ -571,6 +579,34 @@ void PlayMode::execute_player_statement(float time_left) {
 	if (time_left >= time) {
 		std::cout << "Executing statement.\n";
 		player_statement->execute();
+		bool enemies_alive = false;
+		bool players_alive = false;
+		for (auto& enemy : enemy_units) {
+			if (enemy->property("ALIVE")) {
+				enemies_alive = true;
+				break;
+			}
+		}
+		for (auto& player : player_units) {
+			if (player->property("ALIVE")) {
+				players_alive = true;
+				break;
+			}
+		}
+		if (!players_alive) {
+			get_effect_string() = "All player units have fallen...";
+			player_done = true;
+			enemy_done = true;
+			game_lost = true;
+			return;
+		}
+		if (!enemies_alive) {
+			get_effect_string() = "All enemy units have been slain!";
+			player_done = true;
+			enemy_done = true;
+			game_won = true;
+			return;
+		}
 		player_statement = player_exe->next();
 		if (player_statement == nullptr) {
 			player_done = true;
@@ -587,6 +623,34 @@ void PlayMode::execute_enemy_statement(float time_left) {
 	if (time_left >= time) {
 		std::cout << "Executing statement.\n";
 		enemy_statement->execute();
+		bool enemies_alive = false;
+		bool players_alive = false;
+		for (auto& enemy : enemy_units) {
+			if (enemy->property("ALIVE")) {
+				enemies_alive = true;
+				break;
+			}
+		}
+		for (auto& player : player_units) {
+			if (player->property("ALIVE")) {
+				players_alive = true;
+				break;
+			}
+		}
+		if (!players_alive) {
+			get_effect_string() = "All player units have fallen...";
+			player_done = true;
+			enemy_done = true;
+			game_lost = true;
+			return;
+		}
+		if (!enemies_alive) {
+			get_effect_string() = "All enemy units have been slain!";
+			player_done = true;
+			enemy_done = true;
+			game_won = true;
+			return;
+		}
 		enemy_statement = enemy_exe->next();
 		if (enemy_statement == nullptr) {
 			enemy_done = true;
@@ -625,7 +689,7 @@ void PlayMode::update(float elapsed) {
 				turn_time -= elapsed;
 			}
 		} else {
-			if (turn_time <= 0.0f) {
+			if (turn_time <= 0.0f && !game_won && !game_lost) {
 				left_shift = false;
 				right_shift = false;
 				turn_done = true;
