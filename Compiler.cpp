@@ -160,7 +160,7 @@ Compiler::ActionStatement* Compiler::parseActionStatement(Program& program, Prog
      && parseWord(word_it, "(")
      && parseObject(word_it, &out->target)
      && parseWord(word_it, ")")) {
-        std::advance(line_it, 1);
+        line_it++;
         return out;
     }
 
@@ -184,43 +184,11 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
      && parseWord(word_it, ")")) {
         // If so, parse all subsequent lines into out->statements until end is reached
         line_it++;
-
-        /*
-        while (line_it != program.end()) {
-            if (line_it->size() > 0) {
-                word_it = line_it->begin();
-                size_t line_num = std::distance(program.begin(), line_it);
-
-                // On end, return successfully
-                if (parseWord(word_it, "END")) {
-                    std::advance(line_it, 1);
-                    return out;
-                }
-
-                // Otherwise, parse next statement
-                out->statements.push_back(parseStatement(program, line_it));
-
-                // If the parse failed, print error message and return failure
-                if (out->statements.back() == nullptr) {
-                    std::cout << "Failed to parse statement on line " << (line_num + 1) << std::endl;
-                    delete out;
-                    line_it = old_it;
-                    return nullptr;
-                }
-            } else {
-                line_it++;
-            }
-        }
-
-        std::cout << "If statement must be closed with an end" << std::endl;
-        */
-
         if (!parseStatementBlock(program, line_it, &out->statements)) {
             delete out;
             line_it = old_it;
             return nullptr;
         }
-
         return out;
     }
 
@@ -242,41 +210,11 @@ Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Progra
      && parseWord(word_it, ")")) {
         // If so, parse all subsequent lines into out->statements until end is reached
         line_it++;
-        /*
-        while (line_it != program.end()) {
-            if (line_it->size() > 0) {
-                word_it = line_it->begin();
-                size_t line_num = std::distance(program.begin(), line_it);
-
-                // On end, return successfully
-                if (parseWord(word_it, "END")) {
-                    std::advance(line_it, 1);
-                    return out;
-                }
-
-                // Otherwise, parse next statement
-                out->statements.push_back(parseStatement(program, line_it));
-
-                // If the parse failed, print error message and return failure
-                if (out->statements.back() == nullptr) {
-                    std::cout << "Failed to parse statement on line " << (line_num + 1) << std::endl;
-                    delete out;
-                    line_it = old_it;
-                    return nullptr;
-                }
-            } else {
-                line_it++;
-            }
-        }
-
-        std::cout << "If statement must be closed with an end" << std::endl;
-        */
         if (!parseStatementBlock(program, line_it, &out->statements)) {
             delete out;
             line_it = old_it;
             return nullptr;
         }
-
         return out;
     }
 
@@ -331,7 +269,7 @@ bool Compiler::parseObject(Line::iterator& word_it, Object** out) {
     auto obj = objects.find(*word_it);
     if (obj != objects.end()) {
         *out = obj->second;
-        std::advance(word_it, 1);
+        word_it++;
         return true;
     }
     return false;
@@ -346,7 +284,7 @@ bool Compiler::parseAction(Line::iterator& word_it, Object* obj, ActionFunction*
         if (out_dur != nullptr) {
             *out_dur = act->second.duration;
         }
-        std::advance(word_it, 1);
+        word_it++;
         return true;
     }
     return false;
@@ -365,6 +303,13 @@ bool Compiler::parseCondition(Line::iterator& word_it, Condition* out) {
     }
 
     word_it = old_it;
+
+    if (parseValue(word_it, &out->left)) {
+        out->comparator = "!=";
+        out->right = new int(0);
+        return true;
+    }
+
     return false;
 }
 
@@ -373,9 +318,12 @@ bool Compiler::parseCondition(Line::iterator& word_it, Condition* out) {
 // Advances the word iterator if successful.
 bool Compiler::parseComparator(Line::iterator& word_it, std::string* out) {
     std::string comp = *word_it;
-    if (parseWord(word_it, "=")
+    if (parseWord(word_it, "==")
      || parseWord(word_it, "<")
-     || parseWord(word_it, ">")) {
+     || parseWord(word_it, ">")
+     || parseWord(word_it, "!=")
+     || parseWord(word_it, "<=")
+     || parseWord(word_it, ">=")) {
         *out = comp;
         return true;
     }
@@ -387,7 +335,8 @@ bool Compiler::parseComparator(Line::iterator& word_it, std::string* out) {
 // Advances the word iterator if successful.
 bool Compiler::parseValue(Line::iterator& word_it, int** out) {
     if (parsePropertyValue(word_it, out)
-     || parseIntValue(word_it, out)) {
+     || parseIntValue(word_it, out)
+     || parseBooleanValue(word_it, out)) {
         return true;
     }
 
@@ -405,8 +354,26 @@ bool Compiler::parseIntValue(Line::iterator& word_it, int** out) {
     }
     *out = new int();
     **out = val;
-    std::advance(word_it, 1);
+    word_it++;
     return true;
+}
+
+// Attempts to parse a word as true/false
+// Advances the word iterator if successful.
+bool Compiler::parseBooleanValue(Line::iterator& word_it, int** out) {
+    if (parseWord(word_it, "TRUE")) {
+        *out = new int();
+        **out = 1;
+        return true;
+    }
+
+    if (parseWord(word_it, "FALSE")) {
+        *out = new int();
+        **out = 0;
+        return true;
+    }
+
+    return false;
 }
 
 // Attempts to parse a sequence of words as an object property value,
@@ -432,7 +399,7 @@ bool Compiler::parseProperty(Line::iterator& word_it, Object* obj, int** out) {
     auto prop = obj->properties.find(*word_it);
     if (prop != obj->properties.end()) {
         *out = prop->second;
-        std::advance(word_it, 1);
+        word_it++;
         return true;
     }
     return false;
@@ -442,7 +409,7 @@ bool Compiler::parseProperty(Line::iterator& word_it, Object* obj, int** out) {
 // Advances the word iterator if successful.
 bool Compiler::parseWord(Line::iterator& word_it, std::string word) {
     if (*word_it == word) {
-        std::advance(word_it, 1);
+        word_it++;
         return true;
     }
     return false;
@@ -616,12 +583,18 @@ void Compiler::Executable::execute() {
 
 // Evaluate a conditional
 bool Compiler::Condition::isTrue() {
-    if (comparator == "=") {
+    if (comparator == "==") {
         return *left == *right;
     } else if (comparator == "<") {
         return *left < *right;
     } else if (comparator == ">") {
         return *left > *right;
+    } else if (comparator == "!=") {
+        return *left != *right;
+    } else if (comparator == "<=") {
+        return *left <= *right;
+    } else if (comparator == ">=") {
+        return *left >= *right;
     } else {
         std::cout << "Invalid comparator " << comparator << " in condition" << std::endl;
         return false;

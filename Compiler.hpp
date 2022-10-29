@@ -118,6 +118,7 @@ struct Compiler {
     bool parseCondition(Line::iterator& word_it, Condition* out);
     bool parseValue(Line::iterator& word_it, int** out);
     bool parseIntValue(Line::iterator& word_it, int** out);
+    bool parseBooleanValue(Line::iterator& word_it, int** out);
     bool parsePropertyValue(Line::iterator& word_it, int** out);
     bool parseProperty(Line::iterator& word_it, Object* obj, int** out);
     bool parseComparator(Line::iterator& word_it, std::string* out);
