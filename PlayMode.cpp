@@ -359,7 +359,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			}
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_1){
-			insert("1");
+			if(shift.pressed){
+				insert("!");
+			} else {
+				insert("1");
+			}
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_2){
 			insert("2");
