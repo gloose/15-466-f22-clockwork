@@ -152,7 +152,7 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	init_compiler();
 
 	// Temporary
-	player_exe = player_compiler.compile("player-test.txt");
+	player_exe = player_compiler.compile("player-loop-test.txt");
 	player_statement = player_exe->next();
 	enemy_exe = enemy_compiler.compile("enemy-test.txt");
 	enemy_statement = enemy_exe->next();

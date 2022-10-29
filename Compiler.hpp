@@ -44,22 +44,27 @@ struct Compiler {
         std::string comparator;
         int* right;
         std::vector<Condition> conditions;
+
+        bool isTrue();
     };
 
     enum StatementType {
         ACTION_STATEMENT,
-        IF_STATEMENT
+        IF_STATEMENT,
+        WHILE_STATEMENT
     };
 
     struct Statement {
         StatementType type;
         size_t current_line = 0;
+        float base_duration = 1.f;
         float duration = 1.f;
         size_t line_num = 0;
 
         virtual ~Statement();
         virtual Statement* next();
         virtual void execute();
+        virtual void reset();
     };
 
     struct ActionStatement : Statement {
@@ -80,6 +85,18 @@ struct Compiler {
         IfStatement();
         Statement* next();
         void execute();
+        void reset();
+    };
+
+    struct WhileStatement : Statement {
+        Condition condition;
+        std::vector<Statement*> statements;
+        bool truth = false;
+
+        WhileStatement();
+        Statement* next();
+        void execute();
+        void reset();
     };
 
     struct Executable {
@@ -95,6 +112,8 @@ struct Compiler {
     bool parseAction(Line::iterator& word_it, Object* obj, ActionFunction* out_func, float* out_dur);
     ActionStatement* parseActionStatement(Program& program, Program::iterator& line_it);
     IfStatement* parseIfStatement(Program& program, Program::iterator& line_it);
+    Compiler::WhileStatement* parseWhileStatement(Program& program, Program::iterator& line_it);
+    bool parseStatementBlock(Program& program, Program::iterator& line_it, std::vector<Statement*>* out, std::string end = "END");
     bool parseWord(Line::iterator& word_it, std::string word);
     bool parseCondition(Line::iterator& word_it, Condition* out);
     bool parseValue(Line::iterator& word_it, int** out);

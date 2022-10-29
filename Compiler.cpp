@@ -121,6 +121,13 @@ Compiler::Statement* Compiler::parseStatement(Program& program, Program::iterato
         out->line_num = line_num;
         return out;
     }
+
+    // Attempt to parse the line as a while statement
+    out = parseWhileStatement(program, line_it);
+    if (out != nullptr) {
+        out->line_num = line_num;
+        return out;
+    }
     
     // Attempt to parse the line as an action statement
     out = parseActionStatement(program, line_it);
@@ -176,7 +183,9 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
      && parseCondition(word_it, &out->condition)
      && parseWord(word_it, ")")) {
         // If so, parse all subsequent lines into out->statements until end is reached
-        std::advance(line_it, 1);
+        line_it++;
+
+        /*
         while (line_it != program.end()) {
             if (line_it->size() > 0) {
                 word_it = line_it->begin();
@@ -204,11 +213,116 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
         }
 
         std::cout << "If statement must be closed with an end" << std::endl;
+        */
+
+        if (!parseStatementBlock(program, line_it, &out->statements)) {
+            delete out;
+            line_it = old_it;
+            return nullptr;
+        }
+
+        return out;
     }
 
     line_it = old_it;
     delete out;
     return nullptr;
+}
+
+Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Program::iterator& line_it) {
+    Program::iterator old_it = line_it;
+
+    Line::iterator word_it = line_it->begin();
+    WhileStatement* out = new WhileStatement();
+
+    // Check if the first line matches the if statement format
+    if (parseWord(word_it, "WHILE")
+     && parseWord(word_it, "(")
+     && parseCondition(word_it, &out->condition)
+     && parseWord(word_it, ")")) {
+        // If so, parse all subsequent lines into out->statements until end is reached
+        line_it++;
+        /*
+        while (line_it != program.end()) {
+            if (line_it->size() > 0) {
+                word_it = line_it->begin();
+                size_t line_num = std::distance(program.begin(), line_it);
+
+                // On end, return successfully
+                if (parseWord(word_it, "END")) {
+                    std::advance(line_it, 1);
+                    return out;
+                }
+
+                // Otherwise, parse next statement
+                out->statements.push_back(parseStatement(program, line_it));
+
+                // If the parse failed, print error message and return failure
+                if (out->statements.back() == nullptr) {
+                    std::cout << "Failed to parse statement on line " << (line_num + 1) << std::endl;
+                    delete out;
+                    line_it = old_it;
+                    return nullptr;
+                }
+            } else {
+                line_it++;
+            }
+        }
+
+        std::cout << "If statement must be closed with an end" << std::endl;
+        */
+        if (!parseStatementBlock(program, line_it, &out->statements)) {
+            delete out;
+            line_it = old_it;
+            return nullptr;
+        }
+
+        return out;
+    }
+
+    line_it = old_it;
+    delete out;
+    return nullptr;
+}
+
+bool Compiler::parseStatementBlock(Program& program, Program::iterator& line_it, std::vector<Statement*>* out, std::string end) {
+    Program::iterator old_it = line_it;
+    size_t start_line = std::distance(program.begin(), line_it);
+
+    while (line_it != program.end()) {
+        if (line_it->size() > 0) {
+            size_t line_num = std::distance(program.begin(), line_it);
+            
+            // On end, return successfully
+            Line::iterator word_it = line_it->begin();
+            if (parseWord(word_it, end)) {
+                line_it++;
+                return true;
+            }
+
+            // Otherwise, parse next statement
+            out->push_back(parseStatement(program, line_it));
+
+            // If the parse failed, print error message and return failure
+            if (out->back() == nullptr) {
+                std::cout << "Failed to parse statement on line " << (line_num + 1) << std::endl;
+                line_it = old_it;
+                out->clear();
+                return false;
+            }
+        } else {
+            line_it++;
+        }
+    }
+
+    if (end == "") {
+        return true;
+    }
+
+    std::cout << "Code block starting on line " << start_line << " must be closed with " << end << std::endl;
+    line_it = old_it;
+    out->clear();
+    return false;
 }
 
 // Attempts to parse a word as the name of an object.
@@ -338,15 +452,23 @@ bool Compiler::parseWord(Line::iterator& word_it, std::string word) {
 Compiler::Statement::~Statement() {
 }
 
-// If statement constructor just sets statement type
+// Action statement constructor
+Compiler::ActionStatement::ActionStatement() {
+    type = ACTION_STATEMENT;
+}
+
+// If statement constructor
 Compiler::IfStatement::IfStatement() {
     type = IF_STATEMENT;
+    base_duration = 0.25f;
     duration = 0.25f;
 }
 
-// Action statement constructor just sets statement type
-Compiler::ActionStatement::ActionStatement() {
-    type = ACTION_STATEMENT;
+// While statement constructor
+Compiler::WhileStatement::WhileStatement() {
+    type = WHILE_STATEMENT;
+    base_duration = 0.25f;
+    duration = 0.25f;
 }
 
 // Statement superclass doesn't implement next
@@ -358,6 +480,12 @@ Compiler::Statement* Compiler::Statement::next() {
 // Statement superclass doesn't implement execute
 void Compiler::Statement::execute() {
     assert(false && "Statement::execute must be overridden by child class");
+}
+
+// Reset a statement so it can be used again
+void Compiler::Statement::reset() {
+    duration = base_duration;
+    current_line = 0;
 }
 
 // Action statement only returns itself
@@ -381,7 +509,19 @@ Compiler::Statement* Compiler::IfStatement::next() {
         current_line++;
         return this;
     } else if (truth && current_line - 1 < statements.size()) {
-        return statements[current_line++ - 1]->next();
+        Statement* statement = nullptr;
+
+        // Move past statement ends until you get a next statement
+        while (current_line < 1 + statements.size()) {
+            statement = statements[current_line - 1]->next();
+            if (statement == nullptr) {
+                current_line++;
+            } else {
+                break;
+            }
+        }
+
+        return statement;
     }
 
     return nullptr;
@@ -389,14 +529,75 @@ Compiler::Statement* Compiler::IfStatement::next() {
 
 // Execute just the conditional line and set the truth value
 void Compiler::IfStatement::execute() {
-    if (condition.comparator == "=") {
-        truth = *condition.left == *condition.right;
-    } else if (condition.comparator == "<") {
-        truth = *condition.left < *condition.right;
-    } else if (condition.comparator == ">") {
-        truth = *condition.left > *condition.right;
-    } else {
-        std::cout << "Invalid comparator " << condition.comparator << " in if statement" << std::endl;
+    truth = condition.isTrue();
+    if (truth) {
+        reset();
+        current_line = 1;
+        truth = true;
+    }
+}
+
+// Reset if statement and all lines inside of it
+void Compiler::IfStatement::reset() {
+    current_line = 0;
+    duration = base_duration;
+    truth = false;
+    for (size_t i = 0; i < statements.size(); i++) {
+        statements[i]->reset();
+    }
+}
+
+// First call returns the if line itself.
+// If true, subsequent calls return statements in order
+Compiler::Statement* Compiler::WhileStatement::next() {
+    if (current_line == 0) {
+        current_line++;
+        return this;
+    } else if (truth && current_line < 1 + statements.size()) {
+        Statement* statement = nullptr;
+
+        // Move past statement ends until you get a next statement
+        while (current_line < 1 + statements.size()) {
+            statement = statements[current_line - 1]->next();
+            if (statement == nullptr) {
+                current_line++;
+            } else {
+                break;
+            }
+        }
+
+        // If we reached the end of the loop, start over
+        if (current_line == 1 + statements.size()) {
+            current_line = 1;
+            return this;
+        }
+        
+        return statement;
+    } else if (truth && current_line == 1 + statements.size()) {
+        current_line = 1;
+        return this;
+    }
+
+    return nullptr;
+}
+
+// Execute just the conditional line and set the truth value
+void Compiler::WhileStatement::execute() {
+    truth = condition.isTrue();
+    if (truth) {
+        reset();
+        current_line = 1;
+        truth = true;
+    }
+}
+
+// Reset while statement and all lines inside of it
+void Compiler::WhileStatement::reset() {
+    current_line = 0;
+    duration = base_duration;
+    truth = false;
+    for (size_t i = 0; i < statements.size(); i++) {
+        statements[i]->reset();
     }
 }
 
@@ -410,6 +611,20 @@ void Compiler::Executable::execute() {
         } else {
             break;
         }
+    }
+}
+
+// Evaluate a conditional
+bool Compiler::Condition::isTrue() {
+    if (comparator == "=") {
+        return *left == *right;
+    } else if (comparator == "<") {
+        return *left < *right;
+    } else if (comparator == ">") {
+        return *left > *right;
+    } else {
+        std::cout << "Invalid comparator " << comparator << " in condition" << std::endl;
+        return false;
     }
 }
 
