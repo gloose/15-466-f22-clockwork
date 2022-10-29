@@ -263,6 +263,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			enter.downs += 1; 
 			enter.pressed = true;
 			if(shift.pressed){
+				player_compiler.compile(text_buffer);
 				std::cout << "this shoud submit" << std::endl;
 			}
 			else{
@@ -505,6 +506,7 @@ void PlayMode::take_turn() {
 		}
 	}
 }
+
 
 void PlayMode::update(float elapsed) {
 	if (!player_done || !enemy_done) {
