@@ -153,7 +153,8 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	enemy_done = true;
 	turn_done = true;
 	turn = Turn::PLAYER;
-	shifts = 0;
+	left_shift = false;
+	right_shift = false;
 	init_compiler();
 
 	code.push_back("");
@@ -448,7 +449,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			}
 		} else if (evt.key.keysym.sym == SDLK_9) {
 			if (code[code_line].size() < MAX_LINE_LENGTH) {
-				if (shifts > 0) {
+				if (left_shift || right_shift) {
 					code[code_line].insert(code[code_line].begin() + line_pos, '(');
 				} else {
 					code[code_line].insert(code[code_line].begin() + line_pos, '9');
@@ -458,7 +459,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			}
 		} else if (evt.key.keysym.sym == SDLK_0) {
 			if (code[code_line].size() < MAX_LINE_LENGTH) {
-				if (shifts > 0) {
+				if (left_shift || right_shift) {
 					code[code_line].insert(code[code_line].begin() + line_pos, ')');
 				} else {
 					code[code_line].insert(code[code_line].begin() + line_pos, '0');
@@ -468,7 +469,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			}
 		} else if (evt.key.keysym.sym == SDLK_PERIOD) {
 			if (code[code_line].size() < MAX_LINE_LENGTH) {
-				if (shifts > 0) {
+				if (left_shift || right_shift) {
 					code[code_line].insert(code[code_line].begin() + line_pos, '>');
 				}
 				else {
@@ -477,7 +478,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				line_pos++;
 				return true;
 			}
-		} else if (evt.key.keysym.sym == SDLK_COMMA && shifts > 0) {
+		} else if (evt.key.keysym.sym == SDLK_COMMA && (left_shift || right_shift)) {
 			if (code[code_line].size() < MAX_LINE_LENGTH) {
 				code[code_line].insert(code[code_line].begin() + line_pos, '<');
 				line_pos++;
@@ -529,16 +530,19 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				code_line++;
 				return true;
 			}
-		} else if (evt.key.keysym.sym == SDLK_RSHIFT || evt.key.keysym.sym == SDLK_LSHIFT) {
-			shifts++;
+		} else if (evt.key.keysym.sym == SDLK_RSHIFT) {
+			right_shift = true;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+			left_shift = true;
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_RETURN) {
-			if (shifts == 0 && code.size() < MAX_LINES && line_pos == code[code_line].size()) {
+			if (!right_shift && !left_shift && code.size() < MAX_LINES && line_pos == code[code_line].size()) {
 				code.insert(code.begin() + code_line + 1, "");
 				code_line++;
 				line_pos = 0;
 				return true;
-			} else if (shifts > 0) {
+			} else if (left_shift || right_shift) {
 				std::cout << "Submitted!\n";
 				player_exe = player_compiler.compile(code);
 				player_statement = player_exe->next();
@@ -551,8 +555,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			}
 		}
 	} else if (evt.type == SDL_KEYUP) {
-		if (evt.key.keysym.sym == SDLK_RSHIFT || evt.key.keysym.sym == SDLK_LSHIFT) {
-			shifts--;
+		if (evt.key.keysym.sym == SDLK_RSHIFT) {
+			right_shift = false;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+			left_shift = false;
 			return true;
 		}
 	}
@@ -619,7 +626,8 @@ void PlayMode::update(float elapsed) {
 			}
 		} else {
 			if (turn_time <= 0.0f) {
-				shifts = 0;
+				left_shift = false;
+				right_shift = false;
 				turn_done = true;
 				code.clear();
 				code.push_back("");

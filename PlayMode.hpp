@@ -145,7 +145,8 @@ struct PlayMode : Mode {
 	Compiler::Statement *enemy_statement;
 
 	// David Text Test
-	int shifts;
+	bool left_shift;
+	bool right_shift;
 	std::vector<std::string> code;
 	int code_line;
 	int line_pos;
