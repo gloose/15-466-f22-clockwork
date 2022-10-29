@@ -159,6 +159,8 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	code.push_back("");
 	code_line = 0;
 	line_pos = 0;
+	get_action_string() = "";
+	get_effect_string() = "";
 }
 
 PlayMode::~PlayMode() {
@@ -623,6 +625,8 @@ void PlayMode::update(float elapsed) {
 				code.push_back("");
 				code_line = 0;
 				line_pos = 0;
+				get_action_string() = "";
+				get_effect_string() = "";
 			} else {
 				turn_time -= elapsed;
 			}
@@ -883,6 +887,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	for (size_t i = 0; i < code.size(); i++) {
 		drawText(code[i], glm::vec2(x, y - font_size * i), w, glm::u8vec4(0xFF, 0xFF, 0xFF, 0xFF), i == code_line);
 	}
+	drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), w);
+	drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), w);
 
 	GL_ERRORS();
 }
