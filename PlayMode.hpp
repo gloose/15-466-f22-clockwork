@@ -168,6 +168,5 @@ struct PlayMode : Mode {
 	void delete_text();
 	void insert(std::string cur_letter);
 	void render();
-	void render(std::string replace_char);
 	//end of the text rendering
 };
