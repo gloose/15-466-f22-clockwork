@@ -811,6 +811,19 @@ void PlayMode::render(){
 	drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
 	drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
 }
+
+//overload to change the insert character
+void PlayMode::render(std::string replace_char){
+	//replace all of the "|" with replace_char
+	for(size_t i = 0; i < text_buffer.size(); i++){
+		for(size_t j = 0; j < text_buffer[i].size(); j++ ){
+			if(text_buffer[i][j] == '|'){
+				text_buffer[i].replace(j,1,replace_char);
+			}
+		}
+	}
+	render(); 
+}
 //TODO: render text end
 void PlayMode::drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip) {
 	// Upload vertex buffer
