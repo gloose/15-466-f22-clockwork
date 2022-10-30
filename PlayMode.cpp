@@ -44,10 +44,6 @@ Load< Scene > hexapod_scene(LoadTagDefault, []() -> Scene const * {
 	});
 });
 
-Load< Sound::Sample > dusty_floor_sample(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("dusty-floor.opus"));
-});
-
 PlayMode::PlayMode() : scene(*hexapod_scene) {
 	//get pointers to leg for convenience:
 	for (auto &transform : scene.transforms) {
@@ -69,7 +65,6 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
-	leg_tip_loop = Sound::loop_3D(*dusty_floor_sample, 1.0f, get_leg_tip_position(), 10.0f);
 
 
 	// Set up text rendering
@@ -278,6 +273,8 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				player_done = false;
 				enemy_done = false;
 				turn_done = false;
+				player_time = 1.0f;
+				enemy_time = 1.0f;
 			} else {
 				line_break();
 			}
@@ -445,9 +442,9 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	return false;
 }
 
-void PlayMode::execute_player_statement(float time_left) {
+void PlayMode::execute_player_statement() {
 	float time = player_statement->duration;
-	if (time_left >= time) {
+	if (player_time >= time) {
 		std::cout << "Executing statement.\n";
 		player_statement->execute();
 		execution_line_index = (int)player_statement->line_num;
@@ -483,16 +480,24 @@ void PlayMode::execute_player_statement(float time_left) {
 		if (player_statement == nullptr) {
 			player_done = true;
 		} else {
-			execute_player_statement(time_left - time);
+			player_time -= time;
+			if (player_time <= 0.0f) {
+				turn = Turn::ENEMY;
+				enemy_time = 1.0f;
+			}
 		}
 	} else {
-		player_statement->duration -= time_left;
+		player_statement->duration -= player_time;
+		if (!enemy_done) {
+			turn = Turn::ENEMY;
+			enemy_time = 1.0f;
+		}
 	}
 }
 
-void PlayMode::execute_enemy_statement(float time_left) {
+void PlayMode::execute_enemy_statement() {
 	float time = enemy_statement->duration;
-	if (time_left >= time) {
+	if (enemy_time >= time) {
 		std::cout << "Executing statement.\n";
 		enemy_statement->execute();
 		execution_line_index = -1;
@@ -527,28 +532,32 @@ void PlayMode::execute_enemy_statement(float time_left) {
 		enemy_statement = enemy_exe->next();
 		if (enemy_statement == nullptr) {
 			enemy_done = true;
+			turn = Turn::PLAYER;
+			player_time = 1.0f;
 		} else {
-			execute_enemy_statement(time_left - time);
+			enemy_time -= time;
+			if (enemy_time <= 0.0f) {
+				turn = Turn::PLAYER;
+				player_time = 1.0f;
+			}
 		}
 	} else {
-		enemy_statement->duration -= time_left;
+		enemy_statement->duration -= enemy_time;
+		// If both are done, we want to switch control to the player for the next turn
+		if (enemy_done || !player_done) {
+			turn = Turn::PLAYER;
+			player_time = 1.0f;
+		}
 	}
 }
 
 void PlayMode::take_turn() {
 	if (turn == Turn::PLAYER) {
 		std::cout << "Player taking turn.\n";
-		execute_player_statement(1.0f);
-		if (!enemy_done) {
-			turn = Turn::ENEMY;
-		}
+		execute_player_statement();
 	} else {
 		std::cout << "Enemy taking turn.\n";
-		execute_enemy_statement(1.0f);
-		// If both are done, we want to switch control to the player for the next turn
-		if (enemy_done || !player_done) {
-			turn = Turn::PLAYER;
-		}
+		execute_enemy_statement();
 	}
 }
 
@@ -596,9 +605,6 @@ void PlayMode::update(float elapsed) {
 		glm::radians(10.0f * std::sin(wobble * 3.0f * 2.0f * float(M_PI))),
 		glm::vec3(0.0f, 0.0f, 1.0f)
 	);
-
-	//move sound to follow leg tip position:
-	leg_tip_loop->set_position(get_leg_tip_position(), 1.0f / 60.0f);
 
 	//move camera:
 	{
@@ -880,15 +886,11 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
+	glDisable(GL_DEPTH_TEST);
 
 	// scene.draw(*camera);
 	render();
 	GL_ERRORS();
-}
-
-glm::vec3 PlayMode::get_leg_tip_position() {
-	//the vertex position here was read from the model in blender:
-	return lower_leg->make_local_to_world() * glm::vec4(-1.26137f, -11.861f, 0.0f, 1.0f);
 }
 
 

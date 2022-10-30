@@ -117,11 +117,6 @@ struct PlayMode : Mode {
 	glm::quat upper_leg_base_rotation;
 	glm::quat lower_leg_base_rotation;
 	float wobble = 0.0f;
-
-	glm::vec3 get_leg_tip_position();
-
-	//music coming from the tip of the leg (as a demonstration):
-	std::shared_ptr< Sound::PlayingSample > leg_tip_loop;
 	
 	//camera:
 	Scene::Camera *camera = nullptr;
@@ -132,13 +127,15 @@ struct PlayMode : Mode {
 		ENEMY
 	} turn;
 	float turn_time;
+	float player_time;
+	float enemy_time;
 	bool player_done;
 	bool enemy_done;
 	bool turn_done;
 	void take_turn();
 	void init_compiler();
-	void execute_player_statement(float time_left);
-	void execute_enemy_statement(float time_left);
+	void execute_player_statement();
+	void execute_enemy_statement();
 	Compiler player_compiler;
 	Compiler enemy_compiler;
 	Compiler::Executable *player_exe;
