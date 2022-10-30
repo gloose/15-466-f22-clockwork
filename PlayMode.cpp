@@ -150,16 +150,12 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	enemy_done = true;
 	turn = Turn::PLAYER;
 	init_compiler();
-
-	// Temporary
-	player_exe = player_compiler.compile("player-loop-test.txt");
-	player_statement = player_exe->next();
-	enemy_exe = enemy_compiler.compile("enemy-test.txt");
-	enemy_statement = enemy_exe->next();
-	player_done = false;
-	enemy_done = false;
 	
-	text_buffer.push_back("|");
+	text_buffer.push_back("");
+	lshift.pressed = false;
+	rshift.pressed = false;
+	get_action_string() = "";
+	get_effect_string() = "";
 }
 
 PlayMode::~PlayMode() {
@@ -218,6 +214,14 @@ void PlayMode::init_compiler() {
 	rupol->addProperty("ALIVE", 1);
 	rupol->addProperty("PRESENT", 1);
 
+	player_units.push_back(warrior);
+	player_units.push_back(wizard);
+	player_units.push_back(healer);
+	player_units.push_back(archer);
+
+	enemy_units.push_back(fargoth);
+	enemy_units.push_back(rupol);
+
 	player_compiler.addObject(warrior);
 	enemy_compiler.addObject(warrior);
 	player_compiler.addObject(wizard);
@@ -233,6 +237,9 @@ void PlayMode::init_compiler() {
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
+	if (!turn_done) {
+		return false;
+	}
 
 	if (evt.type == SDL_KEYDOWN) {
 		if (evt.key.keysym.sym == SDLK_ESCAPE) {
@@ -262,11 +269,16 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		else if(evt.key.keysym.sym == SDLK_RETURN){
 			enter.downs += 1; 
 			enter.pressed = true;
-			if(shift.pressed){
-				player_compiler.compile(text_buffer);
-				std::cout << "this shoud submit" << std::endl;
-			}
-			else{
+			if (lshift.pressed || rshift.pressed) {
+				std::cout << "Submitted!\n";
+				player_exe = player_compiler.compile(text_buffer);
+				player_statement = player_exe->next();
+				enemy_exe = enemy_compiler.compile("enemy-test.txt");
+				enemy_statement = enemy_exe->next();
+				player_done = false;
+				enemy_done = false;
+				turn_done = false;
+			} else {
 				line_break();
 			}
 			return true;
@@ -351,110 +363,81 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if(evt.key.keysym.sym == SDLK_DELETE || evt.key.keysym.sym == SDLK_BACKSPACE){
 			delete_text();
 		} else if(evt.key.keysym.sym == SDLK_0){
-			if(shift.pressed){
+			if (lshift.pressed || rshift.pressed) {
 				insert(")");
-			}
-			else{
+			} else{
 				insert("0");
 			}
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_1){
-			if(shift.pressed){
+		} else if (evt.key.keysym.sym == SDLK_1) {
+			if (lshift.pressed || rshift.pressed) {
 				insert("!");
 			} else {
 				insert("1");
 			}
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_2){
+		} else if (evt.key.keysym.sym == SDLK_2) {
 			insert("2");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_3){
+		} else if (evt.key.keysym.sym == SDLK_3) {
 			insert("3");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_4){
+		} else if(evt.key.keysym.sym == SDLK_4) {
 			insert("4");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_5){
+		} else if (evt.key.keysym.sym == SDLK_5) {
 			insert("5");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_6){
+		} else if (evt.key.keysym.sym == SDLK_6) {
 			insert("6");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_7){
+		} else if (evt.key.keysym.sym == SDLK_7) {
 			insert("7");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_8){
+		} else if (evt.key.keysym.sym == SDLK_8) {
 			insert("8");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_9){
-			if(shift.pressed){
+		} else if (evt.key.keysym.sym == SDLK_9) {
+			if (lshift.pressed || rshift.pressed) {
 				insert("(");
-			}
-			else{
+			} else{
 				insert("9");
 			}
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_SPACE){
+		} else if (evt.key.keysym.sym == SDLK_SPACE) {
 			insert(" ");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_SPACE){
+		} else if (evt.key.keysym.sym == SDLK_SPACE) {
 			insert(" ");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_PERIOD){
-			if(shift.pressed){
+			if (lshift.pressed || rshift.pressed) {
 				insert(">");
-			}
-			else{
+			} else {
 				insert(".");
 			}
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_EQUALS){
+		} else if (evt.key.keysym.sym == SDLK_EQUALS) {
 			insert("=");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_COMMA){
-			if(shift.pressed){
+			if (lshift.pressed || rshift.pressed) {
 				insert("<");
 			}
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_LSHIFT || evt.key.keysym.sym == SDLK_RSHIFT){
-			shift.downs += 1;
-			shift.pressed = true;
+		} else if(evt.key.keysym.sym == SDLK_LSHIFT){
+			lshift.pressed = true;
 			return true;
-		} 
+		} else if (evt.key.keysym.sym == SDLK_RSHIFT) {
+			rshift.pressed = true;
+			return true;
+		}
 	} else if (evt.type == SDL_KEYUP) {
-		if (evt.key.keysym.sym == SDLK_a) {
-			left.pressed = false;
+		if (evt.key.keysym.sym == SDLK_LSHIFT) {
+			lshift.pressed = false;
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_d) {
-			right.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_w) {
-			up.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_s) {
-			down.pressed = false;
-			return true;
-		}
-		else if (evt.key.keysym.sym == SDLK_LSHIFT || evt.key.keysym.sym == SDLK_RSHIFT) {
-			shift.pressed = false;
-			return true;
-		}
-	} else if (evt.type == SDL_MOUSEBUTTONDOWN) {
-		if (SDL_GetRelativeMouseMode() == SDL_FALSE) {
-			SDL_SetRelativeMouseMode(SDL_TRUE);
-			return true;
-		}
-	} else if (evt.type == SDL_MOUSEMOTION) {
-		if (SDL_GetRelativeMouseMode() == SDL_TRUE) {
-			glm::vec2 motion = glm::vec2(
-				evt.motion.xrel / float(window_size.y),
-				-evt.motion.yrel / float(window_size.y)
-			);
-			camera->transform->rotation = glm::normalize(
-				camera->transform->rotation
-				* glm::angleAxis(-motion.x * camera->fovy, glm::vec3(0.0f, 1.0f, 0.0f))
-				* glm::angleAxis(motion.y * camera->fovy, glm::vec3(1.0f, 0.0f, 0.0f))
-			);
+		} else if (evt.key.keysym.sym == SDLK_RSHIFT) {
+			rshift.pressed = false;
 			return true;
 		}
 	}
@@ -467,6 +450,35 @@ void PlayMode::execute_player_statement(float time_left) {
 	if (time_left >= time) {
 		std::cout << "Executing statement.\n";
 		player_statement->execute();
+		execution_line_index = (int)player_statement->line_num;
+		bool enemies_alive = false;
+		bool players_alive = false;
+		for (auto& enemy : enemy_units) {
+			if (enemy->property("ALIVE")) {
+				enemies_alive = true;
+				break;
+			}
+		}
+		for (auto& player : player_units) {
+			if (player->property("ALIVE")) {
+				players_alive = true;
+				break;
+			}
+		}
+		if (!players_alive) {
+			get_effect_string() = "All player units have fallen...";
+			player_done = true;
+			enemy_done = true;
+			game_lost = true;
+			return;
+		}
+		if (!enemies_alive) {
+			get_effect_string() = "All enemy units have been slain!";
+			player_done = true;
+			enemy_done = true;
+			game_won = true;
+			return;
+		}
 		player_statement = player_exe->next();
 		if (player_statement == nullptr) {
 			player_done = true;
@@ -483,6 +495,35 @@ void PlayMode::execute_enemy_statement(float time_left) {
 	if (time_left >= time) {
 		std::cout << "Executing statement.\n";
 		enemy_statement->execute();
+		execution_line_index = -1;
+		bool enemies_alive = false;
+		bool players_alive = false;
+		for (auto& enemy : enemy_units) {
+			if (enemy->property("ALIVE")) {
+				enemies_alive = true;
+				break;
+			}
+		}
+		for (auto& player : player_units) {
+			if (player->property("ALIVE")) {
+				players_alive = true;
+				break;
+			}
+		}
+		if (!players_alive) {
+			get_effect_string() = "All player units have fallen...";
+			player_done = true;
+			enemy_done = true;
+			game_lost = true;
+			return;
+		}
+		if (!enemies_alive) {
+			get_effect_string() = "All enemy units have been slain!";
+			player_done = true;
+			enemy_done = true;
+			game_won = true;
+			return;
+		}
 		enemy_statement = enemy_exe->next();
 		if (enemy_statement == nullptr) {
 			enemy_done = true;
@@ -513,12 +554,29 @@ void PlayMode::take_turn() {
 
 
 void PlayMode::update(float elapsed) {
-	if (!player_done || !enemy_done) {
-		if (turn_time <= 0.0f) {
-			take_turn();
-			turn_time = 1.0f;
+	if (!turn_done) {
+		if (!player_done || !enemy_done) {
+			if (turn_time <= 0.0f) {
+				take_turn();
+				turn_time = 1.0f;
+			} else {
+				turn_time -= elapsed;
+			}
 		} else {
-			turn_time -= elapsed;
+			if (turn_time <= 0.0f && !game_won && !game_lost) {
+				lshift.pressed = false;
+				rshift.pressed = false;
+				turn_done = true;
+				text_buffer.clear();
+				text_buffer.push_back("");
+				line_index = 0;
+				cur_cursor_pos = 0;
+				execution_line_index = -1;
+				get_action_string() = "";
+				get_effect_string() = "";
+			} else {
+				turn_time -= elapsed;
+			}
 		}
 	}
 
@@ -579,7 +637,7 @@ void PlayMode::update(float elapsed) {
 }
 
 
-int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color) {
+int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color, bool cursor_line) {
 	std::vector< PPUDataStream::Vertex > triangle_strip;
 
 	//helper to put a single tile somewhere on the screen:
@@ -599,6 +657,10 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 	const char* text_c_str = text.c_str();
 	size_t start_line = 0;
 	size_t line_num = 0;
+
+	if (start_line == text.size() && cursor_line) {
+		drawText("|", position, width);
+	}
 
 	while (start_line < text.size()) {
 		line_num++;
@@ -623,6 +685,9 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 		double current_y = position.y - line_num * font_size;
 		for (size_t i = 0; i < len; i++)
 		{
+			if (cursor_line && i == cur_cursor_pos) {
+				drawText("|", glm::vec2(current_x - 5., current_y + font_size), width);
+			}
 			// Line break if next word would overflow
 			if (text[start_line + i] == ' ') {
 				double cx = current_x + pos[i].x_advance / 64.;
@@ -657,6 +722,9 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 			}
 			
 		}
+		if (cursor_line && cur_cursor_pos == text.size()) {
+			drawText("|", glm::vec2(current_x - 5., current_y + font_size), width);
+		}
 	}
 
 	drawTriangleStrip(triangle_strip);
@@ -665,64 +733,59 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 }
 
 void PlayMode::move_up(){
-	text_buffer[line_index].erase(cur_cursor_pos,1);
-	if(line_index == 0){
-		line_index = 0;
+	if (line_index > 0) {
+		line_index--;
+		if (cur_cursor_pos > text_buffer[line_index].size()) {
+			cur_cursor_pos = text_buffer[line_index].size();
+		}
 	}
-	else{
-		line_index = line_index - 1;
-		cur_cursor_pos = text_buffer[line_index].size();
-	}
-	text_buffer[line_index].insert(cur_cursor_pos,"|");
 }
 
 void PlayMode::move_down(){
-	if(line_index < (text_buffer.size() - 1)){
-		text_buffer[line_index].erase(cur_cursor_pos,1);
-		line_index = line_index + 1;
-		cur_cursor_pos = text_buffer[line_index].size();
-		text_buffer[line_index].insert(cur_cursor_pos,"|");
+	if(line_index < text_buffer.size() - 1){
+		line_index++;
+		if (cur_cursor_pos > text_buffer[line_index].size()) {
+			cur_cursor_pos = text_buffer[line_index].size();
+		}
 	}
 }
 
 void PlayMode::move_right(){
-	if(cur_cursor_pos < text_buffer[line_index].length() - 1){
-		text_buffer[line_index].erase(cur_cursor_pos,1);
-		cur_cursor_pos = cur_cursor_pos + 1;
-		text_buffer[line_index].insert(cur_cursor_pos,"|");
+	if(cur_cursor_pos < text_buffer[line_index].size()){
+		cur_cursor_pos++;
 	}
 }
 
 void PlayMode::move_left(){
-	text_buffer[line_index].erase(cur_cursor_pos,1);
-	if(cur_cursor_pos == 0){
-		cur_cursor_pos = 0;
+	if(cur_cursor_pos > 0){
+		cur_cursor_pos--;
 	}
-	else{
-		cur_cursor_pos = cur_cursor_pos - 1;
-	}
-	text_buffer[line_index].insert(cur_cursor_pos,"|");
 }
 
 void PlayMode::line_break(){
-	text_buffer[line_index].erase(cur_cursor_pos,1);
-	text_buffer.push_back("|");
-	cur_cursor_pos = 0; 
-	line_index = line_index + 1;
+	if (text_buffer.size() < max_lines) {
+		text_buffer.insert(text_buffer.begin() + line_index + 1, "");
+		line_index++;
+		cur_cursor_pos = 0;
+	}
 }
 
 void PlayMode::delete_text(){
-	if(cur_cursor_pos != 0){
+	if (cur_cursor_pos > 0){
 		text_buffer[line_index].erase(cur_cursor_pos - 1, 1);
 		cur_cursor_pos = cur_cursor_pos - 1;
+	} else if (text_buffer[line_index].size() == 0 && line_index > 0) {
+		text_buffer.erase(text_buffer.begin() + line_index);
+		line_index--;
+		cur_cursor_pos = text_buffer[line_index].size();
 	}
 }
 
 void PlayMode::insert(std::string cur_letter){
-	text_buffer[line_index].erase(cur_cursor_pos,1);
-	text_buffer[line_index].insert(cur_cursor_pos,cur_letter);
-	cur_cursor_pos = cur_cursor_pos + 1; 
-	text_buffer[line_index].insert(cur_cursor_pos,"|");
+	if (text_buffer[line_index].size() < max_line_chars) {
+		text_buffer[line_index].insert(cur_cursor_pos, cur_letter);
+		cur_cursor_pos++;
+	}
 }
 
 void PlayMode::render(){
@@ -730,16 +793,17 @@ void PlayMode::render(){
 	int y = ScreenHeight - 20;
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < text_buffer.size(); i++){
-		if(!player_done && i == execution_line_index){
+		if (!player_done && i == execution_line_index) {
 			pen_color = execute_line_color;
-		} else if(i == line_index){
+		} else if (player_done && i == line_index) {
 			pen_color = cur_line_color;
-		}
-		else{
+		} else {
 			pen_color = default_line_color;
 		}
-		y -= drawText(text_buffer[i], glm::vec2(x, y), max_line_length, pen_color);
+		drawText(text_buffer[i], glm::vec2(x, y - i * font_size), max_line_length, pen_color, i == line_index);
 	}
+	drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
+	drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
 }
 //TODO: render text end
 void PlayMode::drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip) {
@@ -817,36 +881,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 
-	scene.draw(*camera);
-
-	{ //use DrawLines to overlay some text:
-		glDisable(GL_DEPTH_TEST);
-		float aspect = float(drawable_size.x) / float(drawable_size.y);
-		DrawLines lines(glm::mat4(
-			1.0f / aspect, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f
-		));
-
-		constexpr float H = 0.09f;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
-		float ofs = 2.0f / drawable_size.y;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
-	}
-
-	// // Draw text using proper text rendering
-	// int x = 20;
-	// int y = ScreenHeight - 20;
-	// int w = 400;
-	// y -= drawText("Here's some example text rendering. It supports line wrapping when the length of the line exceeds a chosen width.", glm::vec2(x, y), w);
-	// y -= drawText("It also supports drawing text in different colors. Not different fonts or font sizes, but we could probably change that in the future.", glm::vec2(x, y), w, alt_color);
+	// scene.draw(*camera);
 	render();
 	GL_ERRORS();
 }

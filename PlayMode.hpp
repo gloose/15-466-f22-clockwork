@@ -104,7 +104,7 @@ struct PlayMode : Mode {
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up, enter, shift;
+	} left, right, down, up, enter, lshift, rshift;
 
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
@@ -134,6 +134,7 @@ struct PlayMode : Mode {
 	float turn_time;
 	bool player_done;
 	bool enemy_done;
+	bool turn_done;
 	void take_turn();
 	void init_compiler();
 	void execute_player_statement(float time_left);
@@ -144,17 +145,23 @@ struct PlayMode : Mode {
 	Compiler::Statement *player_statement;
 	Compiler::Executable *enemy_exe;
 	Compiler::Statement *enemy_statement;
+	std::vector<Compiler::Object*> player_units;
+	std::vector<Compiler::Object*> enemy_units;
+	bool game_lost;
+	bool game_won;
 
 	// Helper functions
-	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color);
+	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
 	void drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip);
 
 	//begin of the text rendering
 	size_t line_index = 0;
 	size_t cur_cursor_pos = 0;
 	std::vector< std::string > text_buffer;
-	size_t execution_line_index = 0;
-	size_t max_line_length = 400;
+	int execution_line_index = -1;
+	size_t max_line_length = 600;
+	size_t max_line_chars = 30;
+	size_t max_lines = 20;
 	std::string cur_str;
 	void move_up();
 	void move_down();

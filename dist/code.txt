@@ -1,8 +1,0 @@
-if (warrior.health < 10)
-	warrior.defend(warrior)
-end
-warrior.attack(warrior)
-warrior.attack(warrior)
-if (warrior.health < 10)
-	warrior.defend(warrior)
-end
