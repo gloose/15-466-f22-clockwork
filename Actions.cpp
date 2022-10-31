@@ -33,7 +33,7 @@ bool check_freeze(Compiler::Object* user) {
 }
 
 void attack_function(Compiler::Object* user, Compiler::Object* target) {\
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
 	if (check_burn(user) || check_freeze(user)) {
@@ -56,7 +56,7 @@ void defend_function(Compiler::Object* user, Compiler::Object* target) {
 }
 
 void freeze_function(Compiler::Object* user, Compiler::Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
 	if (check_burn(user) || check_freeze(user)) {
@@ -67,7 +67,7 @@ void freeze_function(Compiler::Object* user, Compiler::Object* target) {
 }
 
 void burn_function(Compiler::Object* user, Compiler::Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
 	if (check_burn(user) || check_freeze(user)) {
@@ -93,7 +93,7 @@ void heal_function(Compiler::Object* user, Compiler::Object* target) {
 }
 
 void shoot_function(Compiler::Object* user, Compiler::Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
 	if (check_burn(user) || check_freeze(user)) {

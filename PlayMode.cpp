@@ -452,7 +452,18 @@ void PlayMode::execute_player_statement() {
 	float time = player_statement->duration;
 	if (player_time >= time) {
 		std::cout << "Executing statement.\n";
-		player_statement->execute();
+		auto obj = player_units.begin();
+		if (player_statement->type == Compiler::ACTION_STATEMENT) {
+			Compiler::ActionStatement *action_statement = dynamic_cast<Compiler::ActionStatement *>(player_statement);
+			obj = std::find(player_units.begin(), player_units.end(), action_statement->object);
+		} else {
+			get_action_string() = "You are thinking...";
+		}
+		if (obj != player_units.end()) {
+			player_statement->execute();
+		} else {
+			get_action_string() = "You can't control the enemy!";
+		}
 		execution_line_index = (int)player_statement->line_num;
 		bool enemies_alive = false;
 		bool players_alive = false;
@@ -505,6 +516,7 @@ void PlayMode::execute_enemy_statement() {
 	float time = enemy_statement->duration;
 	if (enemy_time >= time) {
 		std::cout << "Executing statement.\n";
+		get_action_string() = "The enemy is thinking...";
 		enemy_statement->execute();
 		execution_line_index = -1;
 		bool enemies_alive = false;
