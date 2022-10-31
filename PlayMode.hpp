@@ -146,6 +146,7 @@ struct PlayMode : Mode {
 	std::vector<Compiler::Object*> enemy_units;
 	bool game_lost;
 	bool game_won;
+	bool compile_failed;
 
 	// Helper functions
 	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);

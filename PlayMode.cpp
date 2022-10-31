@@ -145,6 +145,7 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	enemy_done = true;
 	turn = Turn::PLAYER;
 	init_compiler();
+	compile_failed = false;
 	
 	text_buffer.push_back("");
 	lshift.pressed = false;
@@ -267,6 +268,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			if (lshift.pressed || rshift.pressed) {
 				std::cout << "Submitted!\n";
 				player_exe = player_compiler.compile(text_buffer);
+				if (player_exe == nullptr) {
+					compile_failed = true;
+					return true;
+				}
+				compile_failed = false;
 				player_statement = player_exe->next();
 				enemy_exe = enemy_compiler.compile("enemy-test.txt");
 				enemy_statement = enemy_exe->next();
@@ -808,8 +814,12 @@ void PlayMode::render(){
 		}
 		drawText(text_buffer[i], glm::vec2(x, y - i * font_size), max_line_length, pen_color, i == line_index);
 	}
-	drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
-	drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
+	if (compile_failed) {
+		drawText("Couldn't understand your code.", glm::vec2(ScreenWidth / 2, 100), max_line_length);
+	} else {
+		drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
+		drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
+	}
 }
 
 //TODO: render text end
