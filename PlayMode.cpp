@@ -496,11 +496,19 @@ void PlayMode::execute_player_statement() {
 		player_statement = player_exe->next();
 		if (player_statement == nullptr) {
 			player_done = true;
+			if (!enemy_done) {
+				turn = Turn::ENEMY;
+				enemy_time = 1.0f;
+			}
 		} else {
 			player_time -= time;
 			if (player_time <= 0.0f) {
-				turn = Turn::ENEMY;
-				enemy_time = 1.0f;
+				if (!enemy_done) {
+					turn = Turn::ENEMY;
+					enemy_time = 1.0f;
+				} else {
+					player_time = 1.0f;
+				}
 			}
 		}
 	} else {
@@ -508,6 +516,8 @@ void PlayMode::execute_player_statement() {
 		if (!enemy_done) {
 			turn = Turn::ENEMY;
 			enemy_time = 1.0f;
+		} else {
+			player_time = 1.0f;
 		}
 	}
 }
@@ -555,8 +565,12 @@ void PlayMode::execute_enemy_statement() {
 		} else {
 			enemy_time -= time;
 			if (enemy_time <= 0.0f) {
-				turn = Turn::PLAYER;
-				player_time = 1.0f;
+				if (!player_done) {
+					turn = Turn::PLAYER;
+					player_time = 1.0f;
+				} else {
+					enemy_time = 1.0f;
+				}
 			}
 		}
 	} else {
@@ -565,6 +579,8 @@ void PlayMode::execute_enemy_statement() {
 		if (enemy_done || !player_done) {
 			turn = Turn::PLAYER;
 			player_time = 1.0f;
+		} else {
+			enemy_time = 1.0f;
 		}
 	}
 }
