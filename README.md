@@ -10,7 +10,7 @@ Clockwork is a game about writing code to control a party of robotic adventurers
 
 ### Controls
 
-Use your keyboard to type code into the game window. When you're done, press shift+enter to run your code, and watch the status messages to see how you did!
+Use your keyboard to type code into the game window. When you're done, press shift+enter to run your code, and watch the status messages to see how you did! You can also hold ctrl to speed up code execution.
 
 ### Language Specification
 
@@ -39,9 +39,13 @@ These are variables specific to an object that may be used in place of any other
 
 * HEALTH: When this drops to 0, ALIVE is set to FALSE.
 
-* HEALTH_MAX: Maximum value of the HEALTH property.
+* HEALTH_MAX: Maximum value of the HEALTH property. Archer and wizard have 60, healer has 80, warrior has 100, Rupol has 160, and Fargoth has 240.
 
 * DEFENSE: Reduces damage taken from attacks.
+
+* POWER: (Warrior, archer, and monsters only) Determines damage dealt by attacking or shooting. Warrior, archer, and Fargoth have 20, Rupol has 30.
+
+* ARROWS: (Archer only) When this drops to 0, the archer can no longer shoot. Starts at 8.
 
 #### If statements
 
@@ -73,7 +77,7 @@ END
 
 Example: WARRIOR.ATTACK(FARGOTH)
 
-#### Legal Actions
+#### Object Listing
 
 ##### WARRIOR
 
@@ -87,11 +91,15 @@ BURN: The target takes damage before every action for the rest of combat.
 
 ##### ARCHER
 
-SHOOT: Deals damage to target. Faster than ATTACK, but requires arrows to use. The archer starts with 20 arrows.
+SHOOT: Deals damage to target. Can shoot twice per turn, but requires arrows to use. The archer starts with 8 arrows.
 
 ##### HEALER
 
 HEAL: Partially restores the target's health. May not heal beyond maximum health.
+
+### Code Execution
+
+In general, the player and the enemy take turns executing one line of code at a time. However, however, some statements take more or less than a full turn to execute. The conditional checks in an if or while statement only take a quarter of a turn, the archer's shoot action takes half a turn, and the wizard's spells take one and a half turns.
 
 ## Sources:
 
