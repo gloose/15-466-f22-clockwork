@@ -777,6 +777,15 @@ void PlayMode::take_turn() {
 		std::cout << "Enemy taking turn.\n";
 		execute_enemy_statement();
 	}
+
+	if (player_done && enemy_done) {
+		for (Compiler::Object* u : player_units) {
+			u->reset();
+		}
+		for (Compiler::Object* u : enemy_units[current_level]) {
+			u->reset();
+		}
+	}
 }
 
 void PlayMode::next_level() {
