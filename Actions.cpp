@@ -4,7 +4,7 @@ std::string action_string = "";
 std::string effect_string = "";
 
 int calc_damage(int damage, Compiler::Object* target) {
-	return (int)std::round(damage * (100 + target->property("DEFENSE")) / 100.);
+	return (int)std::round(damage * (100 - target->property("DEFENSE")) / 100.);
 }
 
 void attack(int damage, Compiler::Object* target) {
