@@ -109,9 +109,9 @@ void shoot_function(Compiler::Object* user, Compiler::Object* target) {
 	}
 	
 	if (user->property("ARROWS") > 0) {
-		attack(20, target);
+		attack(user->property("POWER"), target);
 		user->property("ARROWS")--;
-		action_string = user->name + " shot " + target->name + " and has " + std::to_string(user->property("ARROWS")) + " arrows remaining.";
+		action_string = user->name + " shot " + target->name + " for " + std::to_string(user->property("POWER")) + " damage, and has " + std::to_string(user->property("ARROWS")) + " arrows remaining.";
 	} else {
 		action_string = user->name + " tried to shoot " + target->name + ", but was out of arrows!";
 	}
