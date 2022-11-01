@@ -156,11 +156,12 @@ Compiler::ActionStatement* Compiler::parseActionStatement(Program& program, Prog
 
     if (parseObject(word_it, &out->object)
      && parseWord(word_it, ".")
-     && parseAction(word_it, out->object, &out->func, &out->duration)
+     && parseAction(word_it, out->object, &out->func, &out->base_duration)
      && parseWord(word_it, "(")
      && parseObject(word_it, &out->target)
      && parseWord(word_it, ")")) {
         line_it++;
+        out->duration = out->base_duration;
         return out;
     }
 

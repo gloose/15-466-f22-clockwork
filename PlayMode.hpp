@@ -104,7 +104,7 @@ struct PlayMode : Mode {
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up, enter, lshift, rshift;
+	} left, right, down, up, enter, lshift, rshift, lctrl, rctrl;
 
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
@@ -159,7 +159,7 @@ struct PlayMode : Mode {
 	int execution_line_index = -1;
 	size_t max_line_length = 600;
 	size_t max_line_chars = 30;
-	size_t max_lines = 20;
+	size_t max_lines = 16;
 	std::string cur_str;
 	void move_up();
 	void move_down();

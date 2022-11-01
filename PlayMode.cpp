@@ -143,6 +143,7 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	turn_time = 0.0f;
 	player_done = true;
 	enemy_done = true;
+	turn_done = true;
 	turn = Turn::PLAYER;
 	init_compiler();
 	compile_failed = false;
@@ -161,54 +162,58 @@ void PlayMode::init_compiler() {
 	Compiler::Object *warrior = new Compiler::Object("WARRIOR");
 	warrior->addAction("ATTACK", attack_function, 1.0f);
 	warrior->addAction("DEFEND", defend_function, 1.0f);
-	warrior->addProperty("HEALTH_MAX", 100);
+	warrior->addProperty("HEALTH_MAX", 60);
 	warrior->addProperty("HEALTH", 100);
-	warrior->addProperty("DEFENSE", 2);
+	warrior->addProperty("DEFENSE", 0);
 	warrior->addProperty("ALIVE", 1);
+	warrior->addProperty("POWER", 15);
 
 	Compiler::Object *wizard = new Compiler::Object("WIZARD");
 	wizard->addAction("FREEZE", freeze_function, 1.5f);
 	wizard->addAction("BURN", burn_function, 1.5f);
-	wizard->addProperty("HEALTH_MAX", 200);
-	wizard->addProperty("HEALTH", 200);
-	wizard->addProperty("DEFENSE", 1);
+	wizard->addProperty("HEALTH_MAX", 60);
+	wizard->addProperty("HEALTH", 60);
+	wizard->addProperty("DEFENSE", 0);
 	wizard->addProperty("ALIVE", 1);
 	wizard->addProperty("DEFENDED", 0); // Defended by the warrior
 
 	Compiler::Object *archer = new Compiler::Object("ARCHER");
 	archer->addAction("SHOOT", shoot_function, 0.5f);
-	archer->addProperty("HEALTH_MAX", 50);
-	archer->addProperty("HEALTH", 50);
-	archer->addProperty("DEFENSE", 1);
+	archer->addProperty("HEALTH_MAX", 60);
+	archer->addProperty("HEALTH", 60);
+	archer->addProperty("DEFENSE", 0);
 	archer->addProperty("ALIVE", 1);
 	archer->addProperty("DEFENDED", 0);
-	archer->addProperty("ARROWS", 20);
+	archer->addProperty("ARROWS", 8);
+	archer->addProperty("POWER", 20);
 
 	Compiler::Object *healer = new Compiler::Object("HEALER");
 	healer->addAction("HEAL", heal_function, 1.0f);
-	healer->addProperty("HEALTH_MAX", 50);
-	healer->addProperty("HEALTH", 50);
-	healer->addProperty("DEFENSE", 1);
+	healer->addProperty("HEALTH_MAX", 80);
+	healer->addProperty("HEALTH", 80);
+	healer->addProperty("DEFENSE", 0);
 	healer->addProperty("ALIVE", 1);
 	healer->addProperty("DEFENDED", 0);
 
 	Compiler::Object *fargoth = new Compiler::Object("FARGOTH");
 	fargoth->addAction("ATTACK", attack_function, 1.0f);
 	fargoth->addAction("DEFEND", defend_function, 1.0f);
-	fargoth->addProperty("HEALTH_MAX", 150);
-	fargoth->addProperty("HEALTH", 150);
-	fargoth->addProperty("DEFENSE", 1);
+	fargoth->addProperty("HEALTH_MAX", 300);
+	fargoth->addProperty("HEALTH", 300);
+	fargoth->addProperty("DEFENSE", 0);
 	fargoth->addProperty("ALIVE", 1);
 	fargoth->addProperty("PRESENT", 1);
+	fargoth->addProperty("POWER", 20);
 
 	Compiler::Object *rupol = new Compiler::Object("RUPOL");
 	rupol->addAction("ATTACK", attack_function, 1.0f);
 	rupol->addAction("DEFEND", defend_function, 1.0f);
 	rupol->addProperty("HEALTH_MAX", 150);
 	rupol->addProperty("HEALTH", 150);
-	rupol->addProperty("DEFENSE", 1);
+	rupol->addProperty("DEFENSE", 0);
 	rupol->addProperty("ALIVE", 1);
 	rupol->addProperty("PRESENT", 1);
+	rupol->addProperty("POWER", 40);
 
 	player_units.push_back(warrior);
 	player_units.push_back(wizard);
@@ -233,6 +238,24 @@ void PlayMode::init_compiler() {
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
+	if (evt.type == SDL_KEYDOWN) {
+		if (evt.key.keysym.sym == SDLK_LCTRL) {
+			lctrl.pressed = true;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_RCTRL) {
+			rctrl.pressed = true;
+			return true;
+		}
+	} else if (evt.type == SDL_KEYUP) {
+		if (evt.key.keysym.sym == SDLK_LCTRL) {
+			lctrl.pressed = false;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_RCTRL) {
+			rctrl.pressed = false;
+			return true;
+		}
+	}
+
 	if (!turn_done) {
 		return false;
 	}
@@ -603,7 +626,11 @@ void PlayMode::update(float elapsed) {
 				take_turn();
 				turn_time = 1.0f;
 			} else {
-				turn_time -= elapsed;
+				if (lctrl.pressed || rctrl.pressed) {
+					turn_time -= elapsed * 10.f;
+				} else {
+					turn_time -= elapsed;
+				}
 			}
 		} else {
 			if (turn_time <= 0.0f && !game_won && !game_lost) {
@@ -618,7 +645,11 @@ void PlayMode::update(float elapsed) {
 				get_action_string() = "";
 				get_effect_string() = "";
 			} else {
-				turn_time -= elapsed;
+				if (lctrl.pressed || rctrl.pressed) {
+					turn_time -= elapsed * 10.f;
+				} else {
+					turn_time -= elapsed;
+				}
 			}
 		}
 	}
