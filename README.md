@@ -97,6 +97,14 @@ SHOOT: Deals damage to target. Can shoot twice per turn, but requires arrows to 
 
 HEAL: Partially restores the target's health. May not heal beyond maximum health.
 
+##### FARGOTH
+
+One of the enemies that you can attack. Attacks every unit before RUPOL, and has a lot of health.
+
+##### RUPOL
+
+One of the enemies that you can attack. Attacks every unit after FARGOTH, and does a lot of damage.
+
 ### Code Execution
 
 In general, the player and the enemy take turns executing one line of code at a time. However, some statements take more or less than a full turn to execute. The conditional checks in an if or while statement only take a quarter of a turn, the archer's shoot action takes half a turn, and the wizard's spells take one and a half turns.
