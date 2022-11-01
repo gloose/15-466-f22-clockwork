@@ -99,7 +99,7 @@ HEAL: Partially restores the target's health. May not heal beyond maximum health
 
 ### Code Execution
 
-In general, the player and the enemy take turns executing one line of code at a time. However, however, some statements take more or less than a full turn to execute. The conditional checks in an if or while statement only take a quarter of a turn, the archer's shoot action takes half a turn, and the wizard's spells take one and a half turns.
+In general, the player and the enemy take turns executing one line of code at a time. However, some statements take more or less than a full turn to execute. The conditional checks in an if or while statement only take a quarter of a turn, the archer's shoot action takes half a turn, and the wizard's spells take one and a half turns.
 
 ## Sources:
 
