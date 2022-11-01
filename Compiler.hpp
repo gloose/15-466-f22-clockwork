@@ -23,6 +23,7 @@ struct Compiler {
         Object(std::string name);
         void addAction(std::string action_name, ActionFunction func, float duration);
         void addProperty(std::string property_name, int default_value);
+        void reset();
         int& property(std::string property_name);
     };
 

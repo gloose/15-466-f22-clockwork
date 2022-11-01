@@ -134,6 +134,8 @@ struct PlayMode : Mode {
 	bool turn_done;
 	void take_turn();
 	void init_compiler();
+	void create_levels();
+	void next_level();
 	void execute_player_statement();
 	void execute_enemy_statement();
 	Compiler player_compiler;
@@ -143,9 +145,12 @@ struct PlayMode : Mode {
 	Compiler::Executable *enemy_exe;
 	Compiler::Statement *enemy_statement;
 	std::vector<Compiler::Object*> player_units;
-	std::vector<Compiler::Object*> enemy_units;
-	bool game_lost;
-	bool game_won;
+	std::vector<std::vector<Compiler::Object*>> enemy_units;
+	std::vector<std::string> level_enemy_code;
+	std::vector<std::string> level_guidance;
+	int current_level;
+	bool level_lost;
+	bool level_won;
 	bool compile_failed;
 
 	// Helper functions
