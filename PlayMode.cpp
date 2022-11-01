@@ -198,8 +198,8 @@ void PlayMode::init_compiler() {
 	Compiler::Object *fargoth = new Compiler::Object("FARGOTH");
 	fargoth->addAction("ATTACK", attack_function, 1.0f);
 	fargoth->addAction("DEFEND", defend_function, 1.0f);
-	fargoth->addProperty("HEALTH_MAX", 300);
-	fargoth->addProperty("HEALTH", 300);
+	fargoth->addProperty("HEALTH_MAX", 240);
+	fargoth->addProperty("HEALTH", 240);
 	fargoth->addProperty("DEFENSE", 0);
 	fargoth->addProperty("ALIVE", 1);
 	fargoth->addProperty("PRESENT", 1);
@@ -208,12 +208,12 @@ void PlayMode::init_compiler() {
 	Compiler::Object *rupol = new Compiler::Object("RUPOL");
 	rupol->addAction("ATTACK", attack_function, 1.0f);
 	rupol->addAction("DEFEND", defend_function, 1.0f);
-	rupol->addProperty("HEALTH_MAX", 150);
-	rupol->addProperty("HEALTH", 150);
+	rupol->addProperty("HEALTH_MAX", 160);
+	rupol->addProperty("HEALTH", 160);
 	rupol->addProperty("DEFENSE", 0);
 	rupol->addProperty("ALIVE", 1);
 	rupol->addProperty("PRESENT", 1);
-	rupol->addProperty("POWER", 40);
+	rupol->addProperty("POWER", 30);
 
 	player_units.push_back(warrior);
 	player_units.push_back(wizard);
