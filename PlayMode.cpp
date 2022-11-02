@@ -166,14 +166,14 @@ PlayMode::~PlayMode() {
 
 void PlayMode::create_levels() {
 	level_guidance.push_back("An enemy approaches! Use \"warrior.attack(enemy1)\" to attack him with the warrior! Press shift + enter to submit your code.");
-	level_guidance.push_back("Another enemy! You also have a wizard. With the same syntax, tell the \"wizard\" to \"burn\" \"enemy2\".");
+	level_guidance.push_back("Another enemy! This one can't be hurt by the warrior...but you also have a wizard. With the same syntax, tell the \"wizard\" to \"burn\" \"enemy2\".");
 	level_guidance.push_back("Uh oh, enemy3 will survive a hit... After typing the line to have the warrior attack, press enter to move to the next line. Then have the warrior attack enemy3 again. Press shift + enter to submit both lines.");
-	level_guidance.push_back("Enemy4 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the warrior attacks once, use the \"healer\" to \"heal\" the \"warrior\". Then have the warrior finish him off.");
-	level_guidance.push_back("Your last unit is an archer, who can attack faster than the warrior but has limited ammo! Try having the \"archer\" \"shoot\" enemy5 twice before he has a chance to attack!");
-	level_guidance.push_back("You can do more than just perform actions. You can also do loops! Type \"while (true)\" and hit enter, have the warrior attack enemy6, and then type \"end\" below the last line to end the loop. Watch him attack repeatedly!");
-	level_guidance.push_back("You can also check properties. Try \"while (enemy7.alive)\". A list of valid properties can be found in the manual, but all units have power and health.");
-	level_guidance.push_back("Integers and comparisons are also supported. Try using the archer to beat enemy8 \"while (archer.arrows > 0)\".");
-	level_guidance.push_back("If statements work the same way. Try attacking the enemy only \"if (enemy9.alive)\". Remember the \"end\"!");
+	level_guidance.push_back("Enemy4 has a powerful attack coming up! The wizard can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the warrior.");
+	level_guidance.push_back("Enemy5 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the warrior attacks once, use the \"healer\" to \"heal\" the \"warrior\". Then have the warrior finish him off.");
+	level_guidance.push_back("Your last unit is an archer, who can attack faster than the warrior but has limited ammo! Try having the \"archer\" \"shoot\" enemy6 twice before he has a chance to attack!");
+	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the warrior attack enemy7, and then type \"end\" below the last line to end the loop.");
+	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (archer.arrows > 0)\", and then use the warrior afterwards. A list of the properties can be found in the manual, but all units have alive, health, and power.");
+	level_guidance.push_back("If statements work the same way. Try checking \"if (warrior.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"!");
 	level_guidance.push_back("Alright, time to test everything you've learned! Enemy10 is tough, but you can do it!");
 	level_guidance.push_back("Fargoth and Rupol appeared! Fargoth has a lot of health, and Rupol does a lot of damage.");
 
@@ -207,15 +207,14 @@ void PlayMode::init_compiler() {
 	wizard->addProperty("HEALTH", 60);
 	wizard->addProperty("DEFENSE", 0);
 	wizard->addProperty("ALIVE", 1);
-	wizard->addProperty("DEFENDED", 0); // Defended by the warrior
 
 	Compiler::Object *archer = new Compiler::Object("ARCHER");
+	archer->addAction("ATTACK", shoot_function, 0.5f);
 	archer->addAction("SHOOT", shoot_function, 0.5f);
 	archer->addProperty("HEALTH_MAX", 60);
 	archer->addProperty("HEALTH", 60);
 	archer->addProperty("DEFENSE", 0);
 	archer->addProperty("ALIVE", 1);
-	archer->addProperty("DEFENDED", 0);
 	archer->addProperty("ARROWS", 8);
 	archer->addProperty("POWER", 20);
 
@@ -225,7 +224,6 @@ void PlayMode::init_compiler() {
 	healer->addProperty("HEALTH", 80);
 	healer->addProperty("DEFENSE", 0);
 	healer->addProperty("ALIVE", 1);
-	healer->addProperty("DEFENDED", 0);
 
 	Compiler::Object* enemy1 = new Compiler::Object("ENEMY1");
 	enemy1->addAction("ATTACK", attack_function, 1.0f);
@@ -241,7 +239,7 @@ void PlayMode::init_compiler() {
 	enemy2->addAction("DEFEND", defend_function, 1.0f);
 	enemy2->addProperty("HEALTH_MAX", 10);
 	enemy2->addProperty("HEALTH", 10);
-	enemy2->addProperty("DEFENSE", 0);
+	enemy2->addProperty("DEFENSE", 100);
 	enemy2->addProperty("ALIVE", 1);
 	enemy2->addProperty("POWER", 10);
 
@@ -257,35 +255,35 @@ void PlayMode::init_compiler() {
 	Compiler::Object* enemy4 = new Compiler::Object("ENEMY4");
 	enemy4->addAction("ATTACK", attack_function, 1.0f);
 	enemy4->addAction("DEFEND", defend_function, 1.0f);
-	enemy4->addProperty("HEALTH_MAX", 40);
-	enemy4->addProperty("HEALTH", 40);
+	enemy4->addProperty("HEALTH_MAX", 75);
+	enemy4->addProperty("HEALTH", 75);
 	enemy4->addProperty("DEFENSE", 0);
 	enemy4->addProperty("ALIVE", 1);
-	enemy4->addProperty("POWER", 50);
+	enemy4->addProperty("POWER", 200);
 
 	Compiler::Object* enemy5 = new Compiler::Object("ENEMY5");
 	enemy5->addAction("ATTACK", attack_function, 1.0f);
 	enemy5->addAction("DEFEND", defend_function, 1.0f);
-	enemy5->addProperty("HEALTH_MAX", 40);
-	enemy5->addProperty("HEALTH", 40);
+	enemy5->addProperty("HEALTH_MAX", 45);
+	enemy5->addProperty("HEALTH", 45);
 	enemy5->addProperty("DEFENSE", 0);
 	enemy5->addProperty("ALIVE", 1);
-	enemy5->addProperty("POWER", 10);
+	enemy5->addProperty("POWER", 50);
 
 	Compiler::Object* enemy6 = new Compiler::Object("ENEMY6");
 	enemy6->addAction("ATTACK", attack_function, 1.0f);
 	enemy6->addAction("DEFEND", defend_function, 1.0f);
-	enemy6->addProperty("HEALTH_MAX", 100);
-	enemy6->addProperty("HEALTH", 100);
+	enemy6->addProperty("HEALTH_MAX", 40);
+	enemy6->addProperty("HEALTH", 40);
 	enemy6->addProperty("DEFENSE", 0);
 	enemy6->addProperty("ALIVE", 1);
-	enemy6->addProperty("POWER", 10);
+	enemy6->addProperty("POWER", 100);
 
 	Compiler::Object* enemy7 = new Compiler::Object("ENEMY7");
 	enemy7->addAction("ATTACK", attack_function, 1.0f);
 	enemy7->addAction("DEFEND", defend_function, 1.0f);
-	enemy7->addProperty("HEALTH_MAX", 100);
-	enemy7->addProperty("HEALTH", 100);
+	enemy7->addProperty("HEALTH_MAX", 200);
+	enemy7->addProperty("HEALTH", 200);
 	enemy7->addProperty("DEFENSE", 0);
 	enemy7->addProperty("ALIVE", 1);
 	enemy7->addProperty("POWER", 10);
@@ -293,8 +291,8 @@ void PlayMode::init_compiler() {
 	Compiler::Object* enemy8 = new Compiler::Object("ENEMY8");
 	enemy8->addAction("ATTACK", attack_function, 1.0f);
 	enemy8->addAction("DEFEND", defend_function, 1.0f);
-	enemy8->addProperty("HEALTH_MAX", 120);
-	enemy8->addProperty("HEALTH", 120);
+	enemy8->addProperty("HEALTH_MAX", 175);
+	enemy8->addProperty("HEALTH", 175);
 	enemy8->addProperty("DEFENSE", 0);
 	enemy8->addProperty("ALIVE", 1);
 	enemy8->addProperty("POWER", 10);
@@ -302,11 +300,11 @@ void PlayMode::init_compiler() {
 	Compiler::Object* enemy9 = new Compiler::Object("ENEMY9");
 	enemy9->addAction("ATTACK", attack_function, 1.0f);
 	enemy9->addAction("DEFEND", defend_function, 1.0f);
-	enemy9->addProperty("HEALTH_MAX", 10);
-	enemy9->addProperty("HEALTH", 10);
+	enemy9->addProperty("HEALTH_MAX", 90);
+	enemy9->addProperty("HEALTH", 90);
 	enemy9->addProperty("DEFENSE", 0);
 	enemy9->addProperty("ALIVE", 1);
-	enemy9->addProperty("POWER", 10);
+	enemy9->addProperty("POWER", 50);
 
 	Compiler::Object* enemy10 = new Compiler::Object("ENEMY10");
 	enemy10->addAction("ATTACK", attack_function, 1.0f);
@@ -437,8 +435,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.pressed = true;
 			insert("S");
 			return true;
-		}
-		else if(evt.key.keysym.sym == SDLK_RETURN){
+		} else if(evt.key.keysym.sym == SDLK_RETURN) {
 			enter.downs += 1; 
 			enter.pressed = true;
 			if (lshift.pressed || rshift.pressed) {
@@ -461,82 +458,82 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				line_break();
 			}
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_DOWN){
+		} else if(evt.key.keysym.sym == SDLK_DOWN) {
 			move_down();
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_UP){
+		} else if(evt.key.keysym.sym == SDLK_UP) {
 			move_up();
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_LEFT){
+		} else if(evt.key.keysym.sym == SDLK_LEFT) {
 			move_left();
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_RIGHT){
+		} else if(evt.key.keysym.sym == SDLK_RIGHT) {
 			move_right();
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_b){
+		} else if(evt.key.keysym.sym == SDLK_b) {
 			insert("B");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_c){
+		} else if(evt.key.keysym.sym == SDLK_c) {
 			insert("C");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_e){
+		} else if(evt.key.keysym.sym == SDLK_e) {
 			insert("E");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_f){
+		} else if(evt.key.keysym.sym == SDLK_f) {
 			insert("F");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_g){
+		} else if(evt.key.keysym.sym == SDLK_g) {
 			insert("G");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_h){
+		} else if(evt.key.keysym.sym == SDLK_h) {
 			insert("H");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_i){
+		} else if(evt.key.keysym.sym == SDLK_i) {
 			insert("I");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_j){
+		} else if(evt.key.keysym.sym == SDLK_j) {
 			insert("J");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_k){
+		} else if(evt.key.keysym.sym == SDLK_k) {
 			insert("K");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_l){
+		} else if(evt.key.keysym.sym == SDLK_l) {
 			insert("L");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_m){
+		} else if(evt.key.keysym.sym == SDLK_m) {
 			insert("M");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_n){
+		} else if(evt.key.keysym.sym == SDLK_n) {
 			insert("N");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_o){
+		} else if(evt.key.keysym.sym == SDLK_o) {
 			insert("O");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_p){
+		} else if(evt.key.keysym.sym == SDLK_p) {
 			insert("P");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_q){
+		} else if(evt.key.keysym.sym == SDLK_q) {
 			insert("Q");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_r){
+		} else if(evt.key.keysym.sym == SDLK_r) {
 			insert("R");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_t){
+		} else if(evt.key.keysym.sym == SDLK_t) {
 			insert("T");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_u){
+		} else if(evt.key.keysym.sym == SDLK_u) {
 			insert("U");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_v){
+		} else if(evt.key.keysym.sym == SDLK_v) {
 			insert("V");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_x){
+		} else if(evt.key.keysym.sym == SDLK_x) {
 			insert("X");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_y){
+		} else if(evt.key.keysym.sym == SDLK_y) {
 			insert("Y");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_z){
+		} else if(evt.key.keysym.sym == SDLK_z) {
 			insert("Z");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_DELETE || evt.key.keysym.sym == SDLK_BACKSPACE){
@@ -779,6 +776,9 @@ void PlayMode::take_turn() {
 	}
 
 	if (player_done && enemy_done) {
+		if (!level_lost && !level_won) {
+			get_effect_string() = "Your code didn't solve the puzzle...";
+		}
 		for (Compiler::Object* u : player_units) {
 			u->reset();
 		}
@@ -810,10 +810,11 @@ void PlayMode::update(float elapsed) {
 				}
 			}
 		} else {
-			if (turn_time <= 0.0f && !level_lost) {
+			if (turn_time <= 0.0f) {
 				lshift.pressed = false;
 				rshift.pressed = false;
 				turn_done = true;
+				level_lost = false;
 				text_buffer.clear();
 				text_buffer.push_back("");
 				line_index = 0;
