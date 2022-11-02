@@ -642,6 +642,15 @@ void Compiler::Object::addProperty(std::string property_name, int default_value)
     properties.emplace(property_name, new int(default_value));
 }
 
+// Reset an object
+void Compiler::Object::reset() {
+    property("ALIVE") = 1;
+    property("HEALTH") = property("HEALTH_MAX");
+    if (name == "ARCHER") {
+        property("ARROWS") = 8;
+    }
+}
+
 // Returns a reference to the property named property_name
 // If the object has no such property, create one with default value 0
 int& Compiler::Object::property(std::string property_name) {

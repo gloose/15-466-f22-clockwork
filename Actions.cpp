@@ -30,9 +30,12 @@ bool check_burn(Compiler::Object* user) {
 }
 
 bool check_freeze(Compiler::Object* user) {
-	srand((unsigned int)time(NULL));
-	if (user->property("FROZEN") == 1 && ((rand() % 3) == 0)) {
-		effect_string = user->name + " was frozen and could not move.";
+	if (user->property("FROZEN") == 1) {
+		user->property("FREEZE_COUNTDOWN")--;
+		if (user->property("FREEZE_COUNTDOWN") == 0) {
+			effect_string = user->name + " was frozen and could not move.";
+			user->property("FREEZE_COUNTDOWN") = 3;
+		}
 		return true;
 	}
 	return false;
@@ -69,8 +72,13 @@ void freeze_function(Compiler::Object* user, Compiler::Object* target) {
 	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
-	action_string = user->name + " froze " + target->name + ".";
-	target->property("FROZEN") = 1;
+	if (target->property("FROZEN") == 0) {
+		target->property("FROZEN") = 1;
+		target->property("FREEZE_COUNTDOWN") = 3;
+		action_string = user->name + " froze " + target->name + ".";
+	} else {
+		action_string = target->name + " is already frozen.";
+	}
 }
 
 void burn_function(Compiler::Object* user, Compiler::Object* target) {

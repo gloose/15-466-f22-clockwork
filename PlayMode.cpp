@@ -144,7 +144,13 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	player_done = true;
 	enemy_done = true;
 	turn_done = true;
+	level_won = false;
+	level_lost = false;
 	turn = Turn::PLAYER;
+	current_level = 0;
+	player_units.clear();
+	enemy_units.clear();
+	create_levels();
 	init_compiler();
 	compile_failed = false;
 	
@@ -158,11 +164,37 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 PlayMode::~PlayMode() {
 }
 
+void PlayMode::create_levels() {
+	level_guidance.push_back("An enemy approaches! Use \"warrior.attack(enemy1)\" to attack him with the warrior! Press shift + enter to submit your code.");
+	level_guidance.push_back("Another enemy! This one can't be hurt by the warrior...but you also have a wizard. With the same syntax, tell the \"wizard\" to \"burn\" \"enemy2\".");
+	level_guidance.push_back("Uh oh, enemy3 will survive a hit... After typing the line to have the warrior attack, press enter to move to the next line. Then have the warrior attack enemy3 again. Press shift + enter to submit both lines.");
+	level_guidance.push_back("Enemy4 has a powerful attack coming up! The wizard can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the warrior.");
+	level_guidance.push_back("Enemy5 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the warrior attacks once, use the \"healer\" to \"heal\" the \"warrior\". Then have the warrior finish him off.");
+	level_guidance.push_back("Your last unit is an archer, who can attack faster than the warrior but has limited ammo! Try having the \"archer\" \"shoot\" enemy6 twice before he has a chance to attack!");
+	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the warrior attack enemy7, and then type \"end\" below the last line to end the loop.");
+	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (archer.arrows > 0)\", and then use the warrior afterwards. A list of the properties can be found in the manual, but all units have alive, health, and power.");
+	level_guidance.push_back("If statements work the same way. Try checking \"if (warrior.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"!");
+	level_guidance.push_back("Alright, time to test everything you've learned! Enemy10 is tough, but you can do it!");
+	level_guidance.push_back("Fargoth and Rupol appeared! Fargoth has a lot of health, and Rupol does a lot of damage.");
+
+	level_enemy_code.push_back("enemy1.txt");
+	level_enemy_code.push_back("enemy2.txt");
+	level_enemy_code.push_back("enemy3.txt");
+	level_enemy_code.push_back("enemy4.txt");
+	level_enemy_code.push_back("enemy5.txt");
+	level_enemy_code.push_back("enemy6.txt");
+	level_enemy_code.push_back("enemy7.txt");
+	level_enemy_code.push_back("enemy8.txt");
+	level_enemy_code.push_back("enemy9.txt");
+	level_enemy_code.push_back("enemy10.txt");
+	level_enemy_code.push_back("enemy-test.txt");
+}
+
 void PlayMode::init_compiler() {
 	Compiler::Object *warrior = new Compiler::Object("WARRIOR");
 	warrior->addAction("ATTACK", attack_function, 1.0f);
 	warrior->addAction("DEFEND", defend_function, 1.0f);
-	warrior->addProperty("HEALTH_MAX", 60);
+	warrior->addProperty("HEALTH_MAX", 100);
 	warrior->addProperty("HEALTH", 100);
 	warrior->addProperty("DEFENSE", 0);
 	warrior->addProperty("ALIVE", 1);
@@ -175,15 +207,14 @@ void PlayMode::init_compiler() {
 	wizard->addProperty("HEALTH", 60);
 	wizard->addProperty("DEFENSE", 0);
 	wizard->addProperty("ALIVE", 1);
-	wizard->addProperty("DEFENDED", 0); // Defended by the warrior
 
 	Compiler::Object *archer = new Compiler::Object("ARCHER");
+	archer->addAction("ATTACK", shoot_function, 0.5f);
 	archer->addAction("SHOOT", shoot_function, 0.5f);
 	archer->addProperty("HEALTH_MAX", 60);
 	archer->addProperty("HEALTH", 60);
 	archer->addProperty("DEFENSE", 0);
 	archer->addProperty("ALIVE", 1);
-	archer->addProperty("DEFENDED", 0);
 	archer->addProperty("ARROWS", 8);
 	archer->addProperty("POWER", 20);
 
@@ -193,7 +224,96 @@ void PlayMode::init_compiler() {
 	healer->addProperty("HEALTH", 80);
 	healer->addProperty("DEFENSE", 0);
 	healer->addProperty("ALIVE", 1);
-	healer->addProperty("DEFENDED", 0);
+
+	Compiler::Object* enemy1 = new Compiler::Object("ENEMY1");
+	enemy1->addAction("ATTACK", attack_function, 1.0f);
+	enemy1->addAction("DEFEND", defend_function, 1.0f);
+	enemy1->addProperty("HEALTH_MAX", 15);
+	enemy1->addProperty("HEALTH", 15);
+	enemy1->addProperty("DEFENSE", 0);
+	enemy1->addProperty("ALIVE", 1);
+	enemy1->addProperty("POWER", 0);
+
+	Compiler::Object* enemy2 = new Compiler::Object("ENEMY2");
+	enemy2->addAction("ATTACK", attack_function, 1.0f);
+	enemy2->addAction("DEFEND", defend_function, 1.0f);
+	enemy2->addProperty("HEALTH_MAX", 10);
+	enemy2->addProperty("HEALTH", 10);
+	enemy2->addProperty("DEFENSE", 100);
+	enemy2->addProperty("ALIVE", 1);
+	enemy2->addProperty("POWER", 10);
+
+	Compiler::Object* enemy3 = new Compiler::Object("ENEMY3");
+	enemy3->addAction("ATTACK", attack_function, 1.0f);
+	enemy3->addAction("DEFEND", defend_function, 1.0f);
+	enemy3->addProperty("HEALTH_MAX", 30);
+	enemy3->addProperty("HEALTH", 30);
+	enemy3->addProperty("DEFENSE", 0);
+	enemy3->addProperty("ALIVE", 1);
+	enemy3->addProperty("POWER", 10);
+
+	Compiler::Object* enemy4 = new Compiler::Object("ENEMY4");
+	enemy4->addAction("ATTACK", attack_function, 1.0f);
+	enemy4->addAction("DEFEND", defend_function, 1.0f);
+	enemy4->addProperty("HEALTH_MAX", 75);
+	enemy4->addProperty("HEALTH", 75);
+	enemy4->addProperty("DEFENSE", 0);
+	enemy4->addProperty("ALIVE", 1);
+	enemy4->addProperty("POWER", 200);
+
+	Compiler::Object* enemy5 = new Compiler::Object("ENEMY5");
+	enemy5->addAction("ATTACK", attack_function, 1.0f);
+	enemy5->addAction("DEFEND", defend_function, 1.0f);
+	enemy5->addProperty("HEALTH_MAX", 45);
+	enemy5->addProperty("HEALTH", 45);
+	enemy5->addProperty("DEFENSE", 0);
+	enemy5->addProperty("ALIVE", 1);
+	enemy5->addProperty("POWER", 50);
+
+	Compiler::Object* enemy6 = new Compiler::Object("ENEMY6");
+	enemy6->addAction("ATTACK", attack_function, 1.0f);
+	enemy6->addAction("DEFEND", defend_function, 1.0f);
+	enemy6->addProperty("HEALTH_MAX", 40);
+	enemy6->addProperty("HEALTH", 40);
+	enemy6->addProperty("DEFENSE", 0);
+	enemy6->addProperty("ALIVE", 1);
+	enemy6->addProperty("POWER", 100);
+
+	Compiler::Object* enemy7 = new Compiler::Object("ENEMY7");
+	enemy7->addAction("ATTACK", attack_function, 1.0f);
+	enemy7->addAction("DEFEND", defend_function, 1.0f);
+	enemy7->addProperty("HEALTH_MAX", 200);
+	enemy7->addProperty("HEALTH", 200);
+	enemy7->addProperty("DEFENSE", 0);
+	enemy7->addProperty("ALIVE", 1);
+	enemy7->addProperty("POWER", 10);
+
+	Compiler::Object* enemy8 = new Compiler::Object("ENEMY8");
+	enemy8->addAction("ATTACK", attack_function, 1.0f);
+	enemy8->addAction("DEFEND", defend_function, 1.0f);
+	enemy8->addProperty("HEALTH_MAX", 175);
+	enemy8->addProperty("HEALTH", 175);
+	enemy8->addProperty("DEFENSE", 0);
+	enemy8->addProperty("ALIVE", 1);
+	enemy8->addProperty("POWER", 10);
+
+	Compiler::Object* enemy9 = new Compiler::Object("ENEMY9");
+	enemy9->addAction("ATTACK", attack_function, 1.0f);
+	enemy9->addAction("DEFEND", defend_function, 1.0f);
+	enemy9->addProperty("HEALTH_MAX", 90);
+	enemy9->addProperty("HEALTH", 90);
+	enemy9->addProperty("DEFENSE", 0);
+	enemy9->addProperty("ALIVE", 1);
+	enemy9->addProperty("POWER", 50);
+
+	Compiler::Object* enemy10 = new Compiler::Object("ENEMY10");
+	enemy10->addAction("ATTACK", attack_function, 1.0f);
+	enemy10->addAction("DEFEND", defend_function, 1.0f);
+	enemy10->addProperty("HEALTH_MAX", 100);
+	enemy10->addProperty("HEALTH", 100);
+	enemy10->addProperty("DEFENSE", 0);
+	enemy10->addProperty("ALIVE", 1);
+	enemy10->addProperty("POWER", 40);
 
 	Compiler::Object *fargoth = new Compiler::Object("FARGOTH");
 	fargoth->addAction("ATTACK", attack_function, 1.0f);
@@ -202,7 +322,6 @@ void PlayMode::init_compiler() {
 	fargoth->addProperty("HEALTH", 240);
 	fargoth->addProperty("DEFENSE", 0);
 	fargoth->addProperty("ALIVE", 1);
-	fargoth->addProperty("PRESENT", 1);
 	fargoth->addProperty("POWER", 20);
 
 	Compiler::Object *rupol = new Compiler::Object("RUPOL");
@@ -212,7 +331,6 @@ void PlayMode::init_compiler() {
 	rupol->addProperty("HEALTH", 160);
 	rupol->addProperty("DEFENSE", 0);
 	rupol->addProperty("ALIVE", 1);
-	rupol->addProperty("PRESENT", 1);
 	rupol->addProperty("POWER", 30);
 
 	player_units.push_back(warrior);
@@ -220,21 +338,54 @@ void PlayMode::init_compiler() {
 	player_units.push_back(healer);
 	player_units.push_back(archer);
 
-	enemy_units.push_back(fargoth);
-	enemy_units.push_back(rupol);
+	std::vector<Compiler::Object *> level1;
+	level1.push_back(enemy1);
+	std::vector<Compiler::Object*> level2;
+	level2.push_back(enemy2);
+	std::vector<Compiler::Object*> level3;
+	level3.push_back(enemy3);
+	std::vector<Compiler::Object*> level4;
+	level4.push_back(enemy4);
+	std::vector<Compiler::Object*> level5;
+	level5.push_back(enemy5);
+	std::vector<Compiler::Object*> level6;
+	level6.push_back(enemy6);
+	std::vector<Compiler::Object*> level7;
+	level7.push_back(enemy7);
+	std::vector<Compiler::Object*> level8;
+	level8.push_back(enemy8);
+	std::vector<Compiler::Object*> level9;
+	level9.push_back(enemy9);
+	std::vector<Compiler::Object*> level10;
+	level10.push_back(enemy10);
 
-	player_compiler.addObject(warrior);
-	enemy_compiler.addObject(warrior);
-	player_compiler.addObject(wizard);
-	enemy_compiler.addObject(wizard);
-	player_compiler.addObject(archer);
-	enemy_compiler.addObject(archer);
-	player_compiler.addObject(healer);
-	enemy_compiler.addObject(healer);
-	player_compiler.addObject(fargoth);
-	enemy_compiler.addObject(fargoth);
-	player_compiler.addObject(rupol);
-	enemy_compiler.addObject(rupol);
+	std::vector<Compiler::Object*> level11;
+	level11.push_back(fargoth);
+	level11.push_back(rupol);
+
+	enemy_units.push_back(level1);
+	enemy_units.push_back(level2);
+	enemy_units.push_back(level3);
+	enemy_units.push_back(level4);
+	enemy_units.push_back(level5);
+	enemy_units.push_back(level6);
+	enemy_units.push_back(level7);
+	enemy_units.push_back(level8);
+	enemy_units.push_back(level9);
+	enemy_units.push_back(level10);
+	enemy_units.push_back(level11);
+
+	for (Compiler::Object *u : player_units) {
+		player_compiler.addObject(u);
+		enemy_compiler.addObject(u);
+	}
+
+	for (auto& v : enemy_units) {
+		for (Compiler::Object* u : v) {
+			player_compiler.addObject(u);
+			enemy_compiler.addObject(u);
+		}
+	}
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -284,8 +435,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.pressed = true;
 			insert("S");
 			return true;
-		}
-		else if(evt.key.keysym.sym == SDLK_RETURN){
+		} else if(evt.key.keysym.sym == SDLK_RETURN) {
 			enter.downs += 1; 
 			enter.pressed = true;
 			if (lshift.pressed || rshift.pressed) {
@@ -297,7 +447,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				}
 				compile_failed = false;
 				player_statement = player_exe->next();
-				enemy_exe = enemy_compiler.compile("enemy-test.txt");
+				enemy_exe = enemy_compiler.compile(level_enemy_code[current_level]);
 				enemy_statement = enemy_exe->next();
 				player_done = false;
 				enemy_done = false;
@@ -308,82 +458,82 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				line_break();
 			}
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_DOWN){
+		} else if(evt.key.keysym.sym == SDLK_DOWN) {
 			move_down();
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_UP){
+		} else if(evt.key.keysym.sym == SDLK_UP) {
 			move_up();
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_LEFT){
+		} else if(evt.key.keysym.sym == SDLK_LEFT) {
 			move_left();
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_RIGHT){
+		} else if(evt.key.keysym.sym == SDLK_RIGHT) {
 			move_right();
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_b){
+		} else if(evt.key.keysym.sym == SDLK_b) {
 			insert("B");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_c){
+		} else if(evt.key.keysym.sym == SDLK_c) {
 			insert("C");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_e){
+		} else if(evt.key.keysym.sym == SDLK_e) {
 			insert("E");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_f){
+		} else if(evt.key.keysym.sym == SDLK_f) {
 			insert("F");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_g){
+		} else if(evt.key.keysym.sym == SDLK_g) {
 			insert("G");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_h){
+		} else if(evt.key.keysym.sym == SDLK_h) {
 			insert("H");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_i){
+		} else if(evt.key.keysym.sym == SDLK_i) {
 			insert("I");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_j){
+		} else if(evt.key.keysym.sym == SDLK_j) {
 			insert("J");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_k){
+		} else if(evt.key.keysym.sym == SDLK_k) {
 			insert("K");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_l){
+		} else if(evt.key.keysym.sym == SDLK_l) {
 			insert("L");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_m){
+		} else if(evt.key.keysym.sym == SDLK_m) {
 			insert("M");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_n){
+		} else if(evt.key.keysym.sym == SDLK_n) {
 			insert("N");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_o){
+		} else if(evt.key.keysym.sym == SDLK_o) {
 			insert("O");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_p){
+		} else if(evt.key.keysym.sym == SDLK_p) {
 			insert("P");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_q){
+		} else if(evt.key.keysym.sym == SDLK_q) {
 			insert("Q");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_r){
+		} else if(evt.key.keysym.sym == SDLK_r) {
 			insert("R");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_t){
+		} else if(evt.key.keysym.sym == SDLK_t) {
 			insert("T");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_u){
+		} else if(evt.key.keysym.sym == SDLK_u) {
 			insert("U");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_v){
+		} else if(evt.key.keysym.sym == SDLK_v) {
 			insert("V");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_x){
+		} else if(evt.key.keysym.sym == SDLK_x) {
 			insert("X");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_y){
+		} else if(evt.key.keysym.sym == SDLK_y) {
 			insert("Y");
 			return true;
-		}else if(evt.key.keysym.sym == SDLK_z){
+		} else if(evt.key.keysym.sym == SDLK_z) {
 			insert("Z");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_DELETE || evt.key.keysym.sym == SDLK_BACKSPACE){
@@ -476,21 +626,29 @@ void PlayMode::execute_player_statement() {
 	if (player_time >= time) {
 		std::cout << "Executing statement.\n";
 		auto obj = player_units.begin();
+		auto tgt = enemy_units[current_level].begin();
 		if (player_statement->type == Compiler::ACTION_STATEMENT) {
 			Compiler::ActionStatement *action_statement = dynamic_cast<Compiler::ActionStatement *>(player_statement);
 			obj = std::find(player_units.begin(), player_units.end(), action_statement->object);
+			tgt = std::find(enemy_units[current_level].begin(), enemy_units[current_level].end(), action_statement->target);
+			// Could be that it's a heal action
+			if (tgt == enemy_units[current_level].end()) {
+				tgt = std::find(player_units.begin(), player_units.end(), action_statement->target);
+			}
 		} else {
 			get_action_string() = "You are thinking...";
 		}
-		if (obj != player_units.end()) {
-			player_statement->execute();
-		} else {
+		if (obj == player_units.end()) {
 			get_action_string() = "You can't control the enemy!";
+		} else if (tgt == enemy_units[current_level].end() || tgt == player_units.end()) {
+			get_action_string() = "That target isn't here right now.";
+		} else {
+			player_statement->execute();
 		}
 		execution_line_index = (int)player_statement->line_num;
 		bool enemies_alive = false;
 		bool players_alive = false;
-		for (auto& enemy : enemy_units) {
+		for (auto& enemy : enemy_units[current_level]) {
 			if (enemy->property("ALIVE")) {
 				enemies_alive = true;
 				break;
@@ -506,14 +664,14 @@ void PlayMode::execute_player_statement() {
 			get_effect_string() = "All player units have fallen...";
 			player_done = true;
 			enemy_done = true;
-			game_lost = true;
+			level_lost = true;
 			return;
 		}
 		if (!enemies_alive) {
 			get_effect_string() = "All enemy units have been slain!";
 			player_done = true;
 			enemy_done = true;
-			game_won = true;
+			level_won = true;
 			return;
 		}
 		player_statement = player_exe->next();
@@ -554,7 +712,7 @@ void PlayMode::execute_enemy_statement() {
 		execution_line_index = -1;
 		bool enemies_alive = false;
 		bool players_alive = false;
-		for (auto& enemy : enemy_units) {
+		for (auto& enemy : enemy_units[current_level]) {
 			if (enemy->property("ALIVE")) {
 				enemies_alive = true;
 				break;
@@ -570,14 +728,14 @@ void PlayMode::execute_enemy_statement() {
 			get_effect_string() = "All player units have fallen...";
 			player_done = true;
 			enemy_done = true;
-			game_lost = true;
+			level_lost = true;
 			return;
 		}
 		if (!enemies_alive) {
 			get_effect_string() = "All enemy units have been slain!";
 			player_done = true;
 			enemy_done = true;
-			game_won = true;
+			level_won = true;
 			return;
 		}
 		enemy_statement = enemy_exe->next();
@@ -616,6 +774,25 @@ void PlayMode::take_turn() {
 		std::cout << "Enemy taking turn.\n";
 		execute_enemy_statement();
 	}
+
+	if (player_done && enemy_done) {
+		if (!level_lost && !level_won) {
+			get_effect_string() = "Your code didn't solve the puzzle...";
+		}
+		for (Compiler::Object* u : player_units) {
+			u->reset();
+		}
+		for (Compiler::Object* u : enemy_units[current_level]) {
+			u->reset();
+		}
+	}
+}
+
+void PlayMode::next_level() {
+	current_level++;
+	for (Compiler::Object* u : player_units) {
+		u->reset();
+	}
 }
 
 
@@ -633,10 +810,11 @@ void PlayMode::update(float elapsed) {
 				}
 			}
 		} else {
-			if (turn_time <= 0.0f && !game_won && !game_lost) {
+			if (turn_time <= 0.0f) {
 				lshift.pressed = false;
 				rshift.pressed = false;
 				turn_done = true;
+				level_lost = false;
 				text_buffer.clear();
 				text_buffer.push_back("");
 				line_index = 0;
@@ -644,6 +822,11 @@ void PlayMode::update(float elapsed) {
 				execution_line_index = -1;
 				get_action_string() = "";
 				get_effect_string() = "";
+				if (level_won) {
+					next_level();
+					level_won = false;
+					turn = Turn::PLAYER;
+				}
 			} else {
 				if (lctrl.pressed || rctrl.pressed) {
 					turn_time -= elapsed * 10.f;
@@ -835,7 +1018,8 @@ void PlayMode::move_left(){
 
 void PlayMode::line_break(){
 	if (text_buffer.size() < max_lines) {
-		text_buffer.insert(text_buffer.begin() + line_index + 1, "");
+		text_buffer.insert(text_buffer.begin() + line_index + 1, text_buffer[line_index].substr(cur_cursor_pos, text_buffer[line_index].size() - cur_cursor_pos));
+		text_buffer[line_index] = text_buffer[line_index].substr(0, cur_cursor_pos);
 		line_index++;
 		cur_cursor_pos = 0;
 	}
@@ -845,10 +1029,11 @@ void PlayMode::delete_text(){
 	if (cur_cursor_pos > 0){
 		text_buffer[line_index].erase(cur_cursor_pos - 1, 1);
 		cur_cursor_pos = cur_cursor_pos - 1;
-	} else if (text_buffer[line_index].size() == 0 && line_index > 0) {
+	} else if (line_index > 0 && text_buffer[line_index - 1].size() + text_buffer[line_index].size() <= max_line_chars) {
+		cur_cursor_pos = text_buffer[line_index - 1].size();
+		text_buffer[line_index - 1] += text_buffer[line_index];
 		text_buffer.erase(text_buffer.begin() + line_index);
 		line_index--;
-		cur_cursor_pos = text_buffer[line_index].size();
 	}
 }
 
@@ -879,6 +1064,7 @@ void PlayMode::render(){
 		drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
 		drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
 	}
+	drawText(level_guidance[current_level], glm::vec2(ScreenWidth / 2, ScreenHeight - 20), max_line_length);
 }
 
 //TODO: render text end
