@@ -1018,7 +1018,8 @@ void PlayMode::move_left(){
 
 void PlayMode::line_break(){
 	if (text_buffer.size() < max_lines) {
-		text_buffer.insert(text_buffer.begin() + line_index + 1, "");
+		text_buffer.insert(text_buffer.begin() + line_index + 1, text_buffer[line_index].substr(cur_cursor_pos, text_buffer[line_index].size() - cur_cursor_pos));
+		text_buffer[line_index] = text_buffer[line_index].substr(0, cur_cursor_pos);
 		line_index++;
 		cur_cursor_pos = 0;
 	}
@@ -1028,10 +1029,11 @@ void PlayMode::delete_text(){
 	if (cur_cursor_pos > 0){
 		text_buffer[line_index].erase(cur_cursor_pos - 1, 1);
 		cur_cursor_pos = cur_cursor_pos - 1;
-	} else if (text_buffer[line_index].size() == 0 && line_index > 0) {
+	} else if (line_index > 0 && text_buffer[line_index - 1].size() + text_buffer[line_index].size() <= max_line_chars) {
+		cur_cursor_pos = text_buffer[line_index - 1].size();
+		text_buffer[line_index - 1] += text_buffer[line_index];
 		text_buffer.erase(text_buffer.begin() + line_index);
 		line_index--;
-		cur_cursor_pos = text_buffer[line_index].size();
 	}
 }
 
