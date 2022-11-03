@@ -9,6 +9,7 @@
 #include <freetype/freetype.h>
 #include <freetype/fttypes.h>
 #include "Actions.hpp"
+#include "Compiler.hpp"
 
 #include <vector>
 #include <deque>
@@ -144,8 +145,8 @@ struct PlayMode : Mode {
 	Compiler::Statement *player_statement;
 	Compiler::Executable *enemy_exe;
 	Compiler::Statement *enemy_statement;
-	std::vector<Compiler::Object*> player_units;
-	std::vector<std::vector<Compiler::Object*>> enemy_units;
+	std::vector<Object*> player_units;
+	std::vector<std::vector<Object*>> enemy_units;
 	std::vector<std::string> level_enemy_code;
 	std::vector<std::string> level_guidance;
 	int current_level;

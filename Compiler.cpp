@@ -143,14 +143,6 @@ Compiler::Statement* Compiler::parseStatement(Program& program, Program::iterato
     return nullptr;
 }
 
-std::string Compiler::formatCase(std::string str) {
-    auto upperChar = [](char c) {
-        return (char)toupper(c);
-    };
-    std::transform(str.begin(), str.end(), str.begin(), upperChar);
-    return str;
-}
-
 // Parses a line of the form "object1.action(object2)".
 // Advances the line iterator if successful.
 Compiler::ActionStatement* Compiler::parseActionStatement(Program& program, Program::iterator& line_it) {
@@ -356,6 +348,8 @@ bool Compiler::parseCondition(Line::iterator& word_it, Condition* out, std::stri
         out->right = new int(0);
         return true;
     }
+
+    word_it = old_it;
 
     if (problem != nullptr) {
         *problem = prob;
@@ -670,47 +664,6 @@ Compiler::Statement* Compiler::Executable::next() {
 // Add object to compiler's object map
 void Compiler::addObject(Object* obj) {
     objects.emplace(obj->name, obj);
-}
-
-// Construct object with name
-Compiler::Object::Object(std::string name) : name(formatCase(name)) {
-}
-
-// Construct action with function and duration
-Compiler::Action::Action(ActionFunction func, float duration) : func(func), duration(duration) {
-}
-
-// Add action to object's map of valid actions
-void Compiler::Object::addAction(std::string action_name, ActionFunction func, float duration) {
-    action_name = formatCase(action_name);
-    actions.emplace(action_name, Action(func, duration));
-}
-
-// Add property to object's map of properties
-void Compiler::Object::addProperty(std::string property_name, int default_value) {
-    property_name = formatCase(property_name);
-    properties.emplace(property_name, new int(default_value));
-}
-
-// Reset an object
-void Compiler::Object::reset() {
-    property("ALIVE") = 1;
-    property("HEALTH") = property("HEALTH_MAX");
-    if (name == "ARCHER") {
-        property("ARROWS") = 8;
-    }
-}
-
-// Returns a reference to the property named property_name
-// If the object has no such property, create one with default value 0
-int& Compiler::Object::property(std::string property_name) {
-    property_name = formatCase(property_name);
-    auto prop = properties.find(property_name);
-    if (prop == properties.end()) {
-        addProperty(property_name, 0);
-        prop = properties.find(property_name);
-    }
-    return *prop->second;
 }
 
 // Sets the error message

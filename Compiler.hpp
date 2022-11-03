@@ -2,31 +2,12 @@
 #include <vector>
 #include <list>
 #include <string>
+#include "Object.hpp"
+
+#ifndef _COMPILER_H_
+#define _COMPILER_H_
 
 struct Compiler {
-    struct Object;
-
-    typedef void (*ActionFunction)(Object*, Object*);
-
-    struct Action {
-        ActionFunction func;
-        float duration;
-
-        Action(ActionFunction func, float duration);
-    };
-
-    struct Object {
-        std::string name = "";
-        std::unordered_map<std::string, Action> actions;
-        std::unordered_map<std::string, int*> properties;
-
-        Object(std::string name);
-        void addAction(std::string action_name, ActionFunction func, float duration);
-        void addProperty(std::string property_name, int default_value);
-        void reset();
-        int& property(std::string property_name);
-    };
-
     std::unordered_map<std::string, Object*> objects;
 
     typedef std::list<std::string> Line;
@@ -131,6 +112,7 @@ struct Compiler {
     void addObject(Object* obj);
     Program readProgram(std::string filename);
     Program readProgram(std::vector<std::string> lines);
-    static std::string formatCase(std::string str);
     void set_error(size_t line_num, std::string message);
 };
+
+#endif

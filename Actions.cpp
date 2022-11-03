@@ -3,11 +3,11 @@
 std::string action_string = "";
 std::string effect_string = "";
 
-int calc_damage(int damage, Compiler::Object* target) {
+int calc_damage(int damage, Object* target) {
 	return (int)std::round(damage * (100 - target->property("DEFENSE")) / 100.);
 }
 
-void attack(int damage, Compiler::Object* target) {
+void attack(int damage, Object* target) {
 	target->property("HEALTH") -= calc_damage(damage, target);
 	if (target->property("HEALTH") <= 0) {
 		target->property("ALIVE") = 0;
@@ -17,7 +17,7 @@ void attack(int damage, Compiler::Object* target) {
 	}
 }
 
-bool check_burn(Compiler::Object* user) {
+bool check_burn(Object* user) {
 	if (user->property("BURNED") == 1) {
 		user->property("HEALTH") -= 10;
 		if (user->property("HEALTH") <= 0) {
@@ -29,7 +29,7 @@ bool check_burn(Compiler::Object* user) {
 	return false;
 }
 
-bool check_freeze(Compiler::Object* user) {
+bool check_freeze(Object* user) {
 	if (user->property("FROZEN") == 1) {
 		user->property("FREEZE_COUNTDOWN")--;
 		if (user->property("FREEZE_COUNTDOWN") == 0) {
@@ -41,7 +41,7 @@ bool check_freeze(Compiler::Object* user) {
 	return false;
 }
 
-void attack_function(Compiler::Object* user, Compiler::Object* target) {
+void attack_function(Object* user, Object* target) {
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
@@ -53,7 +53,7 @@ void attack_function(Compiler::Object* user, Compiler::Object* target) {
 	attack(damage, target);
 }
 
-void defend_function(Compiler::Object* user, Compiler::Object* target) {
+void defend_function(Object* user, Object* target) {
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
 		return;
 	}
@@ -65,7 +65,7 @@ void defend_function(Compiler::Object* user, Compiler::Object* target) {
 	user->property("DEFENDING") = 1;
 }
 
-void freeze_function(Compiler::Object* user, Compiler::Object* target) {
+void freeze_function(Object* user, Object* target) {
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
@@ -81,7 +81,7 @@ void freeze_function(Compiler::Object* user, Compiler::Object* target) {
 	}
 }
 
-void burn_function(Compiler::Object* user, Compiler::Object* target) {
+void burn_function(Object* user, Object* target) {
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
@@ -92,7 +92,7 @@ void burn_function(Compiler::Object* user, Compiler::Object* target) {
 	target->property("BURNED") = 1;
 }
 
-void heal_function(Compiler::Object* user, Compiler::Object* target) {
+void heal_function(Object* user, Object* target) {
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
 		return;
 	}
@@ -108,7 +108,7 @@ void heal_function(Compiler::Object* user, Compiler::Object* target) {
 	effect_string = target->name + " has " + std::to_string(target->property("HEALTH")) + " health.";
 }
 
-void shoot_function(Compiler::Object* user, Compiler::Object* target) {
+void shoot_function(Object* user, Object* target) {
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}

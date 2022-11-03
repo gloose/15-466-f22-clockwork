@@ -191,7 +191,7 @@ void PlayMode::create_levels() {
 }
 
 void PlayMode::init_compiler() {
-	Compiler::Object *warrior = new Compiler::Object("WARRIOR");
+	Object *warrior = new Object("WARRIOR");
 	warrior->addAction("ATTACK", attack_function, 1.0f);
 	warrior->addAction("DEFEND", defend_function, 1.0f);
 	warrior->addProperty("HEALTH_MAX", 100);
@@ -200,7 +200,7 @@ void PlayMode::init_compiler() {
 	warrior->addProperty("ALIVE", 1);
 	warrior->addProperty("POWER", 15);
 
-	Compiler::Object *wizard = new Compiler::Object("WIZARD");
+	Object *wizard = new Object("WIZARD");
 	wizard->addAction("FREEZE", freeze_function, 1.5f);
 	wizard->addAction("BURN", burn_function, 1.5f);
 	wizard->addProperty("HEALTH_MAX", 60);
@@ -208,7 +208,7 @@ void PlayMode::init_compiler() {
 	wizard->addProperty("DEFENSE", 0);
 	wizard->addProperty("ALIVE", 1);
 
-	Compiler::Object *archer = new Compiler::Object("ARCHER");
+	Object *archer = new Object("ARCHER");
 	archer->addAction("ATTACK", shoot_function, 0.5f);
 	archer->addAction("SHOOT", shoot_function, 0.5f);
 	archer->addProperty("HEALTH_MAX", 60);
@@ -218,14 +218,14 @@ void PlayMode::init_compiler() {
 	archer->addProperty("ARROWS", 8);
 	archer->addProperty("POWER", 20);
 
-	Compiler::Object *healer = new Compiler::Object("HEALER");
+	Object *healer = new Object("HEALER");
 	healer->addAction("HEAL", heal_function, 1.0f);
 	healer->addProperty("HEALTH_MAX", 80);
 	healer->addProperty("HEALTH", 80);
 	healer->addProperty("DEFENSE", 0);
 	healer->addProperty("ALIVE", 1);
 
-	Compiler::Object* enemy1 = new Compiler::Object("ENEMY1");
+	Object* enemy1 = new Object("ENEMY1");
 	enemy1->addAction("ATTACK", attack_function, 1.0f);
 	enemy1->addAction("DEFEND", defend_function, 1.0f);
 	enemy1->addProperty("HEALTH_MAX", 15);
@@ -234,7 +234,7 @@ void PlayMode::init_compiler() {
 	enemy1->addProperty("ALIVE", 1);
 	enemy1->addProperty("POWER", 0);
 
-	Compiler::Object* enemy2 = new Compiler::Object("ENEMY2");
+	Object* enemy2 = new Object("ENEMY2");
 	enemy2->addAction("ATTACK", attack_function, 1.0f);
 	enemy2->addAction("DEFEND", defend_function, 1.0f);
 	enemy2->addProperty("HEALTH_MAX", 10);
@@ -243,7 +243,7 @@ void PlayMode::init_compiler() {
 	enemy2->addProperty("ALIVE", 1);
 	enemy2->addProperty("POWER", 10);
 
-	Compiler::Object* enemy3 = new Compiler::Object("ENEMY3");
+	Object* enemy3 = new Object("ENEMY3");
 	enemy3->addAction("ATTACK", attack_function, 1.0f);
 	enemy3->addAction("DEFEND", defend_function, 1.0f);
 	enemy3->addProperty("HEALTH_MAX", 30);
@@ -252,7 +252,7 @@ void PlayMode::init_compiler() {
 	enemy3->addProperty("ALIVE", 1);
 	enemy3->addProperty("POWER", 10);
 
-	Compiler::Object* enemy4 = new Compiler::Object("ENEMY4");
+	Object* enemy4 = new Object("ENEMY4");
 	enemy4->addAction("ATTACK", attack_function, 1.0f);
 	enemy4->addAction("DEFEND", defend_function, 1.0f);
 	enemy4->addProperty("HEALTH_MAX", 75);
@@ -261,7 +261,7 @@ void PlayMode::init_compiler() {
 	enemy4->addProperty("ALIVE", 1);
 	enemy4->addProperty("POWER", 200);
 
-	Compiler::Object* enemy5 = new Compiler::Object("ENEMY5");
+	Object* enemy5 = new Object("ENEMY5");
 	enemy5->addAction("ATTACK", attack_function, 1.0f);
 	enemy5->addAction("DEFEND", defend_function, 1.0f);
 	enemy5->addProperty("HEALTH_MAX", 45);
@@ -270,7 +270,7 @@ void PlayMode::init_compiler() {
 	enemy5->addProperty("ALIVE", 1);
 	enemy5->addProperty("POWER", 50);
 
-	Compiler::Object* enemy6 = new Compiler::Object("ENEMY6");
+	Object* enemy6 = new Object("ENEMY6");
 	enemy6->addAction("ATTACK", attack_function, 1.0f);
 	enemy6->addAction("DEFEND", defend_function, 1.0f);
 	enemy6->addProperty("HEALTH_MAX", 40);
@@ -279,7 +279,7 @@ void PlayMode::init_compiler() {
 	enemy6->addProperty("ALIVE", 1);
 	enemy6->addProperty("POWER", 100);
 
-	Compiler::Object* enemy7 = new Compiler::Object("ENEMY7");
+	Object* enemy7 = new Object("ENEMY7");
 	enemy7->addAction("ATTACK", attack_function, 1.0f);
 	enemy7->addAction("DEFEND", defend_function, 1.0f);
 	enemy7->addProperty("HEALTH_MAX", 200);
@@ -288,7 +288,7 @@ void PlayMode::init_compiler() {
 	enemy7->addProperty("ALIVE", 1);
 	enemy7->addProperty("POWER", 10);
 
-	Compiler::Object* enemy8 = new Compiler::Object("ENEMY8");
+	Object* enemy8 = new Object("ENEMY8");
 	enemy8->addAction("ATTACK", attack_function, 1.0f);
 	enemy8->addAction("DEFEND", defend_function, 1.0f);
 	enemy8->addProperty("HEALTH_MAX", 175);
@@ -297,7 +297,7 @@ void PlayMode::init_compiler() {
 	enemy8->addProperty("ALIVE", 1);
 	enemy8->addProperty("POWER", 10);
 
-	Compiler::Object* enemy9 = new Compiler::Object("ENEMY9");
+	Object* enemy9 = new Object("ENEMY9");
 	enemy9->addAction("ATTACK", attack_function, 1.0f);
 	enemy9->addAction("DEFEND", defend_function, 1.0f);
 	enemy9->addProperty("HEALTH_MAX", 90);
@@ -306,7 +306,7 @@ void PlayMode::init_compiler() {
 	enemy9->addProperty("ALIVE", 1);
 	enemy9->addProperty("POWER", 50);
 
-	Compiler::Object* enemy10 = new Compiler::Object("ENEMY10");
+	Object* enemy10 = new Object("ENEMY10");
 	enemy10->addAction("ATTACK", attack_function, 1.0f);
 	enemy10->addAction("DEFEND", defend_function, 1.0f);
 	enemy10->addProperty("HEALTH_MAX", 100);
@@ -315,7 +315,7 @@ void PlayMode::init_compiler() {
 	enemy10->addProperty("ALIVE", 1);
 	enemy10->addProperty("POWER", 40);
 
-	Compiler::Object *fargoth = new Compiler::Object("FARGOTH");
+	Object *fargoth = new Object("FARGOTH");
 	fargoth->addAction("ATTACK", attack_function, 1.0f);
 	fargoth->addAction("DEFEND", defend_function, 1.0f);
 	fargoth->addProperty("HEALTH_MAX", 240);
@@ -324,7 +324,7 @@ void PlayMode::init_compiler() {
 	fargoth->addProperty("ALIVE", 1);
 	fargoth->addProperty("POWER", 20);
 
-	Compiler::Object *rupol = new Compiler::Object("RUPOL");
+	Object *rupol = new Object("RUPOL");
 	rupol->addAction("ATTACK", attack_function, 1.0f);
 	rupol->addAction("DEFEND", defend_function, 1.0f);
 	rupol->addProperty("HEALTH_MAX", 160);
@@ -338,28 +338,28 @@ void PlayMode::init_compiler() {
 	player_units.push_back(healer);
 	player_units.push_back(archer);
 
-	std::vector<Compiler::Object *> level1;
+	std::vector<Object *> level1;
 	level1.push_back(enemy1);
-	std::vector<Compiler::Object*> level2;
+	std::vector<Object*> level2;
 	level2.push_back(enemy2);
-	std::vector<Compiler::Object*> level3;
+	std::vector<Object*> level3;
 	level3.push_back(enemy3);
-	std::vector<Compiler::Object*> level4;
+	std::vector<Object*> level4;
 	level4.push_back(enemy4);
-	std::vector<Compiler::Object*> level5;
+	std::vector<Object*> level5;
 	level5.push_back(enemy5);
-	std::vector<Compiler::Object*> level6;
+	std::vector<Object*> level6;
 	level6.push_back(enemy6);
-	std::vector<Compiler::Object*> level7;
+	std::vector<Object*> level7;
 	level7.push_back(enemy7);
-	std::vector<Compiler::Object*> level8;
+	std::vector<Object*> level8;
 	level8.push_back(enemy8);
-	std::vector<Compiler::Object*> level9;
+	std::vector<Object*> level9;
 	level9.push_back(enemy9);
-	std::vector<Compiler::Object*> level10;
+	std::vector<Object*> level10;
 	level10.push_back(enemy10);
 
-	std::vector<Compiler::Object*> level11;
+	std::vector<Object*> level11;
 	level11.push_back(fargoth);
 	level11.push_back(rupol);
 
@@ -375,13 +375,13 @@ void PlayMode::init_compiler() {
 	enemy_units.push_back(level10);
 	enemy_units.push_back(level11);
 
-	for (Compiler::Object *u : player_units) {
+	for (Object *u : player_units) {
 		player_compiler.addObject(u);
 		enemy_compiler.addObject(u);
 	}
 
 	for (auto& v : enemy_units) {
-		for (Compiler::Object* u : v) {
+		for (Object* u : v) {
 			player_compiler.addObject(u);
 			enemy_compiler.addObject(u);
 		}
@@ -780,10 +780,10 @@ void PlayMode::take_turn() {
 		if (!level_lost && !level_won) {
 			get_effect_string() = "Your code didn't solve the puzzle...";
 		}
-		for (Compiler::Object* u : player_units) {
+		for (Object* u : player_units) {
 			u->reset();
 		}
-		for (Compiler::Object* u : enemy_units[current_level]) {
+		for (Object* u : enemy_units[current_level]) {
 			u->reset();
 		}
 	}
@@ -791,7 +791,7 @@ void PlayMode::take_turn() {
 
 void PlayMode::next_level() {
 	current_level++;
-	for (Compiler::Object* u : player_units) {
+	for (Object* u : player_units) {
 		u->reset();
 	}
 }
