@@ -81,22 +81,11 @@ Compiler::Program Compiler::readProgram(std::string filename) {
 Compiler::Executable* Compiler::compile(Program program) {
     // Compile the executable
     Executable* exe = new Executable();
-    auto it = program.begin();
-    while (it != program.end()) {
-        if (it->size() > 0) {
-            size_t line_num = std::distance(program.begin(), it);
-            error_message = "";
-            exe->statements.push_back(parseStatement(program, it));
-            if (exe->statements.back() == nullptr) {
-                if (error_message.empty()) {
-                    set_error(line_num, "Unknown error; perhaps '" + *it->begin() + "' is misspelled?");
-                }
-                delete exe;
-                return nullptr;
-            }
-        } else {
-            it++;
-        }
+    auto line_it = program.begin();
+    bool success = parseStatementBlock(program, line_it, &exe->statements, "");
+    if (!success) {
+        delete exe;
+        return nullptr;
     }
     return exe;
 }
@@ -151,26 +140,30 @@ Compiler::ActionStatement* Compiler::parseActionStatement(Program& program, Prog
     ActionStatement* out = new ActionStatement();
 
     std::string obj = *word_it;
-    if (parseObject(word_it, &out->object)) {
-        if (parseWord(word_it, ".")) {
-            if (parseAction(word_it, out->object, &out->func, &out->base_duration)) {
-                if (parseWord(word_it, "(")) {
-                    if (parseObject(word_it, &out->target)) {
-                        if (parseWord(word_it, ")")) {
+    if (parseObject(line_it, word_it, &out->object)) {
+        if (parseWord(line_it, word_it, ".")) {
+            if (parseAction(line_it, word_it, out->object, &out->func, &out->base_duration)) {
+                if (parseWord(line_it, word_it, "(")) {
+                    if (parseObject(line_it, word_it, &out->target)) {
+                        if (parseWord(line_it, word_it, ")")) {
                             line_it++;
                             out->duration = out->base_duration;
                             return out;
                         } else {
                             set_error(line_num, "Action statement missing a ')'");
                         }
-                    } else {
+                    } else if (word_it != line_it->end()) {
                         set_error(line_num, "Action target '" + *word_it + "' is not a valid object");
+                    } else {
+                        set_error(line_num, "Action statement missing a target after '('.");
                     }
                 } else {
                     set_error(line_num, "Action statement missing a '('");
                 }
-            } else {
+            } else if (word_it != line_it->end()) {
                 set_error(line_num, "Invalid action '" + *word_it + "' for object '" + obj + "'.");
+            } else {
+                set_error(line_num, "Action statement missing an action after '.'");
             }
         } else {
             set_error(line_num, "Action statement missing a '.' after object name.");
@@ -192,9 +185,9 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
     IfStatement* out = new IfStatement();
 
     // Check if the first line matches the if statement format
-    if (parseWord(word_it, "IF")) {
+    if (parseWord(line_it, word_it, "IF")) {
         std::string problem;
-        if (parseCondition(word_it, &out->condition, &problem)) {
+        if (parseCondition(line_it, word_it, &out->condition, &problem)) {
             // If so, parse all subsequent lines into out->statements until end is reached
             line_it++;
             if (!parseStatementBlock(program, line_it, &out->statements)) {
@@ -221,9 +214,9 @@ Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Progra
     WhileStatement* out = new WhileStatement();
 
     // Check if the first line matches the if statement format
-    if (parseWord(word_it, "WHILE")) {
+    if (parseWord(line_it, word_it, "WHILE")) {
         std::string problem;
-        if (parseCondition(word_it, &out->condition, &problem)) {
+        if (parseCondition(line_it, word_it, &out->condition, &problem)) {
             // If so, parse all subsequent lines into out->statements until end is reached
             line_it++;
             if (!parseStatementBlock(program, line_it, &out->statements)) {
@@ -250,7 +243,7 @@ bool Compiler::parseStatementBlock(Program& program, Program::iterator& line_it,
         if (line_it->size() > 0) {
             // On end, return successfully
             Line::iterator word_it = line_it->begin();
-            if (parseWord(word_it, end)) {
+            if (parseWord(line_it, word_it, end)) {
                 line_it++;
                 return true;
             }
@@ -262,7 +255,7 @@ bool Compiler::parseStatementBlock(Program& program, Program::iterator& line_it,
             if (out->back() == nullptr) {
                 if (error_message.empty()) {
                     size_t line_num = std::distance(program.begin(), line_it);
-                    set_error(line_num, "Unknown error; perhaps '" + *line_it->begin() + "' is misspelled?");
+                    set_error(line_num, "Could not parse '" + *line_it->begin() + "' as an IF, WHILE, or object name.");
                 }
                 line_it = old_it;
                 out->clear();
@@ -285,7 +278,11 @@ bool Compiler::parseStatementBlock(Program& program, Program::iterator& line_it,
 
 // Attempts to parse a word as the name of an object.
 // Advances the word iterator if successful.
-bool Compiler::parseObject(Line::iterator& word_it, Object** out) {
+bool Compiler::parseObject(Program::iterator& line_it, Line::iterator& word_it, Object** out) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+
     auto obj = objects.find(*word_it);
     if (obj != objects.end()) {
         *out = obj->second;
@@ -297,7 +294,11 @@ bool Compiler::parseObject(Line::iterator& word_it, Object** out) {
 
 // Attempts to parse a word as the name of a legal action for the given object.
 // Advances the word iterator if successful.
-bool Compiler::parseAction(Line::iterator& word_it, Object* obj, ActionFunction* out_func, float* out_dur) {
+bool Compiler::parseAction(Program::iterator& line_it, Line::iterator& word_it, Object* obj, ActionFunction* out_func, float* out_dur) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+
     auto act = obj->actions.find(*word_it);
     if (act != obj->actions.end()) {
         *out_func = act->second.func;
@@ -313,15 +314,19 @@ bool Compiler::parseAction(Line::iterator& word_it, Object* obj, ActionFunction*
 // Attempts to parse a sequence of words as a condition of the form:
 // value1 comparator value2
 // Advances the word iterator if successful.
-bool Compiler::parseCondition(Line::iterator& word_it, Condition* out, std::string* problem) {
+bool Compiler::parseCondition(Program::iterator& line_it, Line::iterator& word_it, Condition* out, std::string* problem) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+    
     Line::iterator old_it = word_it;
     std::string prob = "";
 
-    if (parseWord(word_it, "(")) {
-        if (parseValue(word_it, &out->left)) {
-            if (parseComparator(word_it, &out->comparator)) {
-                if (parseValue(word_it, &out->right)) {
-                    if (parseWord(word_it, ")")) {
+    if (parseWord(line_it, word_it, "(")) {
+        if (parseValue(line_it, word_it, &out->left)) {
+            if (parseComparator(line_it, word_it, &out->comparator)) {
+                if (parseValue(line_it, word_it, &out->right)) {
+                    if (parseWord(line_it, word_it, ")")) {
                         return true;
                     } else {
                         prob = "Condition is missing a ')'";
@@ -329,8 +334,10 @@ bool Compiler::parseCondition(Line::iterator& word_it, Condition* out, std::stri
                 } else {
                     prob = "Failed to parse right value in condition.";
                 }
-            } else {
+            } else if (word_it != line_it->end()) {
                 prob = "Failed to parse comparator '" + *word_it + "' in condition.";
+            } else {
+                prob = "Condition is missing a ')'";
             }
         } else {
             prob = "Failed to parse left value in condition.";
@@ -341,9 +348,9 @@ bool Compiler::parseCondition(Line::iterator& word_it, Condition* out, std::stri
 
     word_it = old_it;
 
-    if (parseWord(word_it, "(")
-     && parseValue(word_it, &out->left)
-     && parseWord(word_it, ")")) {
+    if (parseWord(line_it, word_it, "(")
+     && parseValue(line_it, word_it, &out->left)
+     && parseWord(line_it, word_it, ")")) {
         out->comparator = "!=";
         out->right = new int(0);
         return true;
@@ -361,14 +368,18 @@ bool Compiler::parseCondition(Line::iterator& word_it, Condition* out, std::stri
 // Attempts to parse a word as a comparator.
 // Currently, only =, <, and > are supported.
 // Advances the word iterator if successful.
-bool Compiler::parseComparator(Line::iterator& word_it, std::string* out) {
+bool Compiler::parseComparator(Program::iterator& line_it, Line::iterator& word_it, std::string* out) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+    
     std::string comp = *word_it;
-    if (parseWord(word_it, "==")
-     || parseWord(word_it, "<")
-     || parseWord(word_it, ">")
-     || parseWord(word_it, "!=")
-     || parseWord(word_it, "<=")
-     || parseWord(word_it, ">=")) {
+    if (parseWord(line_it, word_it, "==")
+     || parseWord(line_it, word_it, "<")
+     || parseWord(line_it, word_it, ">")
+     || parseWord(line_it, word_it, "!=")
+     || parseWord(line_it, word_it, "<=")
+     || parseWord(line_it, word_it, ">=")) {
         *out = comp;
         return true;
     }
@@ -378,10 +389,14 @@ bool Compiler::parseComparator(Line::iterator& word_it, std::string* out) {
 // Attempts to parse a word or sequence of words as either
 // an integer value or an object property.
 // Advances the word iterator if successful.
-bool Compiler::parseValue(Line::iterator& word_it, int** out) {
-    if (parsePropertyValue(word_it, out)
-     || parseIntValue(word_it, out)
-     || parseBooleanValue(word_it, out)) {
+bool Compiler::parseValue(Program::iterator& line_it, Line::iterator& word_it, int** out) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+    
+    if (parsePropertyValue(line_it, word_it, out)
+     || parseIntValue(line_it, word_it, out)
+     || parseBooleanValue(line_it, word_it, out)) {
         return true;
     }
 
@@ -390,7 +405,11 @@ bool Compiler::parseValue(Line::iterator& word_it, int** out) {
 
 // Attempts to parse a word as an integer value.
 // Advances the word iterator if successful.
-bool Compiler::parseIntValue(Line::iterator& word_it, int** out) {
+bool Compiler::parseIntValue(Program::iterator& line_it, Line::iterator& word_it, int** out) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+    
     int val;
     try {
         val = std::stoi(*word_it);
@@ -405,14 +424,18 @@ bool Compiler::parseIntValue(Line::iterator& word_it, int** out) {
 
 // Attempts to parse a word as true/false
 // Advances the word iterator if successful.
-bool Compiler::parseBooleanValue(Line::iterator& word_it, int** out) {
-    if (parseWord(word_it, "TRUE")) {
+bool Compiler::parseBooleanValue(Program::iterator& line_it, Line::iterator& word_it, int** out) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+    
+    if (parseWord(line_it, word_it, "TRUE")) {
         *out = new int();
         **out = 1;
         return true;
     }
 
-    if (parseWord(word_it, "FALSE")) {
+    if (parseWord(line_it, word_it, "FALSE")) {
         *out = new int();
         **out = 0;
         return true;
@@ -424,13 +447,17 @@ bool Compiler::parseBooleanValue(Line::iterator& word_it, int** out) {
 // Attempts to parse a sequence of words as an object property value,
 // of the form: object.property
 // Advances the word iterator if successful.
-bool Compiler::parsePropertyValue(Line::iterator& word_it, int** out) {
+bool Compiler::parsePropertyValue(Program::iterator& line_it, Line::iterator& word_it, int** out) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+    
     Line::iterator old_it = word_it;
     Object* obj;
     
-    if (parseObject(word_it, &obj)
-     && parseWord(word_it, ".")
-     && parseProperty(word_it, obj, out)) {
+    if (parseObject(line_it, word_it, &obj)
+     && parseWord(line_it, word_it, ".")
+     && parseProperty(line_it, word_it, obj, out)) {
         return true;
     }
 
@@ -440,7 +467,11 @@ bool Compiler::parsePropertyValue(Line::iterator& word_it, int** out) {
 
 // Attempts to parse a word as the name of a property of the given object.
 // Advances the word iterator if successful.
-bool Compiler::parseProperty(Line::iterator& word_it, Object* obj, int** out) {
+bool Compiler::parseProperty(Program::iterator& line_it, Line::iterator& word_it, Object* obj, int** out) {
+    if (word_it == line_it->end()) {
+        return false;
+    }
+    
     auto prop = obj->properties.find(*word_it);
     if (prop != obj->properties.end()) {
         *out = prop->second;
@@ -452,7 +483,11 @@ bool Compiler::parseProperty(Line::iterator& word_it, Object* obj, int** out) {
 
 // Attempts to parse a word that is equal to the given word.
 // Advances the word iterator if successful.
-bool Compiler::parseWord(Line::iterator& word_it, std::string word) {
+bool Compiler::parseWord(Program::iterator& line_it, Line::iterator& word_it, std::string word) {
+    if (word_it == line_it->end() || word == "") {
+        return false;
+    }
+    
     if (*word_it == word) {
         word_it++;
         return true;
