@@ -29,6 +29,4 @@ struct Object {
     int& property(std::string property_name);
 };
 
-static std::string formatCase(std::string str);
-
 #endif
