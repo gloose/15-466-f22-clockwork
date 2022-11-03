@@ -316,6 +316,9 @@ bool Compiler::parseAction(Program::iterator& line_it, Line::iterator& word_it, 
 // Advances the word iterator if successful.
 bool Compiler::parseCondition(Program::iterator& line_it, Line::iterator& word_it, Condition* out, std::string* problem) {
     if (word_it == line_it->end()) {
+        if (problem != nullptr) {
+            *problem = "Missing condition.";
+        }
         return false;
     }
     
