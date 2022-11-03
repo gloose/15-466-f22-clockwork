@@ -82,11 +82,19 @@ Compiler::Executable* Compiler::compile(Program program) {
     // Compile the executable
     Executable* exe = new Executable();
     auto line_it = program.begin();
+    error_message = "";
     bool success = parseStatementBlock(program, line_it, &exe->statements, "");
+
+    if (success && exe->statements.empty()) {
+        success = false;
+        set_error(0, "Cannot submit an empty program.");
+    }
+
     if (!success) {
         delete exe;
         return nullptr;
     }
+
     return exe;
 }
 
