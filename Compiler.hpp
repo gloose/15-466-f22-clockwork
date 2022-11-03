@@ -107,6 +107,8 @@ struct Compiler {
         Statement* next();
     };
 
+    std::string error_message = "";
+
     Compiler();
     Statement* parseStatement(Program& program, Program::iterator& line_it);
     bool parseObject(Line::iterator& word_it, Object** out);
@@ -116,7 +118,7 @@ struct Compiler {
     Compiler::WhileStatement* parseWhileStatement(Program& program, Program::iterator& line_it);
     bool parseStatementBlock(Program& program, Program::iterator& line_it, std::vector<Statement*>* out, std::string end = "END");
     bool parseWord(Line::iterator& word_it, std::string word);
-    bool parseCondition(Line::iterator& word_it, Condition* out);
+    bool parseCondition(Line::iterator& word_it, Condition* out, std::string* problem = nullptr);
     bool parseValue(Line::iterator& word_it, int** out);
     bool parseIntValue(Line::iterator& word_it, int** out);
     bool parseBooleanValue(Line::iterator& word_it, int** out);
@@ -130,4 +132,5 @@ struct Compiler {
     Program readProgram(std::string filename);
     Program readProgram(std::vector<std::string> lines);
     static std::string formatCase(std::string str);
+    void set_error(size_t line_num, std::string message);
 };

@@ -171,7 +171,7 @@ void PlayMode::create_levels() {
 	level_guidance.push_back("Enemy4 has a powerful attack coming up! The wizard can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the warrior.");
 	level_guidance.push_back("Enemy5 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the warrior attacks once, use the \"healer\" to \"heal\" the \"warrior\". Then have the warrior finish him off.");
 	level_guidance.push_back("Your last unit is an archer, who can attack faster than the warrior but has limited ammo! Try having the \"archer\" \"shoot\" enemy6 twice before he has a chance to attack!");
-	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the warrior attack enemy7, and then type \"end\" below the last line to end the loop.");
+	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the warrior attack enemy7, and then type \"end\" below the last line to end the loop. If this fight is too slow for your taste, try holding ctrl to speed things up!");
 	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (archer.arrows > 0)\", and then use the warrior afterwards. A list of the properties can be found in the manual, but all units have alive, health, and power.");
 	level_guidance.push_back("If statements work the same way. Try checking \"if (warrior.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"!");
 	level_guidance.push_back("Alright, time to test everything you've learned! Enemy10 is tough, but you can do it!");
@@ -583,7 +583,8 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if (evt.key.keysym.sym == SDLK_SPACE) {
 			insert(" ");
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+		} else if (evt.key.keysym.sym == SDLK_TAB) {
+			insert(" ");
 			insert(" ");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_PERIOD){
@@ -1059,7 +1060,7 @@ void PlayMode::render(){
 		drawText(text_buffer[i], glm::vec2(x, y - i * font_size), max_line_length, pen_color, i == line_index);
 	}
 	if (compile_failed) {
-		drawText("Couldn't understand your code.", glm::vec2(ScreenWidth / 2, 100), max_line_length);
+		drawText(player_compiler.error_message, glm::vec2(ScreenWidth / 2, 100), max_line_length);
 	} else {
 		drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
 		drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
