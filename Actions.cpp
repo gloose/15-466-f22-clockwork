@@ -11,6 +11,7 @@ void attack(int damage, Object* target) {
 	target->property("HEALTH") -= calc_damage(damage, target);
 	if (target->property("HEALTH") <= 0) {
 		target->property("ALIVE") = 0;
+		add_animation(new DeathAnimation(target));
 		effect_string = target->name + " has been killed.";
 	} else {
 		effect_string = target->name + " has " + std::to_string(target->property("HEALTH")) + " health.";
@@ -22,6 +23,7 @@ bool check_burn(Object* user) {
 		user->property("HEALTH") -= 10;
 		if (user->property("HEALTH") <= 0) {
 			user->property("ALIVE") = 0;
+			add_animation(new DeathAnimation(user));
 			effect_string = user->name + " died to burn damage.";
 			return true;
 		}
@@ -74,6 +76,7 @@ void freeze_function(Object* user, Object* target) {
 		return;
 	}
 	if (target->property("FROZEN") == 0) {
+		add_animation(new EnergyAnimation(EnergyType::FREEZE, target));
 		target->property("FROZEN") = 1;
 		target->property("FREEZE_COUNTDOWN") = 3;
 		action_string = user->name + " froze " + target->name + ".";
@@ -90,6 +93,7 @@ void burn_function(Object* user, Object* target) {
 		return;
 	}
 	action_string = user->name + " burned " + target->name + ".";
+	add_animation(new EnergyAnimation(EnergyType::BURN, target));
 	target->property("BURNED") = 1;
 }
 
@@ -101,6 +105,7 @@ void heal_function(Object* user, Object* target) {
 		return;
 	}
 	action_string = user->name + " healed " + target->name + ".";
+	add_animation(new EnergyAnimation(EnergyType::HEAL, target));
 	if (target->property("HEALTH_MAX") - target->property("HEALTH") < 20) {
 		target->property("HEALTH") = target->property("HEALTH_MAX");
 	} else {
@@ -118,6 +123,7 @@ void shoot_function(Object* user, Object* target) {
 	}
 	
 	if (user->property("ARROWS") > 0) {
+		add_animation(new ShootAnimation(target));
 		attack(user->property("POWER"), target);
 		user->property("ARROWS")--;
 		action_string = user->name + " shot " + target->name + " for " + std::to_string(user->property("POWER")) + " damage, and has " + std::to_string(user->property("ARROWS")) + " arrows remaining.";

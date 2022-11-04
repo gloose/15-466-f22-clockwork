@@ -4,6 +4,7 @@ Scene::Transform* heal_transform;
 Scene::Transform* freeze_transform;
 Scene::Transform* burn_transform;
 Scene::Transform* arrow_transform;
+Object* archer_object;
 
 void end(size_t my_id);
 
@@ -17,6 +18,10 @@ float turn_duration() {
 	return turn_length;
 }
 
+glm::vec3 offscreen_position() {
+	return glm::vec3(0.0f, 0.0f, 10.0f);
+}
+
 void add_animation(Animation* animation) {
 	active_animations.push_back(animation);
 }
@@ -28,6 +33,7 @@ void update_animations(float time) {
 		MoveAnimation* move;
 		DeathAnimation* death;
 		EnergyAnimation* energy;
+		ShootAnimation* shoot;
 		switch (animation->type) {
 		case MOVE:
 			move = (MoveAnimation*)animation;
@@ -48,6 +54,14 @@ void update_animations(float time) {
 		case ENERGY:
 			energy = (EnergyAnimation*)animation;
 			if (energy->update(time)) {
+				iter++;
+			} else {
+				iter = active_animations.erase(iter);
+			}
+			break;
+		case SHOOT:
+			shoot = (ShootAnimation*)animation;
+			if (shoot->update(time)) {
 				iter++;
 			} else {
 				iter = active_animations.erase(iter);
@@ -76,12 +90,15 @@ void register_arrow_transform(Scene::Transform* t) {
 	arrow_transform = t;
 }
 
+void register_archer_object(Object* o) {
+	archer_object = o;
+}
+
 bool Animation::update(float update_time) {
 	assert(false && "Animation::update must be overriden by child class.");
 	return false;
 }
 
-// Uncomment when objects have a transform field
 MoveAnimation::MoveAnimation(Object* source, Object* target) {
 	start_position = source->transform->position;
 	target_position = target->transform->position;
@@ -89,6 +106,12 @@ MoveAnimation::MoveAnimation(Object* source, Object* target) {
 	id = animation_id++;
 	transform = source->transform;
 	elapsed_time = 0.0f;
+}
+
+ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(archer_object, target) {
+	transform = arrow_transform;
+	// TODO: Some trig magic to rotate the arrow to face the enemy.
+	type = AnimationType::SHOOT;
 }
 
 DeathAnimation::DeathAnimation(Object* victim) {
@@ -136,11 +159,24 @@ bool MoveAnimation::update(float update_time) {
 	}
 }
 
-// Note, define a constant to be some downward translation that will move a character offscreen. I'll call it 1 unit for now.
+bool ShootAnimation::update(float update_time) {
+	elapsed_time += update_time;
+	if (elapsed_time <= turn_length / 2.0f) {
+		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_length / 2.0f));
+		return true;
+	} else {
+		transform->position = start_position;
+		return false;
+	}
+}
+
+// Note, define a constant to be some downward translation that will move a character offscreen. I'll call it 0.5 units for now.
 bool DeathAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	if (elapsed_time < turn_length) {
-		transform->position -= glm::vec3(1.0f, 1.0f, 1.0f) * (elapsed_time / turn_length);
+	if (elapsed_time < (turn_length / 2.0f)) {
+		return true;
+	} else if ((turn_length / 2.0f) <= elapsed_time && elapsed_time < turn_length) {
+		transform->position -= 0.5f * (elapsed_time / (turn_length / 2.0f));
 		return true;
 	} else {
 		return false;
@@ -157,7 +193,7 @@ bool EnergyAnimation::update(float update_time) {
 		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) - glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f);
 		return true;
 	} else {
-		transform->position = glm::vec3(0, 0, -1);
+		transform->position = offscreen_position();
 		return false;
 	}
 }

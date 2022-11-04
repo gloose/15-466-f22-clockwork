@@ -121,6 +121,7 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	enemy_units.clear();
 	create_levels();
 	init_compiler();
+	energyTransforms();
 	compile_failed = false;
 	
 	text_buffer.push_back("");
@@ -148,6 +149,32 @@ Object* PlayMode::makeObject(std::string name, std::string model_name) {
 	}
 
 	return obj;
+}
+
+void PlayMode::energyTransforms() {
+	for (auto& transform : scene.transforms) {
+		if (transform.name == "heal") {
+			register_heal_transform(&transform);
+			scene.drawables.emplace_back(&transform);
+			setMesh(&scene.drawables.back(), transform.name);
+			transform.position = offscreen_position();
+		} else if (transform.name == "arrow") {
+			register_arrow_transform(&transform);
+			scene.drawables.emplace_back(&transform);
+			setMesh(&scene.drawables.back(), transform.name);
+			transform.position = archer->transform->position;
+		} else if (transform.name == "fire") {
+			register_burn_transform(&transform);
+			scene.drawables.emplace_back(&transform);
+			setMesh(&scene.drawables.back(), transform.name);
+			transform.position = offscreen_position();
+		} else if (transform.name == "ice") {
+			register_freeze_transform(&transform);
+			scene.drawables.emplace_back(&transform);
+			setMesh(&scene.drawables.back(), transform.name);
+			transform.position = offscreen_position();
+		}
+	}
 }
 
 PlayMode::~PlayMode() {
@@ -192,6 +219,7 @@ void PlayMode::create_levels() {
 void PlayMode::init_compiler() {
 	warrior = makeObject("WARRIOR", "warrior");
 	warrior->transform->position = glm::vec3(-1.f, 0.f, 1.15f);
+	warrior->start_position = glm::vec3(-1.f, 0.f, 1.15f);
 	warrior->addAction("ATTACK", attack_function, turn_duration());
 	warrior->addAction("DEFEND", defend_function, turn_duration());
 	warrior->addProperty("HEALTH_MAX", 100);
@@ -202,6 +230,7 @@ void PlayMode::init_compiler() {
 
 	wizard = makeObject("WIZARD", "wizard");
 	wizard->transform->position = glm::vec3(-5.f, -5.f, 2.1f);
+	wizard->start_position = glm::vec3(-5.f, -5.f, 2.1f);
 	wizard->addAction("FREEZE", freeze_function, turn_duration() * 1.5f);
 	wizard->addAction("BURN", burn_function, turn_duration() * 1.5f);
 	wizard->addProperty("HEALTH_MAX", 60);
@@ -211,6 +240,8 @@ void PlayMode::init_compiler() {
 
 	archer = makeObject("ARCHER", "archer");
 	archer->transform->position = glm::vec3(5.f, 5.f, 0.f);
+	archer->start_position = glm::vec3(5.f, 5.f, 0.f);
+	register_archer_object(archer);
 	archer->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
 	archer->addAction("SHOOT", shoot_function, turn_duration() * 0.5f);
 	archer->addProperty("HEALTH_MAX", 60);
@@ -222,6 +253,7 @@ void PlayMode::init_compiler() {
 
 	healer = makeObject("HEALER", "healer");
 	healer->transform->position = glm::vec3(5.f, -5.f, 1.35f);
+	healer->start_position = glm::vec3(5.f, -5.f, 1.35f);
 	healer->addAction("HEAL", heal_function, turn_duration());
 	healer->addProperty("HEALTH_MAX", 80);
 	healer->addProperty("HEALTH", 80);
@@ -230,6 +262,7 @@ void PlayMode::init_compiler() {
 
 	Object* enemy1 = makeObject("ENEMY1", "monster");
 	enemy1->transform->position = glm::vec3(-5.f, 5.f, 2.3f);
+	enemy1->start_position = glm::vec3(-5.f, 5.f, 2.3f);
 	enemy1->addAction("ATTACK", attack_function, turn_duration());
 	enemy1->addAction("DEFEND", defend_function, turn_duration());
 	enemy1->addProperty("HEALTH_MAX", 15);
@@ -238,7 +271,10 @@ void PlayMode::init_compiler() {
 	enemy1->addProperty("ALIVE", 1);
 	enemy1->addProperty("POWER", 0);
 
-	Object* enemy2 = makeObject("ENEMY2", "monster");
+	Object* enemy2 = new Object("ENEMY2");
+	enemy2->transform = enemy1->transform;
+	enemy2->drawables = enemy1->drawables;
+	enemy2->start_position = enemy1->start_position;
 	enemy2->addAction("ATTACK", attack_function, turn_duration());
 	enemy2->addAction("DEFEND", defend_function, turn_duration());
 	enemy2->addProperty("HEALTH_MAX", 10);
@@ -247,7 +283,10 @@ void PlayMode::init_compiler() {
 	enemy2->addProperty("ALIVE", 1);
 	enemy2->addProperty("POWER", 10);
 
-	Object* enemy3 = makeObject("ENEMY3", "monster");
+	Object* enemy3 = new Object("ENEMY3");
+	enemy3->transform = enemy1->transform;
+	enemy3->drawables = enemy1->drawables;
+	enemy3->start_position = enemy1->start_position;
 	enemy3->addAction("ATTACK", attack_function, turn_duration());
 	enemy3->addAction("DEFEND", defend_function, turn_duration());
 	enemy3->addProperty("HEALTH_MAX", 30);
@@ -256,7 +295,10 @@ void PlayMode::init_compiler() {
 	enemy3->addProperty("ALIVE", 1);
 	enemy3->addProperty("POWER", 10);
 
-	Object* enemy4 = makeObject("ENEMY4", "monster");
+	Object* enemy4 = new Object("ENEMY4");
+	enemy4->transform = enemy1->transform;
+	enemy4->drawables = enemy1->drawables;
+	enemy4->start_position = enemy1->start_position;
 	enemy4->addAction("ATTACK", attack_function, turn_duration());
 	enemy4->addAction("DEFEND", defend_function, turn_duration());
 	enemy4->addProperty("HEALTH_MAX", 75);
@@ -265,7 +307,10 @@ void PlayMode::init_compiler() {
 	enemy4->addProperty("ALIVE", 1);
 	enemy4->addProperty("POWER", 200);
 
-	Object* enemy5 = makeObject("ENEMY5", "monster");
+	Object* enemy5 = new Object("ENEMY5");
+	enemy5->transform = enemy1->transform;
+	enemy5->drawables = enemy1->drawables;
+	enemy5->start_position = enemy1->start_position;
 	enemy5->addAction("ATTACK", attack_function, turn_duration());
 	enemy5->addAction("DEFEND", defend_function, turn_duration());
 	enemy5->addProperty("HEALTH_MAX", 45);
@@ -274,7 +319,10 @@ void PlayMode::init_compiler() {
 	enemy5->addProperty("ALIVE", 1);
 	enemy5->addProperty("POWER", 50);
 
-	Object* enemy6 = makeObject("ENEMY6", "monster");
+	Object* enemy6 = new Object("ENEMY6");
+	enemy6->transform = enemy1->transform;
+	enemy6->drawables = enemy1->drawables;
+	enemy6->start_position = enemy1->start_position;
 	enemy6->addAction("ATTACK", attack_function, turn_duration());
 	enemy6->addAction("DEFEND", defend_function, turn_duration());
 	enemy6->addProperty("HEALTH_MAX", 40);
@@ -283,7 +331,10 @@ void PlayMode::init_compiler() {
 	enemy6->addProperty("ALIVE", 1);
 	enemy6->addProperty("POWER", 100);
 
-	Object* enemy7 = makeObject("ENEMY7", "monster");
+	Object* enemy7 = new Object("ENEMY7");
+	enemy7->transform = enemy1->transform;
+	enemy7->drawables = enemy1->drawables;
+	enemy7->start_position = enemy1->start_position;
 	enemy7->addAction("ATTACK", attack_function, turn_duration());
 	enemy7->addAction("DEFEND", defend_function, turn_duration());
 	enemy7->addProperty("HEALTH_MAX", 200);
@@ -292,7 +343,10 @@ void PlayMode::init_compiler() {
 	enemy7->addProperty("ALIVE", 1);
 	enemy7->addProperty("POWER", 10);
 
-	Object* enemy8 = makeObject("ENEMY8", "monster");
+	Object* enemy8 = new Object("ENEMY8");
+	enemy8->transform = enemy1->transform;
+	enemy8->drawables = enemy1->drawables;
+	enemy8->start_position = enemy1->start_position;
 	enemy8->addAction("ATTACK", attack_function, turn_duration());
 	enemy8->addAction("DEFEND", defend_function, turn_duration());
 	enemy8->addProperty("HEALTH_MAX", 175);
@@ -301,7 +355,10 @@ void PlayMode::init_compiler() {
 	enemy8->addProperty("ALIVE", 1);
 	enemy8->addProperty("POWER", 10);
 
-	Object* enemy9 = makeObject("ENEMY9", "monster");
+	Object* enemy9 = new Object("ENEMY9");
+	enemy9->transform = enemy1->transform;
+	enemy9->drawables = enemy1->drawables;
+	enemy9->start_position = enemy1->start_position;
 	enemy9->addAction("ATTACK", attack_function, turn_duration());
 	enemy9->addAction("DEFEND", defend_function, turn_duration());
 	enemy9->addProperty("HEALTH_MAX", 90);
@@ -310,7 +367,10 @@ void PlayMode::init_compiler() {
 	enemy9->addProperty("ALIVE", 1);
 	enemy9->addProperty("POWER", 50);
 
-	Object* enemy10 = makeObject("ENEMY10", "monster");
+	Object* enemy10 = new Object("ENEMY10");
+	enemy10->transform = enemy1->transform;
+	enemy10->drawables = enemy1->drawables;
+	enemy10->start_position = enemy1->start_position;
 	enemy10->addAction("ATTACK", attack_function, turn_duration());
 	enemy10->addAction("DEFEND", defend_function, turn_duration());
 	enemy10->addProperty("HEALTH_MAX", 100);
@@ -783,20 +843,23 @@ void PlayMode::take_turn() {
 	if (player_done && enemy_done) {
 		if (!level_lost && !level_won) {
 			get_effect_string() = "Your code didn't solve the puzzle...";
-		}
-		for (Object* u : player_units) {
-			u->reset();
-		}
-		for (Object* u : enemy_units[current_level]) {
-			u->reset();
+			for (Object* u : player_units) {
+				u->reset();
+			}
+			for (Object* u : enemy_units[current_level]) {
+				u->reset();
+			}
 		}
 	}
 }
 
 void PlayMode::next_level() {
 	current_level++;
-	for (Object* u : player_units) {
-		u->reset();
+	for (Object* p : player_units) {
+		p->reset();
+	}
+	for (Object* e : enemy_units[current_level]) {
+		e->reset();
 	}
 }
 

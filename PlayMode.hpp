@@ -159,6 +159,7 @@ struct PlayMode : Mode {
 	void drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip);
 	void setMesh(Scene::Drawable* drawable, std::string mesh);
 	Object* makeObject(std::string name, std::string model_name = "");
+	void energyTransforms();
 
 	//begin of the text rendering
 	size_t line_index = 0;

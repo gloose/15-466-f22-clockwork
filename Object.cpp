@@ -36,6 +36,7 @@ void Object::reset() {
     if (name == "ARCHER") {
         property("ARROWS") = 8;
     }
+    transform->position = start_position;
 }
 
 // Returns a reference to the property named property_name

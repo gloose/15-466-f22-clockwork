@@ -12,11 +12,13 @@ void register_heal_transform(Scene::Transform* t);
 void register_freeze_transform(Scene::Transform* t);
 void register_burn_transform(Scene::Transform* t);
 void register_arrow_transform(Scene::Transform* t);
+void register_archer_object(Object* o);
 
 enum AnimationType {
 	MOVE,
 	DEATH,
-	ENERGY
+	ENERGY,
+	SHOOT
 };
 
 enum EnergyType {
@@ -50,10 +52,17 @@ struct EnergyAnimation : Animation {
 	bool update(float update_time);
 };
 
+struct ShootAnimation : MoveAnimation {
+	ShootAnimation(Object* target);
+	bool update(float update_time);
+};
+
 void update_animations(float time);
 
 void add_animation(Animation* animation);
 
 float turn_duration();
+
+glm::vec3 offscreen_position();
 
 #endif
