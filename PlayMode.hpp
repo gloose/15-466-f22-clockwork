@@ -152,7 +152,7 @@ struct PlayMode : Mode {
 	Object* healer;
 
 	// Rotation demo
-	float warrior_theta = 0.f;
+	//float warrior_theta = 0.f;
 
 	// Helper functions
 	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);

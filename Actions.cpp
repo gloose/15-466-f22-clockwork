@@ -35,17 +35,17 @@ bool check_freeze(Object* user) {
 		if (user->property("FREEZE_COUNTDOWN") == 0) {
 			effect_string = user->name + " was frozen and could not move.";
 			user->property("FREEZE_COUNTDOWN") = 3;
+			return true;
 		}
-		return true;
 	}
 	return false;
 }
 
 void attack_function(Object* user, Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
-	if (check_burn(user) || check_freeze(user)) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
 	int damage = user->property("POWER");
@@ -55,10 +55,10 @@ void attack_function(Object* user, Object* target) {
 }
 
 void defend_function(Object* user, Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
-	if (check_burn(user) || check_freeze(user)) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
 		return;
 	}
 	action_string = user->name + " defended " + target->name + ".";
@@ -67,10 +67,10 @@ void defend_function(Object* user, Object* target) {
 }
 
 void freeze_function(Object* user, Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
-	if (check_burn(user) || check_freeze(user)) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
 	if (target->property("FROZEN") == 0) {
@@ -83,10 +83,10 @@ void freeze_function(Object* user, Object* target) {
 }
 
 void burn_function(Object* user, Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
-	if (check_burn(user) || check_freeze(user)) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
 	action_string = user->name + " burned " + target->name + ".";
@@ -94,10 +94,10 @@ void burn_function(Object* user, Object* target) {
 }
 
 void heal_function(Object* user, Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
-	if (check_burn(user) || check_freeze(user)) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
 		return;
 	}
 	action_string = user->name + " healed " + target->name + ".";
@@ -110,10 +110,10 @@ void heal_function(Object* user, Object* target) {
 }
 
 void shoot_function(Object* user, Object* target) {
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
-	if (check_burn(user) || check_freeze(user)) {
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
 		return;
 	}
 	

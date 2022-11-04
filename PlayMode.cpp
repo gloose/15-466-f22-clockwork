@@ -803,6 +803,7 @@ void PlayMode::next_level() {
 
 void PlayMode::update(float elapsed) {
 	// Fun little animation for the warrior to showcase transforms
+	/*
 	warrior->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(0.f, 0.f, 1.f));
 	warrior->drawables.at("warrior-gear-head")->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(1.f, 0.f, 0.f));
 	warrior->drawables.at("warrior-gear-left-shoulder")->transform->rotation = glm::angleAxis(18.f * (float)M_PI / 180.f - warrior_theta, glm::vec3(1.f, 0.f, 0.f));
@@ -814,7 +815,8 @@ void PlayMode::update(float elapsed) {
 		warrior_theta -= (float)(2 * M_PI);
 	}
 	warrior->transform->position = warrior->transform->position + glm::vec3(cos(-M_PI / 2 + warrior_theta), sin(-M_PI / 2 + warrior_theta), 0.f) * elapsed;
-	
+	*/
+
 	if (lctrl.pressed || rctrl.pressed) {
 		update_animations(10.0f * elapsed);
 	} else {
