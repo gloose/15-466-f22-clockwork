@@ -50,6 +50,7 @@ void attack_function(Object* user, Object* target) {
 	}
 	int damage = user->property("POWER");
 	action_string = user->name + " attacked " + target->name + " for " + std::to_string(calc_damage(damage, target)) + " damage.";
+	add_animation(new MoveAnimation(user, target));
 	attack(damage, target);
 }
 

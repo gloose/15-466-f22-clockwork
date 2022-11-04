@@ -1,4 +1,4 @@
-#include "Object.hpp"
+#include "Animation.hpp"
 #include <iostream>
 #include <random>
 #include <string>

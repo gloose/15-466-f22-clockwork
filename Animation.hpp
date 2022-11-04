@@ -31,23 +31,23 @@ struct Animation {
 	Scene::Transform* transform;
 	AnimationType type;
 	size_t id;
-	void update(float update_time);
+	bool update(float update_time);
 };
 
 struct MoveAnimation : Animation {
 	MoveAnimation(Object* source, Object* target);
-	void update(float update_time);
+	bool update(float update_time);
 	glm::vec3 target_position;
 };
 
 struct DeathAnimation : Animation {
 	DeathAnimation(Object* victim);
-	void update(float update_time);
+	bool update(float update_time);
 };
 
 struct EnergyAnimation : Animation {
 	EnergyAnimation(EnergyType nrg, Object *target);
-	void update(float update_time);
+	bool update(float update_time);
 };
 
 void update_animations(float time);

@@ -22,8 +22,41 @@ void add_animation(Animation* animation) {
 }
 
 void update_animations(float time) {
-	for (auto* animation : active_animations) {
-		animation->update(time);
+	auto iter = active_animations.begin();
+	while (iter != active_animations.end()) {
+		Animation* animation = *iter;
+		MoveAnimation* move;
+		DeathAnimation* death;
+		EnergyAnimation* energy;
+		switch (animation->type) {
+		case MOVE:
+			move = (MoveAnimation*)animation;
+			if (move->update(time)) {
+				iter++;
+			} else {
+				iter = active_animations.erase(iter);
+			}
+			break;
+		case DEATH:
+			death = (DeathAnimation*)animation;
+			if (death->update(time)) {
+				iter++;
+			} else {
+				iter = active_animations.erase(iter);
+			}
+			break;
+		case ENERGY:
+			energy = (EnergyAnimation*)animation;
+			if (energy->update(time)) {
+				iter++;
+			} else {
+				iter = active_animations.erase(iter);
+			}
+			break;
+		default:
+			iter = active_animations.end();
+			break;
+		}
 	}
 }
 
@@ -43,36 +76,31 @@ void register_arrow_transform(Scene::Transform* t) {
 	arrow_transform = t;
 }
 
-void Animation::update(float update_time) {
+bool Animation::update(float update_time) {
 	assert(false && "Animation::update must be overriden by child class.");
+	return false;
 }
 
 // Uncomment when objects have a transform field
 MoveAnimation::MoveAnimation(Object* source, Object* target) {
-	// start_position = source->transform->position;
-	// target_position = target->transform->position;
-	start_position = glm::vec3(0, 0, 0);
-	target_position = glm::vec3(1, 1, 1);
+	start_position = source->transform->position;
+	target_position = target->transform->position;
 	type = AnimationType::MOVE;
 	id = animation_id++;
-	// transform = source->transform;
-	transform = nullptr;
+	transform = source->transform;
 	elapsed_time = 0.0f;
 }
 
 DeathAnimation::DeathAnimation(Object* victim) {
-	// start_position = victim->transform->position;
-	start_position = glm::vec3(0, 0, 0);
+	start_position = victim->transform->position;
 	type = AnimationType::DEATH;
 	id = animation_id++;
-	// transform = victim->transform;
-	transform = nullptr;
+	transform = victim->transform;
 	elapsed_time = 0.0f;
 }
 
 EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
-	// start_position = target->transform->position;
-	start_position = glm::vec3(0, 0, 0);
+	start_position = target->transform->position;
 	type = AnimationType::ENERGY;
 	id = animation_id++;
 	switch (nrg) {
@@ -94,45 +122,42 @@ EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
 	elapsed_time = 0.0f;
 }
 
-void MoveAnimation::update(float update_time) {
+bool MoveAnimation::update(float update_time) {
 	elapsed_time += update_time;
 	if (elapsed_time <= turn_time / 2.0f) {
 		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_time / 2.0f));
+		return true;
 	} else if (elapsed_time < turn_time) {
 		transform->position = target_position + (start_position - target_position) * (elapsed_time - (turn_time / 2.0f)) / (turn_time / 2.0f);
+		return true;
 	} else {
 		transform->position = start_position;
-		end(id);
+		return false;
 	}
 }
 
 // Note, define a constant to be some downward translation that will move a character offscreen. I'll call it 1 unit for now.
-void DeathAnimation::update(float update_time) {
+bool DeathAnimation::update(float update_time) {
 	elapsed_time += update_time;
 	if (elapsed_time < turn_time) {
 		transform->position -= glm::vec3(1.0f, 1.0f, 1.0f) * (elapsed_time / turn_time);
+		return true;
 	} else {
-		end(id);
+		return false;
 	}
 }
 
 // Note, define a constant to be some scale that will make an energy ball approximately the size of a character. I'll call it 2 for now.
-void EnergyAnimation::update(float update_time) {
+bool EnergyAnimation::update(float update_time) {
 	elapsed_time += update_time;
 	if (elapsed_time <= turn_time / 2.0f) {
 		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time / (turn_time / 2.0f));
+		return true;
 	} else if (elapsed_time < turn_time) {
 		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) - glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time - (turn_time / 2.0f)) / (turn_time / 2.0f);
+		return true;
 	} else {
 		transform->position = glm::vec3(0, 0, -1);
-		end(id);
-	}
-}
-
-void end(size_t my_id) {
-	for (auto iter = active_animations.begin(); iter != active_animations.end(); iter++) {
-		if ((*iter)->id == my_id) {
-			active_animations.erase(iter);
-		}
+		return false;
 	}
 }
