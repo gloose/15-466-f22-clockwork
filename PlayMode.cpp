@@ -456,8 +456,8 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				player_done = false;
 				enemy_done = false;
 				turn_done = false;
-				player_time = 1.0f;
-				enemy_time = 1.0f;
+				player_time = turn_duration();
+				enemy_time = turn_duration();
 			} else {
 				line_break();
 			}
@@ -684,16 +684,16 @@ void PlayMode::execute_player_statement() {
 			player_done = true;
 			if (!enemy_done) {
 				turn = Turn::ENEMY;
-				enemy_time = 1.0f;
+				enemy_time = turn_duration();
 			}
 		} else {
 			player_time -= time;
 			if (player_time <= 0.0f) {
 				if (!enemy_done) {
 					turn = Turn::ENEMY;
-					enemy_time = 1.0f;
+					enemy_time = turn_duration();
 				} else {
-					player_time = 1.0f;
+					player_time = turn_duration();
 				}
 			}
 		}
@@ -701,9 +701,9 @@ void PlayMode::execute_player_statement() {
 		player_statement->duration -= player_time;
 		if (!enemy_done) {
 			turn = Turn::ENEMY;
-			enemy_time = 1.0f;
+			enemy_time = turn_duration();
 		} else {
-			player_time = 1.0f;
+			player_time = turn_duration();
 		}
 	}
 }
@@ -747,15 +747,15 @@ void PlayMode::execute_enemy_statement() {
 		if (enemy_statement == nullptr) {
 			enemy_done = true;
 			turn = Turn::PLAYER;
-			player_time = 1.0f;
+			player_time = turn_duration();
 		} else {
 			enemy_time -= time;
 			if (enemy_time <= 0.0f) {
 				if (!player_done) {
 					turn = Turn::PLAYER;
-					player_time = 1.0f;
+					player_time = turn_duration();
 				} else {
-					enemy_time = 1.0f;
+					enemy_time = turn_duration();
 				}
 			}
 		}
@@ -764,9 +764,9 @@ void PlayMode::execute_enemy_statement() {
 		// If both are done, we want to switch control to the player for the next turn
 		if (enemy_done || !player_done) {
 			turn = Turn::PLAYER;
-			player_time = 1.0f;
+			player_time = turn_duration();
 		} else {
-			enemy_time = 1.0f;
+			enemy_time = turn_duration();
 		}
 	}
 }
@@ -815,11 +815,13 @@ void PlayMode::update(float elapsed) {
 	}
 	warrior->transform->position = warrior->transform->position + glm::vec3(cos(-M_PI / 2 + warrior_theta), sin(-M_PI / 2 + warrior_theta), 0.f) * elapsed;
 
+	update_animations(elapsed);
+
 	if (!turn_done) {
 		if (!player_done || !enemy_done) {
 			if (turn_time <= 0.0f) {
 				take_turn();
-				turn_time = 1.0f;
+				turn_time = turn_duration();
 			} else {
 				if (lctrl.pressed || rctrl.pressed) {
 					turn_time -= elapsed * 10.f;

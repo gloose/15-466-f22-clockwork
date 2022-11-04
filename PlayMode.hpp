@@ -8,6 +8,7 @@
 #include <hb-ft.h>
 #include <freetype/freetype.h>
 #include <freetype/fttypes.h>
+#include "Animation.hpp"
 #include "Actions.hpp"
 #include "Compiler.hpp"
 
