@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <deque>
+#include <array>
 
 struct PlayMode : Mode {
 	PlayMode();
@@ -47,6 +48,7 @@ struct PlayMode : Mode {
 
 		//Uniform (per-invocation variable) locations:
 		GLuint OBJECT_TO_CLIP_mat4 = -1U;
+		GLuint USE_TEXTURE_bool = -1U;
 
 		//Textures bindings:
 		//TEXTURE0 - the tile table (as a 128x128 R8UI texture)
@@ -90,7 +92,7 @@ struct PlayMode : Mode {
 	uint32_t min_char = 32;
 	uint32_t max_char = 126;
 	uint32_t num_chars = max_char - min_char + 1;
-	int font_size = 24;
+	int font_size = 16;
 	static inline glm::u8vec4 default_color = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
 	static inline glm::u8vec4 alt_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
 	static inline glm::u8vec4 cur_line_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
@@ -154,20 +156,27 @@ struct PlayMode : Mode {
 	// Rotation demo
 	//float warrior_theta = 0.f;
 
+	glm::ivec2 prompt_pos = glm::ivec2(ScreenWidth - 410, ScreenHeight - 10);
+	glm::ivec2 prompt_size = glm::ivec2(ScreenWidth - prompt_pos.x - 10, 200);
+	glm::ivec2 input_pos = glm::ivec2(ScreenWidth - 410, prompt_pos.y - prompt_size.y - 10);
+	glm::ivec2 input_size = glm::ivec2(ScreenWidth - input_pos.x - 10, input_pos.y - 10);
+	glm::ivec2 text_margin = glm::ivec2(10, -10);
+
 	// Helper functions
 	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
-	void drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip);
+	void drawVertexArray(GLenum mode, const std::vector<PPUDataStream::Vertex>& vertex_array, bool use_texture);
 	void setMesh(Scene::Drawable* drawable, std::string mesh);
 	Object* makeObject(std::string name, std::string model_name = "");
 	void energyTransforms();
+	void drawRectangle(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, bool filled);
 
 	//begin of the text rendering
 	size_t line_index = 0;
 	size_t cur_cursor_pos = 0;
 	std::vector< std::string > text_buffer;
 	int execution_line_index = -1;
-	size_t max_line_length = 600;
-	size_t max_line_chars = 30;
+	size_t max_line_length = 400;
+	size_t max_line_chars = 40;
 	size_t max_lines = 30;
 	std::string cur_str;
 	void move_up();

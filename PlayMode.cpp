@@ -116,11 +116,12 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	level_won = false;
 	level_lost = false;
 	turn = Turn::PLAYER;
-	current_level = 0;
+	current_level = -1;
 	player_units.clear();
 	enemy_units.clear();
 	create_levels();
 	init_compiler();
+	next_level();
 	energyTransforms();
 	compile_failed = false;
 	
@@ -129,6 +130,9 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	rshift.pressed = false;
 	get_action_string() = "";
 	get_effect_string() = "";
+
+	makeObject("ISLAND", "island");
+	makeObject("OCEAN", "ocean");
 }
 
 Object* PlayMode::makeObject(std::string name, std::string model_name) {
@@ -162,7 +166,7 @@ void PlayMode::energyTransforms() {
 			register_arrow_transform(&transform);
 			scene.drawables.emplace_back(&transform);
 			setMesh(&scene.drawables.back(), transform.name);
-			transform.position = archer->transform->position;
+			transform.position = archer->transform->position + arrow_offset;
 		} else if (transform.name == "fire") {
 			register_burn_transform(&transform);
 			scene.drawables.emplace_back(&transform);
@@ -218,8 +222,7 @@ void PlayMode::create_levels() {
 
 void PlayMode::init_compiler() {
 	warrior = makeObject("WARRIOR", "warrior");
-	warrior->transform->position = glm::vec3(-1.f, 0.f, 1.15f);
-	warrior->start_position = glm::vec3(-1.f, 0.f, 1.15f);
+	warrior->start_position = glm::vec3(-4.f, -6.f, 1.15f);
 	warrior->addAction("ATTACK", attack_function, turn_duration());
 	warrior->addAction("DEFEND", defend_function, turn_duration());
 	warrior->addProperty("HEALTH_MAX", 100);
@@ -229,8 +232,7 @@ void PlayMode::init_compiler() {
 	warrior->addProperty("POWER", 15);
 
 	wizard = makeObject("WIZARD", "wizard");
-	wizard->transform->position = glm::vec3(-5.f, -5.f, 2.1f);
-	wizard->start_position = glm::vec3(-5.f, -5.f, 2.1f);
+	wizard->start_position = glm::vec3(-4.f, 6.f, 2.1f);
 	wizard->addAction("FREEZE", freeze_function, turn_duration() * 1.5f);
 	wizard->addAction("BURN", burn_function, turn_duration() * 1.5f);
 	wizard->addProperty("HEALTH_MAX", 60);
@@ -239,8 +241,7 @@ void PlayMode::init_compiler() {
 	wizard->addProperty("ALIVE", 1);
 
 	archer = makeObject("ARCHER", "archer");
-	archer->transform->position = glm::vec3(5.f, 5.f, 0.f);
-	archer->start_position = glm::vec3(5.f, 5.f, 0.f);
+	archer->start_position = glm::vec3(-6.f, 3.f, 0.f);
 	register_archer_object(archer);
 	archer->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
 	archer->addAction("SHOOT", shoot_function, turn_duration() * 0.5f);
@@ -252,8 +253,7 @@ void PlayMode::init_compiler() {
 	archer->addProperty("POWER", 20);
 
 	healer = makeObject("HEALER", "healer");
-	healer->transform->position = glm::vec3(5.f, -5.f, 1.35f);
-	healer->start_position = glm::vec3(5.f, -5.f, 1.35f);
+	healer->start_position = glm::vec3(-6.f, -3.f, 1.35f);
 	healer->addAction("HEAL", heal_function, turn_duration());
 	healer->addProperty("HEALTH_MAX", 80);
 	healer->addProperty("HEALTH", 80);
@@ -261,8 +261,7 @@ void PlayMode::init_compiler() {
 	healer->addProperty("ALIVE", 1);
 
 	Object* enemy1 = makeObject("ENEMY1", "monster");
-	enemy1->transform->position = glm::vec3(-5.f, 5.f, 2.3f);
-	enemy1->start_position = glm::vec3(-5.f, 5.f, 2.3f);
+	enemy1->start_position = glm::vec3(6.f, 0.f, 4.f);
 	enemy1->addAction("ATTACK", attack_function, turn_duration());
 	enemy1->addAction("DEFEND", defend_function, turn_duration());
 	enemy1->addProperty("HEALTH_MAX", 15);
@@ -1029,7 +1028,7 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 		}
 	}
 
-	drawTriangleStrip(triangle_strip);
+	drawVertexArray(GL_TRIANGLE_STRIP, triangle_strip, true);
 	
 	return (int)(line_num * font_size);
 }
@@ -1093,8 +1092,8 @@ void PlayMode::insert(std::string cur_letter){
 }
 
 void PlayMode::render(){
-	int x = 20;
-	int y = ScreenHeight - 20;
+	int x = input_pos.x + text_margin.x;
+	int y = input_pos.y + text_margin.y;
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < text_buffer.size(); i++){
 		if (!player_done && (int)i == execution_line_index) {
@@ -1112,14 +1111,14 @@ void PlayMode::render(){
 		drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
 		drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
 	}
-	drawText(level_guidance[current_level], glm::vec2(ScreenWidth / 2, ScreenHeight - 20), max_line_length);
+	drawText(level_guidance[current_level], prompt_pos + text_margin, prompt_size.x - 2 * text_margin.x);
 }
 
 //TODO: render text end
-void PlayMode::drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip) {
+void PlayMode::drawVertexArray(GLenum mode, const std::vector<PPUDataStream::Vertex>& vertex_array, bool use_texture) {
 	// Upload vertex buffer
 	glBindBuffer(GL_ARRAY_BUFFER, data_stream->vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(decltype(triangle_strip[0])) * triangle_strip.size(), triangle_strip.data(), GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(decltype(vertex_array[0])) * vertex_array.size(), vertex_array.data(), GL_STREAM_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	//set up the pipeline:
@@ -1144,6 +1143,7 @@ void PlayMode::drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& trian
 			glm::vec4(-1.0f - scroll_x * 2.f / ScreenWidth, -1.0f - scroll_y * 2.f / ScreenHeight, 0.0f, 1.0f)
 		);
 		glUniformMatrix4fv(tile_program->OBJECT_TO_CLIP_mat4, 1, GL_FALSE, glm::value_ptr(OBJECT_TO_CLIP));
+		glUniform1i(tile_program->USE_TEXTURE_bool, (int)use_texture);
 	}
 
 	// bind texture units to proper texture objects:
@@ -1151,7 +1151,7 @@ void PlayMode::drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& trian
 	glBindTexture(GL_TEXTURE_2D, data_stream->tile_tex);
 
 	//now that the pipeline is configured, trigger drawing of triangle strip:
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, GLsizei(triangle_strip.size()));
+	glDrawArrays(mode, 0, GLsizei(vertex_array.size()));
 
 	//return state to default:
 	glActiveTexture(GL_TEXTURE1);
@@ -1163,6 +1163,34 @@ void PlayMode::drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& trian
 	glDisable(GL_BLEND);
 
 	GL_ERRORS();
+}
+
+
+void PlayMode::drawRectangle(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, bool filled) {
+	// Find corners of rectangle, counter-clockwise from top left, first corner repeated at end
+	std::array<glm::ivec2, 5> corners = {
+		glm::ivec2(pos.x, pos.y),
+		glm::ivec2(pos.x, pos.y - size.y),
+		glm::ivec2(pos.x + size.x, pos.y - size.y),
+		glm::ivec2(pos.x + size.x, pos.y),
+		glm::ivec2(pos.x, pos.y)
+	};
+
+	// Switch corners if filled to get it into the format for a triangle strip
+	if (filled) {
+		glm::ivec2 temp = corners[2];
+		corners[2] = corners[3];
+		corners[3] = temp;
+	}
+	
+	// Build vertex array
+	std::vector< PPUDataStream::Vertex > vertex_array;
+	for (size_t i = 0; i < (filled ? 4 : 5); i++) {
+		vertex_array.emplace_back(corners[i], glm::ivec2(0, 0), color);
+	}
+
+	// Draw vertex array
+	drawVertexArray(filled ? GL_TRIANGLE_STRIP : GL_LINE_STRIP, vertex_array, false);
 }
 
 
@@ -1193,6 +1221,10 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	scene.draw(*camera);
 
 	glDisable(GL_DEPTH_TEST);
+	drawRectangle(input_pos, input_size, glm::u8vec4(0, 0, 0, 255), true);
+	drawRectangle(input_pos + glm::ivec2(5, -5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+	drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
+	drawRectangle(prompt_pos + glm::ivec2(5, -5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 	render();
 	GL_ERRORS();
 }
@@ -1223,11 +1255,16 @@ PlayMode::PPUTileProgram::PPUTileProgram() {
 		//fragment shader:
 		"#version 330\n"
 		"uniform sampler2D TILE_TABLE;\n"
+		"uniform bool USE_TEXTURE;\n"
 		"in vec2 tileCoord;\n"
 		"out vec4 fragColor;\n"
 		"in vec4 color;\n"
 		"void main() {\n"
-		"fragColor = texelFetch(TILE_TABLE, ivec2(tileCoord), 0);\n"
+		"if (USE_TEXTURE) {\n"
+		"	fragColor = texelFetch(TILE_TABLE, ivec2(tileCoord), 0);\n"
+		"} else {\n"
+		"	fragColor.a = 1.0;\n"
+		"}\n"
 		"fragColor.r = color.r;\n"
 		"fragColor.g = color.g;\n"
 		"fragColor.b = color.b;\n"
@@ -1242,6 +1279,7 @@ PlayMode::PPUTileProgram::PPUTileProgram() {
 
 	//look up the locations of uniforms:
 	OBJECT_TO_CLIP_mat4 = glGetUniformLocation(program, "OBJECT_TO_CLIP");
+	USE_TEXTURE_bool = glGetUniformLocation(program, "USE_TEXTURE");
 
 	GLuint TILE_TABLE_usampler2D = glGetUniformLocation(program, "TILE_TABLE");
 	//GLuint PALETTE_TABLE_sampler2D = glGetUniformLocation(program, "PALETTE_TABLE");

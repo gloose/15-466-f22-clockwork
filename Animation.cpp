@@ -19,7 +19,7 @@ float turn_duration() {
 }
 
 glm::vec3 offscreen_position() {
-	return glm::vec3(0.0f, 0.0f, 10.0f);
+	return glm::vec3(0.0f, 0.0f, 100.0f);
 }
 
 void add_animation(Animation* animation) {
@@ -109,6 +109,7 @@ MoveAnimation::MoveAnimation(Object* source, Object* target) {
 }
 
 ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(archer_object, target) {
+	start_position += arrow_offset;
 	transform = arrow_transform;
 	// TODO: Some trig magic to rotate the arrow to face the enemy.
 	type = AnimationType::SHOOT;

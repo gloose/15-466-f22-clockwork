@@ -65,4 +65,6 @@ float turn_duration();
 
 glm::vec3 offscreen_position();
 
+static glm::vec3 arrow_offset = glm::vec3(0.94f, 0.f, 1.6056f);
+
 #endif
