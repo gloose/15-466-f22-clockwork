@@ -1093,7 +1093,7 @@ void PlayMode::insert(std::string cur_letter){
 
 void PlayMode::render(){
 	int x = input_pos.x + text_margin.x;
-	int y = input_pos.y + text_margin.y;
+	int y = input_pos.y + input_size.y + text_margin.y;
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < text_buffer.size(); i++){
 		if (!player_done && (int)i == execution_line_index) {
@@ -1111,7 +1111,7 @@ void PlayMode::render(){
 		drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
 		drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
 	}
-	drawText(level_guidance[current_level], prompt_pos + text_margin, prompt_size.x - 2 * text_margin.x);
+	drawText(level_guidance[current_level], prompt_pos + glm::ivec2(0, prompt_size.y) + text_margin, prompt_size.x - 2 * text_margin.x);
 }
 
 //TODO: render text end
@@ -1167,11 +1167,11 @@ void PlayMode::drawVertexArray(GLenum mode, const std::vector<PPUDataStream::Ver
 
 
 void PlayMode::drawRectangle(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, bool filled) {
-	// Find corners of rectangle, counter-clockwise from top left, first corner repeated at end
+	// Find corners of rectangle, counter-clockwise from bottom left, first corner repeated at end
 	std::array<glm::ivec2, 5> corners = {
 		glm::ivec2(pos.x, pos.y),
-		glm::ivec2(pos.x, pos.y - size.y),
-		glm::ivec2(pos.x + size.x, pos.y - size.y),
+		glm::ivec2(pos.x, pos.y + size.y),
+		glm::ivec2(pos.x + size.x, pos.y + size.y),
 		glm::ivec2(pos.x + size.x, pos.y),
 		glm::ivec2(pos.x, pos.y)
 	};
@@ -1196,7 +1196,8 @@ void PlayMode::drawRectangle(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color,
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//update camera aspect ratio for drawable:
-	camera->aspect = float(drawable_size.x) / float(drawable_size.y);
+	//camera->aspect = float(drawable_size.x) / float(drawable_size.y);
+	camera->aspect = float(worldbox_size.x) / float(worldbox_size.y);
 
 	//set up light type and position for lit_color_texture_program:
 	// TODO: consider using the Light(s) in the scene to do this
@@ -1218,13 +1219,17 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
+
+	glViewport(worldbox_pos.x, worldbox_pos.y, worldbox_size.x, worldbox_size.y);
 	scene.draw(*camera);
+	glViewport(0, 0, drawable_size.x, drawable_size.y);
+	drawRectangle(worldbox_pos - glm::ivec2(5, 5), worldbox_size + glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 
 	glDisable(GL_DEPTH_TEST);
 	drawRectangle(input_pos, input_size, glm::u8vec4(0, 0, 0, 255), true);
-	drawRectangle(input_pos + glm::ivec2(5, -5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+	drawRectangle(input_pos + glm::ivec2(5, 5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 	drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
-	drawRectangle(prompt_pos + glm::ivec2(5, -5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+	drawRectangle(prompt_pos + glm::ivec2(5, 5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 	render();
 	GL_ERRORS();
 }

@@ -156,10 +156,12 @@ struct PlayMode : Mode {
 	// Rotation demo
 	//float warrior_theta = 0.f;
 
-	glm::ivec2 prompt_pos = glm::ivec2(ScreenWidth - 410, ScreenHeight - 10);
+	glm::ivec2 prompt_pos = glm::ivec2(ScreenWidth - 410, ScreenHeight - 210);
 	glm::ivec2 prompt_size = glm::ivec2(ScreenWidth - prompt_pos.x - 10, 200);
-	glm::ivec2 input_pos = glm::ivec2(ScreenWidth - 410, prompt_pos.y - prompt_size.y - 10);
-	glm::ivec2 input_size = glm::ivec2(ScreenWidth - input_pos.x - 10, input_pos.y - 10);
+	glm::ivec2 input_pos = glm::ivec2(ScreenWidth - 410, 10);
+	glm::ivec2 input_size = glm::ivec2(ScreenWidth - input_pos.x - 10, prompt_pos.y - 20);
+	glm::ivec2 worldbox_pos = glm::ivec2(20, 20);
+	glm::ivec2 worldbox_size = glm::ivec2(input_pos.x - 40, ScreenHeight - 40);
 	glm::ivec2 text_margin = glm::ivec2(10, -10);
 
 	// Helper functions
