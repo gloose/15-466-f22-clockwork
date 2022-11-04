@@ -109,15 +109,6 @@ struct PlayMode : Mode {
 
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
-
-	//hexapod leg to wobble:
-	Scene::Transform *hip = nullptr;
-	Scene::Transform *upper_leg = nullptr;
-	Scene::Transform *lower_leg = nullptr;
-	glm::quat hip_base_rotation;
-	glm::quat upper_leg_base_rotation;
-	glm::quat lower_leg_base_rotation;
-	float wobble = 0.0f;
 	
 	//camera:
 	Scene::Camera *camera = nullptr;
@@ -154,9 +145,19 @@ struct PlayMode : Mode {
 	bool level_won;
 	bool compile_failed;
 
+	Object* warrior;
+	Object* wizard;
+	Object* archer;
+	Object* healer;
+
+	// Rotation demo
+	float warrior_theta = 0.f;
+
 	// Helper functions
 	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
 	void drawTriangleStrip(const std::vector<PPUDataStream::Vertex>& triangle_strip);
+	void setMesh(Scene::Drawable* drawable, std::string mesh);
+	Object* makeObject(std::string name, std::string model_name = "");
 
 	//begin of the text rendering
 	size_t line_index = 0;

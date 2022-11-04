@@ -20,52 +20,21 @@
 Load< PlayMode::PPUTileProgram > tile_program(LoadTagEarly); //will 'new PPUTileProgram()' by default
 Load< PlayMode::PPUDataStream > data_stream(LoadTagDefault);
 
-GLuint hexapod_meshes_for_lit_color_texture_program = 0;
-Load< MeshBuffer > hexapod_meshes(LoadTagDefault, []() -> MeshBuffer const * {
-	MeshBuffer const *ret = new MeshBuffer(data_path("hexapod.pnct"));
-	hexapod_meshes_for_lit_color_texture_program = ret->make_vao_for_program(lit_color_texture_program->program);
+GLuint character_meshes_for_lit_color_texture_program = 0;
+Load< MeshBuffer > character_meshes(LoadTagDefault, []() -> MeshBuffer const * {
+	MeshBuffer const *ret = new MeshBuffer(data_path("characters.pnct"));
+	character_meshes_for_lit_color_texture_program = ret->make_vao_for_program(lit_color_texture_program->program);
 	return ret;
 });
 
-Load< Scene > hexapod_scene(LoadTagDefault, []() -> Scene const * {
-	return new Scene(data_path("hexapod.scene"), [&](Scene &scene, Scene::Transform *transform, std::string const &mesh_name){
-		Mesh const &mesh = hexapod_meshes->lookup(mesh_name);
-
-		scene.drawables.emplace_back(transform);
-		Scene::Drawable &drawable = scene.drawables.back();
-
-		drawable.pipeline = lit_color_texture_program_pipeline;
-
-		drawable.pipeline.vao = hexapod_meshes_for_lit_color_texture_program;
-		drawable.pipeline.type = mesh.type;
-		drawable.pipeline.start = mesh.start;
-		drawable.pipeline.count = mesh.count;
-
-	});
+Load< Scene > character_scene(LoadTagDefault, []() -> Scene const * {
+	return new Scene(data_path("characters.scene"), [&](Scene &scene, Scene::Transform *transform, std::string const &mesh_name){});
 });
 
-PlayMode::PlayMode() : scene(*hexapod_scene) {
-	//get pointers to leg for convenience:
-	for (auto &transform : scene.transforms) {
-		if (transform.name == "Hip.FL") hip = &transform;
-		else if (transform.name == "UpperLeg.FL") upper_leg = &transform;
-		else if (transform.name == "LowerLeg.FL") lower_leg = &transform;
-	}
-	if (hip == nullptr) throw std::runtime_error("Hip not found.");
-	if (upper_leg == nullptr) throw std::runtime_error("Upper leg not found.");
-	if (lower_leg == nullptr) throw std::runtime_error("Lower leg not found.");
-
-	hip_base_rotation = hip->rotation;
-	upper_leg_base_rotation = upper_leg->rotation;
-	lower_leg_base_rotation = lower_leg->rotation;
-
+PlayMode::PlayMode() : scene(*character_scene) {
 	//get pointer to camera for convenience:
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
 	camera = &scene.cameras.front();
-
-	//start music loop playing:
-	// (note: position will be over-ridden in update())
-
 
 	// Set up text rendering
 	// Adapted from Harfbuzz example linked on assignment page
@@ -161,7 +130,37 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	get_effect_string() = "";
 }
 
+Object* PlayMode::makeObject(std::string name, std::string model_name) {
+	Object* obj = new Object(name);
+	
+	if (!model_name.empty()) {
+		for (auto& transform : scene.transforms) {
+			if (transform.name == model_name) {
+				obj->transform = &transform;
+			}
+			
+			if (transform.name == model_name || transform.name.rfind(model_name + "-", 0) == 0) {
+				scene.drawables.emplace_back(&transform);
+				setMesh(&scene.drawables.back(), transform.name);
+				obj->drawables.emplace(transform.name, &scene.drawables.back());
+			}
+		}
+	}
+
+	return obj;
+}
+
 PlayMode::~PlayMode() {
+}
+
+void PlayMode::setMesh(Scene::Drawable* drawable, std::string mesh_name) {
+	// Assign the mesh with the given name to the given drawable
+	Mesh const& mesh = character_meshes->lookup(mesh_name);
+	drawable->pipeline = lit_color_texture_program_pipeline;
+	drawable->pipeline.vao = character_meshes_for_lit_color_texture_program;
+	drawable->pipeline.type = mesh.type;
+	drawable->pipeline.start = mesh.start;
+	drawable->pipeline.count = mesh.count;
 }
 
 void PlayMode::create_levels() {
@@ -191,7 +190,8 @@ void PlayMode::create_levels() {
 }
 
 void PlayMode::init_compiler() {
-	Object *warrior = new Object("WARRIOR");
+	warrior = makeObject("WARRIOR", "warrior");
+	warrior->transform->position = glm::vec3(-1.f, 0.f, 1.15f);
 	warrior->addAction("ATTACK", attack_function, 1.0f);
 	warrior->addAction("DEFEND", defend_function, 1.0f);
 	warrior->addProperty("HEALTH_MAX", 100);
@@ -200,7 +200,8 @@ void PlayMode::init_compiler() {
 	warrior->addProperty("ALIVE", 1);
 	warrior->addProperty("POWER", 15);
 
-	Object *wizard = new Object("WIZARD");
+	wizard = makeObject("WIZARD", "wizard");
+	wizard->transform->position = glm::vec3(-5.f, -5.f, 2.1f);
 	wizard->addAction("FREEZE", freeze_function, 1.5f);
 	wizard->addAction("BURN", burn_function, 1.5f);
 	wizard->addProperty("HEALTH_MAX", 60);
@@ -208,7 +209,8 @@ void PlayMode::init_compiler() {
 	wizard->addProperty("DEFENSE", 0);
 	wizard->addProperty("ALIVE", 1);
 
-	Object *archer = new Object("ARCHER");
+	archer = makeObject("ARCHER", "archer");
+	archer->transform->position = glm::vec3(5.f, 5.f, 0.f);
 	archer->addAction("ATTACK", shoot_function, 0.5f);
 	archer->addAction("SHOOT", shoot_function, 0.5f);
 	archer->addProperty("HEALTH_MAX", 60);
@@ -218,14 +220,16 @@ void PlayMode::init_compiler() {
 	archer->addProperty("ARROWS", 8);
 	archer->addProperty("POWER", 20);
 
-	Object *healer = new Object("HEALER");
+	healer = makeObject("HEALER", "healer");
+	healer->transform->position = glm::vec3(5.f, -5.f, 1.35f);
 	healer->addAction("HEAL", heal_function, 1.0f);
 	healer->addProperty("HEALTH_MAX", 80);
 	healer->addProperty("HEALTH", 80);
 	healer->addProperty("DEFENSE", 0);
 	healer->addProperty("ALIVE", 1);
 
-	Object* enemy1 = new Object("ENEMY1");
+	Object* enemy1 = makeObject("ENEMY1", "monster");
+	enemy1->transform->position = glm::vec3(-5.f, 5.f, 2.3f);
 	enemy1->addAction("ATTACK", attack_function, 1.0f);
 	enemy1->addAction("DEFEND", defend_function, 1.0f);
 	enemy1->addProperty("HEALTH_MAX", 15);
@@ -798,6 +802,19 @@ void PlayMode::next_level() {
 
 
 void PlayMode::update(float elapsed) {
+	// Fun little animation for the warrior to showcase transforms
+	warrior->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(0.f, 0.f, 1.f));
+	warrior->drawables.at("warrior-gear-head")->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(1.f, 0.f, 0.f));
+	warrior->drawables.at("warrior-gear-left-shoulder")->transform->rotation = glm::angleAxis(18.f * (float)M_PI / 180.f - warrior_theta, glm::vec3(1.f, 0.f, 0.f));
+	warrior->drawables.at("warrior-gear-neck")->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(0.f, 0.f, 1.f)) * glm::angleAxis((float)M_PI / 2, glm::vec3(0.f, 1.f, 0.f));
+	warrior->drawables.at("warrior-gear-right-shoulder")->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(1.f, 0.f, 0.f));
+	warrior->drawables.at("warrior-upper-jaw")->transform->position = glm::vec3(0.f, 0.f, 0.75f + sin(8 * warrior_theta) * 0.25f);
+	warrior_theta += elapsed;
+	if (warrior_theta > 2 * M_PI) {
+		warrior_theta -= (float)(2 * M_PI);
+	}
+	warrior->transform->position = warrior->transform->position + glm::vec3(cos(-M_PI / 2 + warrior_theta), sin(-M_PI / 2 + warrior_theta), 0.f) * elapsed;
+
 	if (!turn_done) {
 		if (!player_done || !enemy_done) {
 			if (turn_time <= 0.0f) {
@@ -838,57 +855,16 @@ void PlayMode::update(float elapsed) {
 		}
 	}
 
-	//slowly rotates through [0,1):
-	wobble += elapsed / 10.0f;
-	wobble -= std::floor(wobble);
-
-	hip->rotation = hip_base_rotation * glm::angleAxis(
-		glm::radians(5.0f * std::sin(wobble * 2.0f * float(M_PI))),
-		glm::vec3(0.0f, 1.0f, 0.0f)
-	);
-	upper_leg->rotation = upper_leg_base_rotation * glm::angleAxis(
-		glm::radians(7.0f * std::sin(wobble * 2.0f * 2.0f * float(M_PI))),
-		glm::vec3(0.0f, 0.0f, 1.0f)
-	);
-	lower_leg->rotation = lower_leg_base_rotation * glm::angleAxis(
-		glm::radians(10.0f * std::sin(wobble * 3.0f * 2.0f * float(M_PI))),
-		glm::vec3(0.0f, 0.0f, 1.0f)
-	);
-
-	//move camera:
-	{
-
-		//combine inputs into a move:
-		constexpr float PlayerSpeed = 30.0f;
-		glm::vec2 move = glm::vec2(0.0f);
-		if (left.pressed && !right.pressed) move.x =-1.0f;
-		if (!left.pressed && right.pressed) move.x = 1.0f;
-		if (down.pressed && !up.pressed) move.y =-1.0f;
-		if (!down.pressed && up.pressed) move.y = 1.0f;
-
-		//make it so that moving diagonally doesn't go faster:
-		if (move != glm::vec2(0.0f)) move = glm::normalize(move) * PlayerSpeed * elapsed;
-
-		glm::mat4x3 frame = camera->transform->make_local_to_parent();
-		glm::vec3 frame_right = frame[0];
-		//glm::vec3 up = frame[1];
-		glm::vec3 frame_forward = -frame[2];
-
-		camera->transform->position += move.x * frame_right + move.y * frame_forward;
-	}
-
-	{ //update listener to camera position:
-		glm::mat4x3 frame = camera->transform->make_local_to_parent();
-		glm::vec3 frame_right = frame[0];
-		glm::vec3 frame_at = frame[3];
-		Sound::listener.set_position_right(frame_at, frame_right, 1.0f / 60.0f);
-	}
-
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;
 	up.downs = 0;
 	down.downs = 0;
+	enter.downs = 0;
+	lshift.downs = 0;
+	rshift.downs = 0;
+	lctrl.downs = 0;
+	rctrl.downs = 0;
 }
 
 
@@ -1143,9 +1119,9 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
-	glDisable(GL_DEPTH_TEST);
+	scene.draw(*camera);
 
-	// scene.draw(*camera);
+	glDisable(GL_DEPTH_TEST);
 	render();
 	GL_ERRORS();
 }

@@ -2,6 +2,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include "Scene.hpp"
 
 #ifndef _OBJECT_H_
 #define _OBJECT_H_
@@ -21,6 +22,8 @@ struct Object {
     std::string name = "";
     std::unordered_map<std::string, Action> actions;
     std::unordered_map<std::string, int*> properties;
+    std::unordered_map<std::string, Scene::Drawable*> drawables;
+    Scene::Transform* transform;
 
     Object(std::string name);
     void addAction(std::string action_name, ActionFunction func, float duration);
