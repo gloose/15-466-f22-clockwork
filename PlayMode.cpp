@@ -192,8 +192,8 @@ void PlayMode::create_levels() {
 void PlayMode::init_compiler() {
 	warrior = makeObject("WARRIOR", "warrior");
 	warrior->transform->position = glm::vec3(-1.f, 0.f, 1.15f);
-	warrior->addAction("ATTACK", attack_function, 1.0f);
-	warrior->addAction("DEFEND", defend_function, 1.0f);
+	warrior->addAction("ATTACK", attack_function, turn_duration());
+	warrior->addAction("DEFEND", defend_function, turn_duration());
 	warrior->addProperty("HEALTH_MAX", 100);
 	warrior->addProperty("HEALTH", 100);
 	warrior->addProperty("DEFENSE", 0);
@@ -202,8 +202,8 @@ void PlayMode::init_compiler() {
 
 	wizard = makeObject("WIZARD", "wizard");
 	wizard->transform->position = glm::vec3(-5.f, -5.f, 2.1f);
-	wizard->addAction("FREEZE", freeze_function, 1.5f);
-	wizard->addAction("BURN", burn_function, 1.5f);
+	wizard->addAction("FREEZE", freeze_function, turn_duration() * 1.5f);
+	wizard->addAction("BURN", burn_function, turn_duration() * 1.5f);
 	wizard->addProperty("HEALTH_MAX", 60);
 	wizard->addProperty("HEALTH", 60);
 	wizard->addProperty("DEFENSE", 0);
@@ -211,8 +211,8 @@ void PlayMode::init_compiler() {
 
 	archer = makeObject("ARCHER", "archer");
 	archer->transform->position = glm::vec3(5.f, 5.f, 0.f);
-	archer->addAction("ATTACK", shoot_function, 0.5f);
-	archer->addAction("SHOOT", shoot_function, 0.5f);
+	archer->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
+	archer->addAction("SHOOT", shoot_function, turn_duration() * 0.5f);
 	archer->addProperty("HEALTH_MAX", 60);
 	archer->addProperty("HEALTH", 60);
 	archer->addProperty("DEFENSE", 0);
@@ -222,7 +222,7 @@ void PlayMode::init_compiler() {
 
 	healer = makeObject("HEALER", "healer");
 	healer->transform->position = glm::vec3(5.f, -5.f, 1.35f);
-	healer->addAction("HEAL", heal_function, 1.0f);
+	healer->addAction("HEAL", heal_function, turn_duration());
 	healer->addProperty("HEALTH_MAX", 80);
 	healer->addProperty("HEALTH", 80);
 	healer->addProperty("DEFENSE", 0);
@@ -230,89 +230,89 @@ void PlayMode::init_compiler() {
 
 	Object* enemy1 = makeObject("ENEMY1", "monster");
 	enemy1->transform->position = glm::vec3(-5.f, 5.f, 2.3f);
-	enemy1->addAction("ATTACK", attack_function, 1.0f);
-	enemy1->addAction("DEFEND", defend_function, 1.0f);
+	enemy1->addAction("ATTACK", attack_function, turn_duration());
+	enemy1->addAction("DEFEND", defend_function, turn_duration());
 	enemy1->addProperty("HEALTH_MAX", 15);
 	enemy1->addProperty("HEALTH", 15);
 	enemy1->addProperty("DEFENSE", 0);
 	enemy1->addProperty("ALIVE", 1);
 	enemy1->addProperty("POWER", 0);
 
-	Object* enemy2 = new Object("ENEMY2");
-	enemy2->addAction("ATTACK", attack_function, 1.0f);
-	enemy2->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy2 = makeObject("ENEMY2", "monster");
+	enemy2->addAction("ATTACK", attack_function, turn_duration());
+	enemy2->addAction("DEFEND", defend_function, turn_duration());
 	enemy2->addProperty("HEALTH_MAX", 10);
 	enemy2->addProperty("HEALTH", 10);
 	enemy2->addProperty("DEFENSE", 100);
 	enemy2->addProperty("ALIVE", 1);
 	enemy2->addProperty("POWER", 10);
 
-	Object* enemy3 = new Object("ENEMY3");
-	enemy3->addAction("ATTACK", attack_function, 1.0f);
-	enemy3->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy3 = makeObject("ENEMY3", "monster");
+	enemy3->addAction("ATTACK", attack_function, turn_duration());
+	enemy3->addAction("DEFEND", defend_function, turn_duration());
 	enemy3->addProperty("HEALTH_MAX", 30);
 	enemy3->addProperty("HEALTH", 30);
 	enemy3->addProperty("DEFENSE", 0);
 	enemy3->addProperty("ALIVE", 1);
 	enemy3->addProperty("POWER", 10);
 
-	Object* enemy4 = new Object("ENEMY4");
-	enemy4->addAction("ATTACK", attack_function, 1.0f);
-	enemy4->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy4 = makeObject("ENEMY4", "monster");
+	enemy4->addAction("ATTACK", attack_function, turn_duration());
+	enemy4->addAction("DEFEND", defend_function, turn_duration());
 	enemy4->addProperty("HEALTH_MAX", 75);
 	enemy4->addProperty("HEALTH", 75);
 	enemy4->addProperty("DEFENSE", 0);
 	enemy4->addProperty("ALIVE", 1);
 	enemy4->addProperty("POWER", 200);
 
-	Object* enemy5 = new Object("ENEMY5");
-	enemy5->addAction("ATTACK", attack_function, 1.0f);
-	enemy5->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy5 = makeObject("ENEMY5", "monster");
+	enemy5->addAction("ATTACK", attack_function, turn_duration());
+	enemy5->addAction("DEFEND", defend_function, turn_duration());
 	enemy5->addProperty("HEALTH_MAX", 45);
 	enemy5->addProperty("HEALTH", 45);
 	enemy5->addProperty("DEFENSE", 0);
 	enemy5->addProperty("ALIVE", 1);
 	enemy5->addProperty("POWER", 50);
 
-	Object* enemy6 = new Object("ENEMY6");
-	enemy6->addAction("ATTACK", attack_function, 1.0f);
-	enemy6->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy6 = makeObject("ENEMY6", "monster");
+	enemy6->addAction("ATTACK", attack_function, turn_duration());
+	enemy6->addAction("DEFEND", defend_function, turn_duration());
 	enemy6->addProperty("HEALTH_MAX", 40);
 	enemy6->addProperty("HEALTH", 40);
 	enemy6->addProperty("DEFENSE", 0);
 	enemy6->addProperty("ALIVE", 1);
 	enemy6->addProperty("POWER", 100);
 
-	Object* enemy7 = new Object("ENEMY7");
-	enemy7->addAction("ATTACK", attack_function, 1.0f);
-	enemy7->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy7 = makeObject("ENEMY7", "monster");
+	enemy7->addAction("ATTACK", attack_function, turn_duration());
+	enemy7->addAction("DEFEND", defend_function, turn_duration());
 	enemy7->addProperty("HEALTH_MAX", 200);
 	enemy7->addProperty("HEALTH", 200);
 	enemy7->addProperty("DEFENSE", 0);
 	enemy7->addProperty("ALIVE", 1);
 	enemy7->addProperty("POWER", 10);
 
-	Object* enemy8 = new Object("ENEMY8");
-	enemy8->addAction("ATTACK", attack_function, 1.0f);
-	enemy8->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy8 = makeObject("ENEMY8", "monster");
+	enemy8->addAction("ATTACK", attack_function, turn_duration());
+	enemy8->addAction("DEFEND", defend_function, turn_duration());
 	enemy8->addProperty("HEALTH_MAX", 175);
 	enemy8->addProperty("HEALTH", 175);
 	enemy8->addProperty("DEFENSE", 0);
 	enemy8->addProperty("ALIVE", 1);
 	enemy8->addProperty("POWER", 10);
 
-	Object* enemy9 = new Object("ENEMY9");
-	enemy9->addAction("ATTACK", attack_function, 1.0f);
-	enemy9->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy9 = makeObject("ENEMY9", "monster");
+	enemy9->addAction("ATTACK", attack_function, turn_duration());
+	enemy9->addAction("DEFEND", defend_function, turn_duration());
 	enemy9->addProperty("HEALTH_MAX", 90);
 	enemy9->addProperty("HEALTH", 90);
 	enemy9->addProperty("DEFENSE", 0);
 	enemy9->addProperty("ALIVE", 1);
 	enemy9->addProperty("POWER", 50);
 
-	Object* enemy10 = new Object("ENEMY10");
-	enemy10->addAction("ATTACK", attack_function, 1.0f);
-	enemy10->addAction("DEFEND", defend_function, 1.0f);
+	Object* enemy10 = makeObject("ENEMY10", "monster");
+	enemy10->addAction("ATTACK", attack_function, turn_duration());
+	enemy10->addAction("DEFEND", defend_function, turn_duration());
 	enemy10->addProperty("HEALTH_MAX", 100);
 	enemy10->addProperty("HEALTH", 100);
 	enemy10->addProperty("DEFENSE", 0);
@@ -320,8 +320,8 @@ void PlayMode::init_compiler() {
 	enemy10->addProperty("POWER", 40);
 
 	Object *fargoth = new Object("FARGOTH");
-	fargoth->addAction("ATTACK", attack_function, 1.0f);
-	fargoth->addAction("DEFEND", defend_function, 1.0f);
+	fargoth->addAction("ATTACK", attack_function, turn_duration());
+	fargoth->addAction("DEFEND", defend_function, turn_duration());
 	fargoth->addProperty("HEALTH_MAX", 240);
 	fargoth->addProperty("HEALTH", 240);
 	fargoth->addProperty("DEFENSE", 0);
@@ -329,8 +329,8 @@ void PlayMode::init_compiler() {
 	fargoth->addProperty("POWER", 20);
 
 	Object *rupol = new Object("RUPOL");
-	rupol->addAction("ATTACK", attack_function, 1.0f);
-	rupol->addAction("DEFEND", defend_function, 1.0f);
+	rupol->addAction("ATTACK", attack_function, turn_duration());
+	rupol->addAction("DEFEND", defend_function, turn_duration());
 	rupol->addProperty("HEALTH_MAX", 160);
 	rupol->addProperty("HEALTH", 160);
 	rupol->addProperty("DEFENSE", 0);
@@ -814,8 +814,12 @@ void PlayMode::update(float elapsed) {
 		warrior_theta -= (float)(2 * M_PI);
 	}
 	warrior->transform->position = warrior->transform->position + glm::vec3(cos(-M_PI / 2 + warrior_theta), sin(-M_PI / 2 + warrior_theta), 0.f) * elapsed;
-
-	update_animations(elapsed);
+	
+	if (lctrl.pressed || rctrl.pressed) {
+		update_animations(10.0f * elapsed);
+	} else {
+		update_animations(elapsed);
+	}
 
 	if (!turn_done) {
 		if (!player_done || !enemy_done) {

@@ -30,6 +30,8 @@ void Object::addProperty(std::string property_name, int default_value) {
 // Reset an object
 void Object::reset() {
     property("ALIVE") = 1;
+    property("BURNED") = 0;
+    property("FROZEN") = 0;
     property("HEALTH") = property("HEALTH_MAX");
     if (name == "ARCHER") {
         property("ARROWS") = 8;

@@ -11,10 +11,10 @@ std::vector<Animation*> active_animations;
 
 size_t animation_id = 0;
 
-float turn_time = 2.0f;
+float turn_length = 2.0f;
 
 float turn_duration() {
-	return turn_time;
+	return turn_length;
 }
 
 void add_animation(Animation* animation) {
@@ -124,11 +124,11 @@ EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
 
 bool MoveAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	if (elapsed_time <= turn_time / 2.0f) {
-		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_time / 2.0f));
+	if (elapsed_time <= turn_length / 2.0f) {
+		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_length / 2.0f));
 		return true;
-	} else if (elapsed_time < turn_time) {
-		transform->position = target_position + (start_position - target_position) * (elapsed_time - (turn_time / 2.0f)) / (turn_time / 2.0f);
+	} else if (elapsed_time < turn_length) {
+		transform->position = target_position + (start_position - target_position) * (elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f);
 		return true;
 	} else {
 		transform->position = start_position;
@@ -139,8 +139,8 @@ bool MoveAnimation::update(float update_time) {
 // Note, define a constant to be some downward translation that will move a character offscreen. I'll call it 1 unit for now.
 bool DeathAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	if (elapsed_time < turn_time) {
-		transform->position -= glm::vec3(1.0f, 1.0f, 1.0f) * (elapsed_time / turn_time);
+	if (elapsed_time < turn_length) {
+		transform->position -= glm::vec3(1.0f, 1.0f, 1.0f) * (elapsed_time / turn_length);
 		return true;
 	} else {
 		return false;
@@ -150,11 +150,11 @@ bool DeathAnimation::update(float update_time) {
 // Note, define a constant to be some scale that will make an energy ball approximately the size of a character. I'll call it 2 for now.
 bool EnergyAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	if (elapsed_time <= turn_time / 2.0f) {
-		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time / (turn_time / 2.0f));
+	if (elapsed_time <= turn_length / 2.0f) {
+		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time / (turn_length / 2.0f));
 		return true;
-	} else if (elapsed_time < turn_time) {
-		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) - glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time - (turn_time / 2.0f)) / (turn_time / 2.0f);
+	} else if (elapsed_time < turn_length) {
+		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) - glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f);
 		return true;
 	} else {
 		transform->position = glm::vec3(0, 0, -1);
