@@ -1106,7 +1106,7 @@ void PlayMode::render(){
 		drawText(text_buffer[i], glm::vec2(x, y - i * font_size), max_line_length, pen_color, i == line_index);
 	}
 	if (compile_failed) {
-		drawText(player_compiler.error_message, glm::vec2(ScreenWidth / 2, 100), max_line_length);
+		drawText(player_compiler.error_message, glm::ivec2(error_pos.x + text_margin.x, error_pos.y + error_size.y + text_margin.y), error_size.x - 2 * text_margin.x);
 	} else {
 		drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
 		drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
@@ -1230,6 +1230,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	drawRectangle(input_pos + glm::ivec2(5, 5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 	drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
 	drawRectangle(prompt_pos + glm::ivec2(5, 5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+	drawRectangle(error_pos, error_size, glm::u8vec4(0, 0, 0, 255), true);
+	drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 	render();
 	GL_ERRORS();
 }
