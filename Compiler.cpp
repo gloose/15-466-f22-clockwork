@@ -678,6 +678,7 @@ void Compiler::IfStatement::execute() {
         }
     }
     
+    // If true, prepare to execute the interior block
     if (truth) {
         reset();
         current_line = 1;
@@ -731,7 +732,20 @@ Compiler::Statement* Compiler::WhileStatement::next() {
 
 // Execute just the conditional line and set the truth value
 void Compiler::WhileStatement::execute() {
+    // Check truth of initial condition
     truth = condition.isTrue();
+
+    // Check truth of compound conditions
+    for (size_t i = 0; i < compounds.size(); i++) {
+        CompoundStatement& compound = *compounds[i];
+        if (compound.compound_type == CONJUNCTION) {
+            truth = truth && compound.condition.isTrue();
+        } else {
+            truth = truth || compound.condition.isTrue();
+        }
+    }
+    
+    // If true, prepare to execute the interior block
     if (truth) {
         reset();
         current_line = 1;
