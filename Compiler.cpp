@@ -182,7 +182,7 @@ Compiler::ActionStatement* Compiler::parseActionStatement(Program& program, Prog
     return nullptr;
 }
 
-// Parses a line of the form "if (value1 comparator value2)", 
+// Parses a line of the form "IF (value1 comparator value2)", 
 // as well as all statements up to the next "end" line.
 // Advances the line iterator if successful.
 Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::iterator& line_it) {
@@ -196,8 +196,13 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
     if (parseWord(line_it, word_it, "IF")) {
         std::string problem;
         if (parseCondition(line_it, word_it, &out->condition, &problem)) {
-            // If so, parse all subsequent lines into out->statements until end is reached
+            // Advance to next line
             line_it++;
+
+            // Parse any extra compound conditionals
+            parseCompoundBlock(program, line_it, &out->compounds);
+
+            // Parse all subsequent lines into out->statements until end is reached
             if (!parseStatementBlock(program, line_it, &out->statements)) {
                 delete out;
                 line_it = old_it;
@@ -214,6 +219,9 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
     return nullptr;
 }
 
+// Parses a line of the form "WHILE (value1 comparator value2)", 
+// as well as all statements up to the next "end" line.
+// Advances the line iterator if successful.
 Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Program::iterator& line_it) {
     Program::iterator old_it = line_it;
 
@@ -225,8 +233,13 @@ Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Progra
     if (parseWord(line_it, word_it, "WHILE")) {
         std::string problem;
         if (parseCondition(line_it, word_it, &out->condition, &problem)) {
-            // If so, parse all subsequent lines into out->statements until end is reached
+            // Advance to next line
             line_it++;
+
+            // Parse any extra compound conditionals
+            parseCompoundBlock(program, line_it, &out->compounds);
+
+            // Parse all subsequent lines into out->statements until end is reached
             if (!parseStatementBlock(program, line_it, &out->statements)) {
                 delete out;
                 line_it = old_it;
@@ -243,41 +256,99 @@ Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Progra
     return nullptr;
 }
 
+// Parses a line of the form "[AND/OR] (value1 comparator value2)"
+// Advances the line iterator if successful.
+Compiler::CompoundStatement* Compiler::parseCompoundStatement(Program& program, Program::iterator& line_it) {
+    size_t line_num = std::distance(program.begin(), line_it);
+    Line::iterator word_it = line_it->begin();
+    CompoundStatement* out = new CompoundStatement();
+
+    CompoundType compound_type = INVALID_COMPOUND;
+    if (parseWord(line_it, word_it, "AND")) {
+        compound_type = CONJUNCTION;
+    } else if (parseWord(line_it, word_it, "OR")) {
+        compound_type = DISJUNCTION;
+    }
+    out->compound_type = compound_type;
+
+    if (compound_type != INVALID_COMPOUND) {
+        std::string problem;
+        if (parseCondition(line_it, word_it, &out->condition, &problem)) {
+            line_it++;
+            return out;
+        } else {
+            set_error(line_num, problem);
+        }
+    }
+
+    delete out;
+    return nullptr;
+}
+
+// Parses any number of consecutive AND/OR lines.
+// Always returns true; the return value is purely for consistency.
+// Advances the line iterator for each successfully parsed compound statement.
+bool Compiler::parseCompoundBlock(Program& program, Program::iterator& line_it, std::vector<CompoundStatement*>* out) {
+    while (line_it != program.end()) {
+        // Skip blank lines
+        if (line_it->empty()) {
+            line_it++;
+            continue;
+        }
+
+        // Attempt to parse a compound statement; end loop if it is not a compound statement
+        CompoundStatement* comp = parseCompoundStatement(program, line_it);
+        if (comp) {
+            out->push_back(comp);
+        } else {
+            break;
+        }
+    }
+    return true;
+}
+
+// Parses an arbitrary number of statements until a line with the give end string is reached.
+// If the end string is empty, parses all statements until end of program.
+// Advances the line iterator past the end of the block if successful.
 bool Compiler::parseStatementBlock(Program& program, Program::iterator& line_it, std::vector<Statement*>* out, std::string end) {
     Program::iterator old_it = line_it;
     size_t start_line = std::distance(program.begin(), line_it);
 
     while (line_it != program.end()) {
-        if (line_it->size() > 0) {
-            // On end, return successfully
-            Line::iterator word_it = line_it->begin();
-            if (parseWord(line_it, word_it, end)) {
-                line_it++;
-                return true;
-            }
-
-            // Otherwise, parse next statement
-            out->push_back(parseStatement(program, line_it));
-
-            // If the parse failed, print error message and return failure
-            if (out->back() == nullptr) {
-                if (error_message.empty()) {
-                    size_t line_num = std::distance(program.begin(), line_it);
-                    set_error(line_num, "Could not parse '" + *line_it->begin() + "' as an IF, WHILE, or object name.");
-                }
-                line_it = old_it;
-                out->clear();
-                return false;
-            }
-        } else {
+        // Skip blank lines
+        if (line_it->empty()) {
             line_it++;
+            continue;
+        }
+
+        // On end, return successfully
+        Line::iterator word_it = line_it->begin();
+        if (parseWord(line_it, word_it, end)) {
+            line_it++;
+            return true;
+        }
+
+        // Otherwise, parse next statement
+        out->push_back(parseStatement(program, line_it));
+
+        // If the parse failed, print error message and return failure
+        if (out->back() == nullptr) {
+            if (error_message.empty()) {
+                size_t line_num = std::distance(program.begin(), line_it);
+                set_error(line_num, "Could not parse '" + *line_it->begin() + "' as an IF, WHILE, or object name.");
+            }
+            line_it = old_it;
+            out->clear();
+            return false;
         }
     }
 
+    // The special empty argument for the end string means that parsing ends successfully on program end
     if (end == "") {
         return true;
     }
 
+    // Otherwise, if we failed to parse an end the parsing fails
     set_error(start_line - 1, "Code block starting here must be closed with '" + end + "'.");
     line_it = old_it;
     out->clear();
@@ -529,6 +600,13 @@ Compiler::WhileStatement::WhileStatement() {
     duration = 0.25f;
 }
 
+// Compound statement constructor
+Compiler::CompoundStatement::CompoundStatement() {
+    type = COMPOUND_STATEMENT;
+    base_duration = 0.f;
+    duration = 0.f;
+}
+
 // Statement superclass doesn't implement next
 Compiler::Statement* Compiler::Statement::next() {
     assert(false && "Statement::next must be overridden by child class");
@@ -587,7 +665,19 @@ Compiler::Statement* Compiler::IfStatement::next() {
 
 // Execute just the conditional line and set the truth value
 void Compiler::IfStatement::execute() {
+    // Check truth of initial condition
     truth = condition.isTrue();
+
+    // Check truth of compound conditions
+    for (size_t i = 0; i < compounds.size(); i++) {
+        CompoundStatement& compound = *compounds[i];
+        if (compound.compound_type == CONJUNCTION) {
+            truth = truth && compound.condition.isTrue();
+        } else {
+            truth = truth || compound.condition.isTrue();
+        }
+    }
+    
     if (truth) {
         reset();
         current_line = 1;

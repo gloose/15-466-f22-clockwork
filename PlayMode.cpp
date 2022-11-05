@@ -860,6 +860,11 @@ void PlayMode::next_level() {
 	for (Object* e : enemy_units[current_level]) {
 		e->reset();
 	}
+
+	text_buffer.clear();
+	text_buffer.push_back("");
+	line_index = 0;
+	cur_cursor_pos = 0;
 }
 
 
@@ -903,10 +908,6 @@ void PlayMode::update(float elapsed) {
 				rshift.pressed = false;
 				turn_done = true;
 				level_lost = false;
-				text_buffer.clear();
-				text_buffer.push_back("");
-				line_index = 0;
-				cur_cursor_pos = 0;
 				execution_line_index = -1;
 				get_action_string() = "";
 				get_effect_string() = "";
