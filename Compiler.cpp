@@ -154,27 +154,31 @@ Compiler::ActionStatement* Compiler::parseActionStatement(Program& program, Prog
                 if (parseWord(line_it, word_it, "(")) {
                     if (parseObject(line_it, word_it, &out->target)) {
                         if (parseWord(line_it, word_it, ")")) {
-                            line_it++;
-                            out->duration = out->base_duration;
-                            return out;
+                            if (word_it == line_it->end()) {
+                                line_it++;
+                                out->duration = out->base_duration;
+                                return out;
+                            } else {
+                                set_error(line_num, "Extra text after end of action statement");
+                            }
                         } else {
                             set_error(line_num, "Action statement missing a ')'");
                         }
                     } else if (word_it != line_it->end()) {
                         set_error(line_num, "Action target '" + *word_it + "' is not a valid object");
                     } else {
-                        set_error(line_num, "Action statement missing a target after '('.");
+                        set_error(line_num, "Action statement missing a target after '('");
                     }
                 } else {
                     set_error(line_num, "Action statement missing a '('");
                 }
             } else if (word_it != line_it->end()) {
-                set_error(line_num, "Invalid action '" + *word_it + "' for object '" + obj + "'.");
+                set_error(line_num, "Invalid action '" + *word_it + "' for object '" + obj + "'");
             } else {
                 set_error(line_num, "Action statement missing an action after '.'");
             }
         } else {
-            set_error(line_num, "Action statement missing a '.' after object name.");
+            set_error(line_num, "Action statement missing a '.' after object name");
         }
     }
 
@@ -196,19 +200,25 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
     if (parseWord(line_it, word_it, "IF")) {
         std::string problem;
         if (parseCondition(line_it, word_it, &out->condition, &problem)) {
-            // Advance to next line
-            line_it++;
+            if (word_it == line_it->end()) {
+                // Advance to next line
+                line_it++;
 
-            // Parse any extra compound conditionals
-            parseCompoundBlock(program, line_it, &out->compounds);
+                // Parse any extra compound conditionals
+                parseCompoundBlock(program, line_it, &out->compounds);
 
-            // Parse all subsequent lines into out->statements until end is reached
-            if (!parseStatementBlock(program, line_it, &out->statements)) {
-                delete out;
-                line_it = old_it;
-                return nullptr;
+                // Parse all subsequent lines into out->statements until end is reached
+                if (!parseStatementBlock(program, line_it, &out->statements)) {
+                    delete out;
+                    line_it = old_it;
+                    return nullptr;
+                }
+                return out;
+            } else if (parseWord(line_it, word_it, "AND") || parseWord(line_it, word_it, "OR")) {
+                set_error(line_num, "Compound conditions beyond the first must go on a separate line");
+            } else {
+                set_error(line_num, "Extra text after end of if statement");
             }
-            return out;
         } else {
             set_error(line_num, problem);
         }
@@ -233,19 +243,25 @@ Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Progra
     if (parseWord(line_it, word_it, "WHILE")) {
         std::string problem;
         if (parseCondition(line_it, word_it, &out->condition, &problem)) {
-            // Advance to next line
-            line_it++;
+            if (word_it == line_it->end()) {
+                // Advance to next line
+                line_it++;
 
-            // Parse any extra compound conditionals
-            parseCompoundBlock(program, line_it, &out->compounds);
+                // Parse any extra compound conditionals
+                parseCompoundBlock(program, line_it, &out->compounds);
 
-            // Parse all subsequent lines into out->statements until end is reached
-            if (!parseStatementBlock(program, line_it, &out->statements)) {
-                delete out;
-                line_it = old_it;
-                return nullptr;
+                // Parse all subsequent lines into out->statements until end is reached
+                if (!parseStatementBlock(program, line_it, &out->statements)) {
+                    delete out;
+                    line_it = old_it;
+                    return nullptr;
+                }
+                return out;
+            } else if (parseWord(line_it, word_it, "AND") || parseWord(line_it, word_it, "OR")) {
+                set_error(line_num, "Compound conditions beyond the first must go on a separate line");
+            } else {
+                set_error(line_num, "Extra text after end of while statement");
             }
-            return out;
         } else {
             set_error(line_num, problem);
         }
@@ -274,8 +290,12 @@ Compiler::CompoundStatement* Compiler::parseCompoundStatement(Program& program, 
     if (compound_type != INVALID_COMPOUND) {
         std::string problem;
         if (parseCondition(line_it, word_it, &out->condition, &problem)) {
-            line_it++;
-            return out;
+            if (word_it == line_it->end()) {
+                line_it++;
+                return out;
+            } else {
+                set_error(line_num, "Extra text after end of compound conditional.");
+            }
         } else {
             set_error(line_num, problem);
         }
@@ -335,7 +355,7 @@ bool Compiler::parseStatementBlock(Program& program, Program::iterator& line_it,
         if (out->back() == nullptr) {
             if (error_message.empty()) {
                 size_t line_num = std::distance(program.begin(), line_it);
-                set_error(line_num, "Could not parse '" + *line_it->begin() + "' as an IF, WHILE, or object name.");
+                set_error(line_num, "Could not parse '" + *line_it->begin() + "' as an IF, WHILE, or object name");
             }
             line_it = old_it;
             out->clear();
@@ -349,7 +369,7 @@ bool Compiler::parseStatementBlock(Program& program, Program::iterator& line_it,
     }
 
     // Otherwise, if we failed to parse an end the parsing fails
-    set_error(start_line - 1, "Code block starting here must be closed with '" + end + "'.");
+    set_error(start_line - 1, "Code block starting here must be closed with '" + end + "'");
     line_it = old_it;
     out->clear();
     return false;
@@ -396,7 +416,7 @@ bool Compiler::parseAction(Program::iterator& line_it, Line::iterator& word_it, 
 bool Compiler::parseCondition(Program::iterator& line_it, Line::iterator& word_it, Condition* out, std::string* problem) {
     if (word_it == line_it->end()) {
         if (problem != nullptr) {
-            *problem = "Missing condition.";
+            *problem = "Missing condition";
         }
         return false;
     }
@@ -411,18 +431,22 @@ bool Compiler::parseCondition(Program::iterator& line_it, Line::iterator& word_i
                     if (parseWord(line_it, word_it, ")")) {
                         return true;
                     } else {
-                        prob = "Condition is missing a ')'";
+                        if (parseWord(line_it, word_it, "AND") || parseWord(line_it, word_it, "OR")) {
+                            prob = "Compound conditions beyond the first must go on a separate line";
+                        } else {
+                            prob = "Condition is missing a ')'";
+                        }
                     }
                 } else {
-                    prob = "Failed to parse right value in condition.";
+                    prob = "Failed to parse right value in condition";
                 }
             } else if (word_it != line_it->end()) {
-                prob = "Failed to parse comparator '" + *word_it + "' in condition.";
+                prob = "Failed to parse comparator '" + *word_it + "' in condition";
             } else {
                 prob = "Condition is missing a ')'";
             }
         } else {
-            prob = "Failed to parse left value in condition.";
+            prob = "Failed to parse left value in condition";
         }
     } else {
         prob = "Condition is missing a '('";
@@ -431,11 +455,14 @@ bool Compiler::parseCondition(Program::iterator& line_it, Line::iterator& word_i
     word_it = old_it;
 
     if (parseWord(line_it, word_it, "(")
-     && parseValue(line_it, word_it, &out->left)
-     && parseWord(line_it, word_it, ")")) {
-        out->comparator = "!=";
-        out->right = new int(0);
-        return true;
+     && parseValue(line_it, word_it, &out->left)) {
+        if (parseWord(line_it, word_it, ")")) {
+            out->comparator = "!=";
+            out->right = new int(0);
+            return true;
+        } else if (parseWord(line_it, word_it, "AND") || parseWord(line_it, word_it, "OR")) {
+            prob = "Compound conditions beyond the first must go on a separate line";
+        }
     }
 
     word_it = old_it;
