@@ -3,6 +3,8 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include "Sound.hpp"
+#include "data_path.hpp"
 #include <glm/glm.hpp>
 
 #ifndef _ANIMATION_H_
@@ -13,6 +15,8 @@ void register_freeze_transform(Scene::Transform* t);
 void register_burn_transform(Scene::Transform* t);
 void register_arrow_transform(Scene::Transform* t);
 void register_archer_object(Object* o);
+
+void init_sounds();
 
 enum AnimationType {
 	MOVE,
@@ -33,6 +37,7 @@ struct Animation {
 	Scene::Transform* transform;
 	AnimationType type;
 	size_t id;
+	bool sound_playing;
 	bool update(float update_time);
 };
 
@@ -49,6 +54,7 @@ struct DeathAnimation : Animation {
 
 struct EnergyAnimation : Animation {
 	EnergyAnimation(EnergyType nrg, Object *target);
+	EnergyType energy_type;
 	bool update(float update_time);
 };
 

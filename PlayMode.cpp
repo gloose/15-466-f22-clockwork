@@ -123,6 +123,7 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	init_compiler();
 	next_level();
 	energyTransforms();
+	init_sounds();
 	compile_failed = false;
 	
 	text_buffer.push_back("");
@@ -906,7 +907,6 @@ void PlayMode::update(float elapsed) {
 				lshift.pressed = false;
 				rshift.pressed = false;
 				turn_done = true;
-				level_lost = false;
 				execution_line_index = -1;
 				get_action_string() = "";
 				get_effect_string() = "";
@@ -914,6 +914,15 @@ void PlayMode::update(float elapsed) {
 					next_level();
 					level_won = false;
 					turn = Turn::PLAYER;
+				} else if (level_lost) {
+					for (Object* p : player_units) {
+						p->reset();
+					}
+					for (Object* e : enemy_units[current_level]) {
+						e->reset();
+					}
+					turn = Turn::PLAYER;
+					level_lost = false;
 				}
 			} else {
 				if (lctrl.pressed || rctrl.pressed) {

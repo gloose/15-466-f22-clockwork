@@ -14,6 +14,20 @@ size_t animation_id = 0;
 
 float turn_length = 2.0f;
 
+Sound::Sample *attack_sample;
+Sound::Sample *freeze_sample;
+Sound::Sample *burn_sample;
+Sound::Sample *arrow_sample;
+Sound::Sample *heal_sample;
+
+void init_sounds() {
+	attack_sample = new Sound::Sample(data_path("Sounds/Attack.wav"));
+	freeze_sample = new Sound::Sample(data_path("Sounds/Freeze.wav"));
+	burn_sample = new Sound::Sample(data_path("Sounds/Burn.wav"));
+	arrow_sample = new Sound::Sample(data_path("Sounds/Arrow.wav"));
+	heal_sample = new Sound::Sample(data_path("Sounds/Heal.wav"));
+}
+
 float turn_duration() {
 	return turn_length;
 }
@@ -106,6 +120,7 @@ MoveAnimation::MoveAnimation(Object* source, Object* target) {
 	id = animation_id++;
 	transform = source->transform;
 	elapsed_time = 0.0f;
+	sound_playing = false;
 }
 
 ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(archer_object, target) {
@@ -113,6 +128,8 @@ ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(archer_object, ta
 	transform = arrow_transform;
 	// TODO: Some trig magic to rotate the arrow to face the enemy.
 	type = AnimationType::SHOOT;
+	play(*arrow_sample);
+	sound_playing = true;
 }
 
 DeathAnimation::DeathAnimation(Object* victim) {
@@ -127,6 +144,8 @@ EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
 	start_position = target->transform->position;
 	type = AnimationType::ENERGY;
 	id = animation_id++;
+	sound_playing = false;
+	energy_type = nrg;
 	switch (nrg) {
 	case HEAL:
 		transform = heal_transform;
@@ -152,6 +171,10 @@ bool MoveAnimation::update(float update_time) {
 		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_length / 2.0f));
 		return true;
 	} else if (elapsed_time < turn_length) {
+		if (!sound_playing) {
+			play(*attack_sample);
+			sound_playing = true;
+		}
 		transform->position = target_position + (start_position - target_position) * (elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f);
 		return true;
 	} else {
@@ -167,6 +190,7 @@ bool ShootAnimation::update(float update_time) {
 		return true;
 	} else {
 		transform->position = start_position;
+		play(*attack_sample);
 		return false;
 	}
 }
@@ -191,6 +215,22 @@ bool EnergyAnimation::update(float update_time) {
 		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time / (turn_length / 2.0f));
 		return true;
 	} else if (elapsed_time < turn_length) {
+		if (!sound_playing) {
+			sound_playing = true;
+			switch (energy_type) {
+			case HEAL:
+				play(*heal_sample);
+				break;
+			case FREEZE:
+				play(*freeze_sample);
+				break;
+			case BURN:
+				play(*burn_sample);
+				break;
+			default:
+				break;
+			}
+		}
 		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) - glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f);
 		return true;
 	} else {
