@@ -222,7 +222,7 @@ void PlayMode::create_levels() {
 
 void PlayMode::init_compiler() {
 	warrior = makeObject("WARRIOR", "warrior");
-	warrior->start_position = glm::vec3(-6.f, -6.f, 1.15f);
+	warrior->start_position = glm::vec3(-6.f, -6.f, 1.2f);
 	warrior->addAction("ATTACK", attack_function, turn_duration());
 	warrior->addAction("DEFEND", defend_function, turn_duration());
 	warrior->addProperty("HEALTH_MAX", 100);
@@ -232,7 +232,7 @@ void PlayMode::init_compiler() {
 	warrior->addProperty("POWER", 15);
 
 	wizard = makeObject("WIZARD", "wizard");
-	wizard->start_position = glm::vec3(-6.f, 6.f, 2.1f);
+	wizard->start_position = glm::vec3(-6.f, 6.f, 2.3f);
 	wizard->addAction("FREEZE", freeze_function, turn_duration() * 1.5f);
 	wizard->addAction("BURN", burn_function, turn_duration() * 1.5f);
 	wizard->addProperty("HEALTH_MAX", 60);
@@ -241,7 +241,7 @@ void PlayMode::init_compiler() {
 	wizard->addProperty("ALIVE", 1);
 
 	archer = makeObject("ARCHER", "archer");
-	archer->start_position = glm::vec3(-6.f, 2.f, 0.f);
+	archer->start_position = glm::vec3(-6.f, 2.f, 1.6f);
 	register_archer_object(archer);
 	archer->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
 	archer->addAction("SHOOT", shoot_function, turn_duration() * 0.5f);
@@ -253,7 +253,7 @@ void PlayMode::init_compiler() {
 	archer->addProperty("POWER", 20);
 
 	healer = makeObject("HEALER", "healer");
-	healer->start_position = glm::vec3(-6.f, -2.f, 1.35f);
+	healer->start_position = glm::vec3(-6.f, -2.f, 1.4f);
 	healer->addAction("HEAL", heal_function, turn_duration());
 	healer->addProperty("HEALTH_MAX", 80);
 	healer->addProperty("HEALTH", 80);
