@@ -471,36 +471,34 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	}
 
 	if (!turn_done) {
+		if (evt.type == SDL_KEYDOWN && evt.key.keysym.sym == SDLK_ESCAPE) {
+			player_done = true;
+			enemy_done = true;
+			level_won = false;
+			level_lost = false;
+			turn_done = true;
+			get_action_string() = "";
+			get_effect_string() = "You aborted the level.";
+			reset_level();
+			return true;
+		}
 		return false;
 	}
 
 	if (evt.type == SDL_KEYDOWN) {
-		if (evt.key.keysym.sym == SDLK_ESCAPE) {
-			SDL_SetRelativeMouseMode(SDL_FALSE);
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_a) {
-			left.downs += 1;
-			left.pressed = true;
+		if (evt.key.keysym.sym == SDLK_a) {
 			insert("A");
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_d) {
-			right.downs += 1;
-			right.pressed = true;
 			insert("D");
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_w) {
-			up.downs += 1;
-			up.pressed = true;
 			insert("W");
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_s) {
-			down.downs += 1;
-			down.pressed = true;
 			insert("S");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_RETURN) {
-			enter.downs += 1; 
-			enter.pressed = true;
 			if (lshift.pressed || rshift.pressed) {
 				std::cout << "Submitted!\n";
 				player_exe = player_compiler.compile(text_buffer);
@@ -842,25 +840,26 @@ void PlayMode::take_turn() {
 	if (player_done && enemy_done) {
 		if (!level_lost && !level_won) {
 			get_effect_string() = "Your code didn't solve the puzzle...";
-			for (Object* u : player_units) {
-				u->reset();
-			}
-			for (Object* u : enemy_units[current_level]) {
-				u->reset();
-			}
+			reset_level();
 		}
 	}
 }
 
-void PlayMode::next_level() {
-	current_level++;
+void PlayMode::reset_level() {
+	turn = Turn::PLAYER;
 	for (Object* p : player_units) {
 		p->reset();
 	}
 	for (Object* e : enemy_units[current_level]) {
 		e->reset();
 	}
+	lshift.pressed = false;
+	rshift.pressed = false;
+}
 
+void PlayMode::next_level() {
+	current_level++;
+	reset_level();
 	text_buffer.clear();
 	text_buffer.push_back("");
 	line_index = 0;
@@ -904,8 +903,6 @@ void PlayMode::update(float elapsed) {
 			}
 		} else {
 			if (turn_time <= 0.0f) {
-				lshift.pressed = false;
-				rshift.pressed = false;
 				turn_done = true;
 				execution_line_index = -1;
 				get_action_string() = "";
@@ -913,15 +910,8 @@ void PlayMode::update(float elapsed) {
 				if (level_won) {
 					next_level();
 					level_won = false;
-					turn = Turn::PLAYER;
 				} else if (level_lost) {
-					for (Object* p : player_units) {
-						p->reset();
-					}
-					for (Object* e : enemy_units[current_level]) {
-						e->reset();
-					}
-					turn = Turn::PLAYER;
+					reset_level();
 					level_lost = false;
 				}
 			} else {
@@ -933,17 +923,6 @@ void PlayMode::update(float elapsed) {
 			}
 		}
 	}
-
-	//reset button press counters:
-	left.downs = 0;
-	right.downs = 0;
-	up.downs = 0;
-	down.downs = 0;
-	enter.downs = 0;
-	lshift.downs = 0;
-	rshift.downs = 0;
-	lctrl.downs = 0;
-	rctrl.downs = 0;
 }
 
 

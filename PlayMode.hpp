@@ -108,7 +108,7 @@ struct PlayMode : Mode {
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up, enter, lshift, rshift, lctrl, rctrl;
+	} lshift, rshift, lctrl, rctrl;
 
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
@@ -131,6 +131,7 @@ struct PlayMode : Mode {
 	void init_compiler();
 	void create_levels();
 	void next_level();
+	void reset_level();
 	void execute_player_statement();
 	void execute_enemy_statement();
 	Compiler player_compiler;
