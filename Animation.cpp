@@ -88,6 +88,10 @@ void update_animations(float time) {
 	}
 }
 
+void clear_animations() {
+	active_animations.clear();
+}
+
 void register_heal_transform(Scene::Transform *t) {
 	heal_transform = t;
 }

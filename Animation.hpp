@@ -70,6 +70,8 @@ void update_animations(float time);
 
 void add_animation(Animation* animation);
 
+void clear_animations();
+
 float turn_duration();
 
 glm::vec3 offscreen_position();

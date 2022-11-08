@@ -492,6 +492,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			get_action_string() = "";
 			get_effect_string() = "You aborted the level.";
 			reset_level();
+			clear_animations();
 			return true;
 		}
 		return false;
