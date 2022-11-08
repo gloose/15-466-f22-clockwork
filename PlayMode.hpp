@@ -167,6 +167,10 @@ struct PlayMode : Mode {
 	glm::ivec2 worldbox_size = glm::ivec2(ScreenWidth - (input_pos.x + input_size.x) - 40, ScreenHeight - 40);
 	glm::ivec2 text_margin = glm::ivec2(10, -10);
 
+	glm::mat4 world_to_screen;
+
+	glm::ivec2 health_bar_size = glm::vec2(100, 10);
+
 	// Helper functions
 	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
 	void drawVertexArray(GLenum mode, const std::vector<PPUDataStream::Vertex>& vertex_array, bool use_texture);
@@ -174,6 +178,9 @@ struct PlayMode : Mode {
 	Object* makeObject(std::string name, std::string model_name = "");
 	void energyTransforms();
 	void drawRectangle(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, bool filled);
+	void drawThickRectangleOutline(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, int thickness);
+	glm::vec2 worldToScreen(glm::vec3 pos);
+	void drawHealthBar(Object* unit);
 
 	//begin of the text rendering
 	size_t line_index = 0;

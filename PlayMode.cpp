@@ -35,6 +35,18 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	//get pointer to camera for convenience:
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
 	camera = &scene.cameras.front();
+	camera->aspect = float(worldbox_size.x) / float(worldbox_size.y);
+
+	// Initialize matrix converting world coordinates to screen coordinates
+	glm::mat4 world_to_clip = camera->make_projection() * glm::mat4(camera->transform->make_world_to_local());
+	glm::mat4 screen_to_clip = glm::mat4(
+		glm::vec4(2.0f / worldbox_size.x, 0.0f, 0.0f, 0.0f),
+		glm::vec4(0.0f, 2.0f / worldbox_size.y, 0.0f, 0.0f),
+		glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+		glm::vec4(-1.0f - worldbox_pos.x * 2.f / worldbox_size.x, -1.0f - worldbox_pos.y * 2.f / worldbox_size.y, 0.0f, 1.0f)
+	);
+	glm::mat4 clip_to_screen = glm::inverse(screen_to_clip);
+	world_to_screen = clip_to_screen * world_to_clip;
 
 	// Set up text rendering
 	// Adapted from Harfbuzz example linked on assignment page
@@ -1172,20 +1184,61 @@ void PlayMode::drawRectangle(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color,
 	}
 	
 	// Build vertex array
-	std::vector< PPUDataStream::Vertex > vertex_array;
+	std::vector<PPUDataStream::Vertex> vertex_array;
 	for (size_t i = 0; i < (filled ? 4 : 5); i++) {
 		vertex_array.emplace_back(corners[i], glm::ivec2(0, 0), color);
 	}
 
 	// Draw vertex array
 	drawVertexArray(filled ? GL_TRIANGLE_STRIP : GL_LINE_STRIP, vertex_array, false);
+
+	// Fill in the bottom left corner, which is empty for some reason
+	std::vector<PPUDataStream::Vertex> point;
+	point.emplace_back(corners[0], glm::ivec2(0, 0), color);
+	drawVertexArray(GL_POINTS, point, false);
+}
+
+void PlayMode::drawThickRectangleOutline(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, int thickness) {
+	thickness--;
+	for (int i = -thickness; i <= thickness; i++) {
+		drawRectangle(pos + glm::ivec2(i, i), size - 2 * glm::ivec2(i, i), color, false);
+	}
+}
+
+
+glm::vec2 PlayMode::worldToScreen(glm::vec3 pos) {
+	glm::vec4 screen_pos = world_to_screen * glm::vec4(pos, 1.f);
+	screen_pos /= screen_pos.w;
+	return glm::vec2(screen_pos.x, screen_pos.y);
+}
+
+
+void PlayMode::drawHealthBar(Object* unit) {
+	if (unit->property("health_max") > 0) {
+		glm::ivec2 health_bar_pos = worldToScreen(unit->transform->position + glm::vec3(0.f, 0.f, 2.5f)) - glm::vec2(health_bar_size.x / 2.f, 0);
+		drawRectangle(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), true);
+		glm::ivec2 filled_size = glm::vec2(health_bar_size.x * (float)unit->property("health") / unit->property("health_max"), health_bar_size.y);
+		drawRectangle(health_bar_pos, filled_size, glm::u8vec4(0, 255, 0, 255), true);
+		if (filled_size.x > 0) {
+			drawThickRectangleOutline(health_bar_pos + glm::ivec2(2, 2), filled_size - glm::ivec2(4, 4), glm::u8vec4(0, 128, 0, 255), 2);
+		}
+		drawThickRectangleOutline(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), 2);
+		float segment_width = 5.f / unit->property("health_max") * health_bar_size.x;
+		float segment_start = 0;
+		while (segment_start < health_bar_size.x) {
+			int x1 = (int)segment_start;
+			int x2 = (int)(segment_start + segment_width);
+			drawRectangle(glm::ivec2(health_bar_pos.x + x1, health_bar_pos.y), glm::ivec2(std::min(x2 - x1, health_bar_size.x - x1), health_bar_size.y), glm::u8vec4(0, 0, 0, 255), false);
+			segment_start += segment_width;
+		}
+	}
 }
 
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//update camera aspect ratio for drawable:
 	//camera->aspect = float(drawable_size.x) / float(drawable_size.y);
-	camera->aspect = float(worldbox_size.x) / float(worldbox_size.y);
+	
 
 	//set up light type and position for lit_color_texture_program:
 	// TODO: consider using the Light(s) in the scene to do this
@@ -1211,9 +1264,18 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glViewport(worldbox_pos.x, worldbox_pos.y, worldbox_size.x, worldbox_size.y);
 	scene.draw(*camera);
 	glViewport(0, 0, drawable_size.x, drawable_size.y);
-	drawRectangle(worldbox_pos - glm::ivec2(5, 5), worldbox_size + glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 
 	glDisable(GL_DEPTH_TEST);
+
+	drawRectangle(worldbox_pos - glm::ivec2(5, 5), worldbox_size + glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+
+	for (size_t i = 0; i < player_units.size(); i++) {
+		drawHealthBar(player_units[i]);
+	}
+	for (size_t i = 0; i < enemy_units[current_level].size(); i++) {
+		drawHealthBar(enemy_units[current_level][i]);
+	}
+
 	drawRectangle(input_pos, input_size, glm::u8vec4(0, 0, 0, 255), true);
 	drawRectangle(input_pos + glm::ivec2(5, 5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 	drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
@@ -1221,6 +1283,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	drawRectangle(error_pos, error_size, glm::u8vec4(0, 0, 0, 255), true);
 	drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 	render();
+
 	GL_ERRORS();
 }
 
