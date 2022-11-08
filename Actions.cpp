@@ -21,6 +21,7 @@ void attack(int damage, Object* target) {
 bool check_burn(Object* user) {
 	if (user->property("BURNED") == 1) {
 		user->property("HEALTH") -= 10;
+		user->updateHealth();
 		if (user->property("HEALTH") <= 0) {
 			user->property("ALIVE") = 0;
 			add_animation(new DeathAnimation(user));

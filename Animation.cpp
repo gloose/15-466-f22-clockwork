@@ -121,6 +121,7 @@ MoveAnimation::MoveAnimation(Object* source, Object* target) {
 	transform = source->transform;
 	elapsed_time = 0.0f;
 	sound_playing = false;
+	health_target = target;
 }
 
 ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(archer_object, target) {
@@ -130,6 +131,7 @@ ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(archer_object, ta
 	type = AnimationType::SHOOT;
 	play(*arrow_sample);
 	sound_playing = true;
+	health_target = target;
 }
 
 DeathAnimation::DeathAnimation(Object* victim) {
@@ -146,6 +148,7 @@ EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
 	id = animation_id++;
 	sound_playing = false;
 	energy_type = nrg;
+	health_target = target;
 	switch (nrg) {
 	case HEAL:
 		transform = heal_transform;
@@ -172,6 +175,7 @@ bool MoveAnimation::update(float update_time) {
 		return true;
 	} else if (elapsed_time < turn_length) {
 		if (!sound_playing) {
+			health_target->updateHealth();
 			play(*attack_sample);
 			sound_playing = true;
 		}
@@ -189,6 +193,7 @@ bool ShootAnimation::update(float update_time) {
 		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_length / 2.0f));
 		return true;
 	} else {
+		health_target->updateHealth();
 		transform->position = start_position;
 		play(*attack_sample);
 		return false;
@@ -219,6 +224,7 @@ bool EnergyAnimation::update(float update_time) {
 			sound_playing = true;
 			switch (energy_type) {
 			case HEAL:
+				health_target->updateHealth();
 				play(*heal_sample);
 				break;
 			case FREEZE:

@@ -848,13 +848,6 @@ void PlayMode::take_turn() {
 		std::cout << "Enemy taking turn.\n";
 		execute_enemy_statement();
 	}
-
-	if (player_done && enemy_done) {
-		if (!level_lost && !level_won) {
-			get_effect_string() = "Your code didn't solve the puzzle...";
-			reset_level();
-		}
-	}
 }
 
 void PlayMode::reset_level() {
@@ -918,13 +911,18 @@ void PlayMode::update(float elapsed) {
 				turn_done = true;
 				execution_line_index = -1;
 				get_action_string() = "";
-				get_effect_string() = "";
-				if (level_won) {
-					next_level();
-					level_won = false;
-				} else if (level_lost) {
+				if (!level_lost && !level_won) {
+					get_effect_string() = "Your code didn't solve the puzzle...";
 					reset_level();
-					level_lost = false;
+				} else {
+					get_effect_string() = "";
+					if (level_won) {
+						next_level();
+						level_won = false;
+					} else if (level_lost) {
+						reset_level();
+						level_lost = false;
+					}
 				}
 			} else {
 				if (lctrl.pressed || rctrl.pressed) {
@@ -1217,7 +1215,7 @@ void PlayMode::drawHealthBar(Object* unit) {
 	if (unit->property("health_max") > 0) {
 		glm::ivec2 health_bar_pos = worldToScreen(unit->transform->position + glm::vec3(0.f, 0.f, 2.5f)) - glm::vec2(health_bar_size.x / 2.f, 0);
 		drawRectangle(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), true);
-		glm::ivec2 filled_size = glm::vec2(health_bar_size.x * (float)unit->property("health") / unit->property("health_max"), health_bar_size.y);
+		glm::ivec2 filled_size = glm::vec2(health_bar_size.x * unit->health_level, health_bar_size.y);
 		drawRectangle(health_bar_pos, filled_size, glm::u8vec4(0, 255, 0, 255), true);
 		if (filled_size.x > 0) {
 			drawThickRectangleOutline(health_bar_pos + glm::ivec2(2, 2), filled_size - glm::ivec2(4, 4), glm::u8vec4(0, 128, 0, 255), 2);

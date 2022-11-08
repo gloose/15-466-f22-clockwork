@@ -43,6 +43,7 @@ struct Animation {
 
 struct MoveAnimation : Animation {
 	MoveAnimation(Object* source, Object* target);
+	Object* health_target;
 	bool update(float update_time);
 	glm::vec3 target_position;
 };
@@ -54,12 +55,14 @@ struct DeathAnimation : Animation {
 
 struct EnergyAnimation : Animation {
 	EnergyAnimation(EnergyType nrg, Object *target);
+	Object* health_target;
 	EnergyType energy_type;
 	bool update(float update_time);
 };
 
 struct ShootAnimation : MoveAnimation {
 	ShootAnimation(Object* target);
+	Object* health_target;
 	bool update(float update_time);
 };
 

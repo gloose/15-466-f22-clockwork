@@ -25,12 +25,14 @@ struct Object {
     std::unordered_map<std::string, Scene::Drawable*> drawables;
     Scene::Transform* transform;
     glm::vec3 start_position;
+    float health_level = 1.0f;
 
     Object(std::string name);
     void addAction(std::string action_name, ActionFunction func, float duration);
     void addProperty(std::string property_name, int default_value);
     void reset();
     int& property(std::string property_name);
+    void updateHealth();
 };
 
 #endif

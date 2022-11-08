@@ -27,6 +27,10 @@ void Object::addProperty(std::string property_name, int default_value) {
     properties.emplace(property_name, new int(default_value));
 }
 
+void Object::updateHealth() {
+    health_level = std::max(0.0f, (float)property("HEALTH") / (float)property("HEALTH_MAX"));
+}
+
 // Reset an object
 void Object::reset() {
     property("ALIVE") = 1;
@@ -36,6 +40,7 @@ void Object::reset() {
     if (name == "ARCHER") {
         property("ARROWS") = 8;
     }
+    updateHealth();
     transform->position = start_position;
 }
 
