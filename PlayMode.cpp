@@ -1221,6 +1221,10 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	drawRectangle(error_pos, error_size, glm::u8vec4(0, 0, 0, 255), true);
 	drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 	render();
+	float start_x = ScreenWidth / 2.0f - 60.0f;
+	float start_y = ScreenHeight / 2.0f - 60.0f;
+	drawRectangle(glm::ivec2(start_x, start_y), glm::ivec2(20.0f, 5.0f), glm::u8vec4(0x00, 0x00, 0x00, 0xFF), true);
+	drawRectangle(glm::ivec2(start_x + 1.0f, start_y + 1.5f), glm::ivec2(18.0f * ((float)warrior->property("HEALTH") / (float)warrior->property("HEALTH_MAX")), 3.0f), glm::u8vec4(0xFF, 0x00, 0x00, 0xFF), true);
 	GL_ERRORS();
 }
 
