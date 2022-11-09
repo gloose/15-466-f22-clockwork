@@ -1231,7 +1231,7 @@ glm::vec2 PlayMode::worldToScreen(glm::vec3 pos) {
 
 
 void PlayMode::drawHealthBar(Object* unit) {
-	if (unit->property("health_max") > 0) {
+	if (unit->property("health_max") > 0 && unit->health_level > 0) {
 		glm::ivec2 health_bar_pos = worldToScreen(unit->transform->position + glm::vec3(0.f, 0.f, 2.5f)) - glm::vec2(health_bar_size.x / 2.f, 0);
 		drawRectangle(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), true);
 		glm::ivec2 filled_size = glm::vec2(health_bar_size.x * unit->health_level, health_bar_size.y);
