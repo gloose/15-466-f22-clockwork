@@ -1236,12 +1236,12 @@ void PlayMode::drawHealthBar(Object* unit) {
 		glm::ivec2 health_bar_pos = worldToScreen(unit->transform->position + glm::vec3(0.f, 0.f, 2.5f)) - glm::vec2(health_bar_size.x / 2.f, 0);
 		drawRectangle(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), true);
 		glm::ivec2 filled_size = glm::vec2(health_bar_size.x * unit->health_level, health_bar_size.y);
-		drawRectangle(health_bar_pos, filled_size, glm::u8vec4(0, 255, 0, 255), true);
+		drawRectangle(health_bar_pos, filled_size - glm::ivec2(1, 0), glm::u8vec4(0, 255, 0, 255), true);
 		if (filled_size.x > 0) {
 			drawThickRectangleOutline(health_bar_pos + glm::ivec2(2, 2), filled_size - glm::ivec2(4, 4), glm::u8vec4(0, 128, 0, 255), 2);
 		}
 		drawThickRectangleOutline(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), 2);
-		float segment_width = 5.f / unit->property("health_max") * health_bar_size.x;
+		float segment_width = 10.f / unit->property("health_max") * health_bar_size.x;
 		float segment_start = 0;
 		while (segment_start < health_bar_size.x) {
 			int x1 = (int)segment_start;
