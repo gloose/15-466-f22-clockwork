@@ -152,14 +152,32 @@ Object* PlayMode::makeObject(std::string name, std::string model_name) {
 	
 	if (!model_name.empty()) {
 		for (auto& transform : scene.transforms) {
+			Scene::Transform* new_transform = new Scene::Transform();
+			new_transform->name = name + ":" + transform.name;
+			new_transform->position = transform.position;
+			new_transform->rotation = transform.rotation;
+			new_transform->scale = transform.scale;
+			new_transform->parent = transform.parent;
+
 			if (transform.name == model_name) {
-				obj->transform = &transform;
+				obj->transform = new_transform;
 			}
 			
 			if (transform.name == model_name || transform.name.rfind(model_name + "-", 0) == 0) {
-				scene.drawables.emplace_back(&transform);
+				scene.drawables.emplace_back(new_transform);
 				setMesh(&scene.drawables.back(), transform.name);
 				obj->drawables.emplace(transform.name, &scene.drawables.back());
+			}
+		}
+		
+		for (auto& drawable : obj->drawables) {
+			Scene::Transform* transform = drawable.second->transform;
+			
+			if (transform->name != name + ":" + model_name) {
+				if (transform->parent != nullptr && obj->drawables.find(transform->parent->name) != obj->drawables.end()) {
+					transform->parent = obj->drawables[transform->parent->name]->transform;
+					std::cout << "Warning: " << transform->name << " is not a child of " << model_name << std::endl;
+				}
 			}
 		}
 	}
@@ -282,9 +300,7 @@ void PlayMode::init_compiler() {
 	enemy1->addProperty("ALIVE", 1);
 	enemy1->addProperty("POWER", 0);
 
-	Object* enemy2 = new Object("ENEMY2");
-	enemy2->transform = enemy1->transform;
-	enemy2->drawables = enemy1->drawables;
+	Object* enemy2 = makeObject("ENEMY2", "monster");
 	enemy2->start_position = enemy1->start_position;
 	enemy2->addAction("ATTACK", attack_function, turn_duration());
 	enemy2->addAction("DEFEND", defend_function, turn_duration());
@@ -294,9 +310,7 @@ void PlayMode::init_compiler() {
 	enemy2->addProperty("ALIVE", 1);
 	enemy2->addProperty("POWER", 10);
 
-	Object* enemy3 = new Object("ENEMY3");
-	enemy3->transform = enemy1->transform;
-	enemy3->drawables = enemy1->drawables;
+	Object* enemy3 = makeObject("ENEMY3", "monster");
 	enemy3->start_position = enemy1->start_position;
 	enemy3->addAction("ATTACK", attack_function, turn_duration());
 	enemy3->addAction("DEFEND", defend_function, turn_duration());
@@ -306,9 +320,7 @@ void PlayMode::init_compiler() {
 	enemy3->addProperty("ALIVE", 1);
 	enemy3->addProperty("POWER", 10);
 
-	Object* enemy4 = new Object("ENEMY4");
-	enemy4->transform = enemy1->transform;
-	enemy4->drawables = enemy1->drawables;
+	Object* enemy4 = makeObject("ENEMY4", "monster");
 	enemy4->start_position = enemy1->start_position;
 	enemy4->addAction("ATTACK", attack_function, turn_duration());
 	enemy4->addAction("DEFEND", defend_function, turn_duration());
@@ -318,9 +330,7 @@ void PlayMode::init_compiler() {
 	enemy4->addProperty("ALIVE", 1);
 	enemy4->addProperty("POWER", 200);
 
-	Object* enemy5 = new Object("ENEMY5");
-	enemy5->transform = enemy1->transform;
-	enemy5->drawables = enemy1->drawables;
+	Object* enemy5 = makeObject("ENEMY5", "monster");
 	enemy5->start_position = enemy1->start_position;
 	enemy5->addAction("ATTACK", attack_function, turn_duration());
 	enemy5->addAction("DEFEND", defend_function, turn_duration());
@@ -330,9 +340,7 @@ void PlayMode::init_compiler() {
 	enemy5->addProperty("ALIVE", 1);
 	enemy5->addProperty("POWER", 50);
 
-	Object* enemy6 = new Object("ENEMY6");
-	enemy6->transform = enemy1->transform;
-	enemy6->drawables = enemy1->drawables;
+	Object* enemy6 = makeObject("ENEMY6", "monster");
 	enemy6->start_position = enemy1->start_position;
 	enemy6->addAction("ATTACK", attack_function, turn_duration());
 	enemy6->addAction("DEFEND", defend_function, turn_duration());
@@ -342,9 +350,7 @@ void PlayMode::init_compiler() {
 	enemy6->addProperty("ALIVE", 1);
 	enemy6->addProperty("POWER", 100);
 
-	Object* enemy7 = new Object("ENEMY7");
-	enemy7->transform = enemy1->transform;
-	enemy7->drawables = enemy1->drawables;
+	Object* enemy7 = makeObject("ENEMY7", "monster");
 	enemy7->start_position = enemy1->start_position;
 	enemy7->addAction("ATTACK", attack_function, turn_duration());
 	enemy7->addAction("DEFEND", defend_function, turn_duration());
@@ -354,9 +360,7 @@ void PlayMode::init_compiler() {
 	enemy7->addProperty("ALIVE", 1);
 	enemy7->addProperty("POWER", 10);
 
-	Object* enemy8 = new Object("ENEMY8");
-	enemy8->transform = enemy1->transform;
-	enemy8->drawables = enemy1->drawables;
+	Object* enemy8 = makeObject("ENEMY8", "monster");
 	enemy8->start_position = enemy1->start_position;
 	enemy8->addAction("ATTACK", attack_function, turn_duration());
 	enemy8->addAction("DEFEND", defend_function, turn_duration());
@@ -366,9 +370,7 @@ void PlayMode::init_compiler() {
 	enemy8->addProperty("ALIVE", 1);
 	enemy8->addProperty("POWER", 10);
 
-	Object* enemy9 = new Object("ENEMY9");
-	enemy9->transform = enemy1->transform;
-	enemy9->drawables = enemy1->drawables;
+	Object* enemy9 = makeObject("ENEMY9", "monster");
 	enemy9->start_position = enemy1->start_position;
 	enemy9->addAction("ATTACK", attack_function, turn_duration());
 	enemy9->addAction("DEFEND", defend_function, turn_duration());
@@ -378,9 +380,7 @@ void PlayMode::init_compiler() {
 	enemy9->addProperty("ALIVE", 1);
 	enemy9->addProperty("POWER", 50);
 
-	Object* enemy10 = new Object("ENEMY10");
-	enemy10->transform = enemy1->transform;
-	enemy10->drawables = enemy1->drawables;
+	Object* enemy10 = makeObject("ENEMY10", "monster");
 	enemy10->start_position = enemy1->start_position;
 	enemy10->addAction("ATTACK", attack_function, turn_duration());
 	enemy10->addAction("DEFEND", defend_function, turn_duration());
@@ -390,7 +390,8 @@ void PlayMode::init_compiler() {
 	enemy10->addProperty("ALIVE", 1);
 	enemy10->addProperty("POWER", 40);
 
-	Object *fargoth = new Object("FARGOTH");
+	Object *fargoth = makeObject("FARGOTH", "monster");
+	fargoth->start_position = glm::vec3(6.f, -3.f, 4.f);
 	fargoth->addAction("ATTACK", attack_function, turn_duration());
 	fargoth->addAction("DEFEND", defend_function, turn_duration());
 	fargoth->addProperty("HEALTH_MAX", 240);
@@ -399,7 +400,8 @@ void PlayMode::init_compiler() {
 	fargoth->addProperty("ALIVE", 1);
 	fargoth->addProperty("POWER", 20);
 
-	Object *rupol = new Object("RUPOL");
+	Object *rupol = makeObject("RUPOL", "monster");
+	rupol->start_position = glm::vec3(6.f, 3.f, 4.f);
 	rupol->addAction("ATTACK", attack_function, turn_duration());
 	rupol->addAction("DEFEND", defend_function, turn_duration());
 	rupol->addProperty("HEALTH_MAX", 160);
@@ -471,6 +473,12 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if (evt.key.keysym.sym == SDLK_RCTRL) {
 			rctrl.pressed = true;
 			return true;
+		} else if(evt.key.keysym.sym == SDLK_LSHIFT){
+			lshift.pressed = true;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_RSHIFT) {
+			rshift.pressed = true;
+			return true;
 		}
 	} else if (evt.type == SDL_KEYUP) {
 		if (evt.key.keysym.sym == SDLK_LCTRL) {
@@ -478,6 +486,12 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_RCTRL) {
 			rctrl.pressed = false;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_LSHIFT) {
+			lshift.pressed = false;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_RSHIFT) {
+			rshift.pressed = false;
 			return true;
 		}
 	}
@@ -539,10 +553,19 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			move_up();
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_LEFT) {
-			move_left();
+			if ((lshift.pressed || rshift.pressed) && (lctrl.pressed || rctrl.pressed)) {
+				current_level -= 2;
+				next_level();
+			} else {
+				move_left();
+			}
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_RIGHT) {
-			move_right();
+			if ((lshift.pressed || rshift.pressed) && (lctrl.pressed || rctrl.pressed)) {
+				next_level();
+			} else {
+				move_right();
+			}
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_b) {
 			insert("B");
@@ -675,20 +698,6 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			if (lshift.pressed || rshift.pressed) {
 				insert("<");
 			}
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_LSHIFT){
-			lshift.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_RSHIFT) {
-			rshift.pressed = true;
-			return true;
-		}
-	} else if (evt.type == SDL_KEYUP) {
-		if (evt.key.keysym.sym == SDLK_LSHIFT) {
-			lshift.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_RSHIFT) {
-			rshift.pressed = false;
 			return true;
 		}
 	}
@@ -856,15 +865,24 @@ void PlayMode::reset_level() {
 	for (Object* p : player_units) {
 		p->reset();
 	}
-	for (Object* e : enemy_units[current_level]) {
-		e->reset();
+	for (size_t i = 0; i < enemy_units.size(); i++) {
+		for (Object* e : enemy_units[i]) {
+			if (i == current_level) {
+				e->reset();
+			} else {
+				e->transform->position = offscreen_position();
+			}
+		}
 	}
-	lshift.pressed = false;
-	rshift.pressed = false;
 }
 
 void PlayMode::next_level() {
 	current_level++;
+	if (current_level < 0) {
+		current_level = 0;
+	} else if (current_level >= level_guidance.size()) {
+		current_level = (int)level_guidance.size() - 1;
+	}
 	reset_level();
 	text_buffer.clear();
 	text_buffer.push_back("");
