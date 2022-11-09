@@ -867,7 +867,7 @@ void PlayMode::reset_level() {
 	}
 	for (size_t i = 0; i < enemy_units.size(); i++) {
 		for (Object* e : enemy_units[i]) {
-			if (i == current_level) {
+			if ((int)i == current_level) {
 				e->reset();
 			} else {
 				e->transform->position = offscreen_position();
@@ -880,7 +880,7 @@ void PlayMode::next_level() {
 	current_level++;
 	if (current_level < 0) {
 		current_level = 0;
-	} else if (current_level >= level_guidance.size()) {
+	} else if (current_level >= (int)level_guidance.size()) {
 		current_level = (int)level_guidance.size() - 1;
 	}
 	reset_level();
