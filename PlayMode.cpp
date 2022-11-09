@@ -176,6 +176,7 @@ Object* PlayMode::makeObject(std::string name, std::string model_name) {
 			if (transform->name != name + ":" + model_name) {
 				if (transform->parent != nullptr && obj->drawables.find(transform->parent->name) != obj->drawables.end()) {
 					transform->parent = obj->drawables[transform->parent->name]->transform;
+				} else {
 					std::cout << "Warning: " << transform->name << " is not a child of " << model_name << std::endl;
 				}
 			}
