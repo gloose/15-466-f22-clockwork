@@ -112,6 +112,13 @@ void register_archer_object(Object* o) {
 	archer_object = o;
 }
 
+void reset_energy() {
+	heal_transform->position = offscreen_position();
+	freeze_transform->position = offscreen_position();
+	burn_transform->position = offscreen_position();
+	arrow_transform->position = archer_object->transform->position + arrow_offset;
+}
+
 bool Animation::update(float update_time) {
 	assert(false && "Animation::update must be overriden by child class.");
 	return false;
@@ -152,7 +159,7 @@ EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
 	id = animation_id++;
 	sound_playing = false;
 	energy_type = nrg;
-	health_target = target;
+	energy_target = target;
 	switch (nrg) {
 	case HEAL:
 		transform = heal_transform;
@@ -220,6 +227,7 @@ bool DeathAnimation::update(float update_time) {
 // Note, define a constant to be some scale that will make an energy ball approximately the size of a character. I'll call it 2 for now.
 bool EnergyAnimation::update(float update_time) {
 	elapsed_time += update_time;
+	transform->position = energy_target->transform->position;
 	if (elapsed_time <= turn_length / 2.0f) {
 		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time / (turn_length / 2.0f));
 		return true;
@@ -228,7 +236,7 @@ bool EnergyAnimation::update(float update_time) {
 			sound_playing = true;
 			switch (energy_type) {
 			case HEAL:
-				health_target->updateHealth();
+				energy_target->updateHealth();
 				play(*heal_sample);
 				break;
 			case FREEZE:

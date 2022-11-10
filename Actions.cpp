@@ -22,6 +22,7 @@ bool check_burn(Object* user) {
 	if (user->property("BURNED") == 1) {
 		user->property("HEALTH") -= 10;
 		user->updateHealth();
+		add_animation(new EnergyAnimation(EnergyType::BURN, user));
 		if (user->property("HEALTH") <= 0) {
 			user->property("ALIVE") = 0;
 			add_animation(new DeathAnimation(user));
@@ -38,6 +39,7 @@ bool check_freeze(Object* user) {
 		if (user->property("FREEZE_COUNTDOWN") == 0) {
 			effect_string = user->name + " was frozen and could not move.";
 			user->property("FREEZE_COUNTDOWN") = 3;
+			add_animation(new EnergyAnimation(EnergyType::FREEZE, user));
 			return true;
 		}
 	}

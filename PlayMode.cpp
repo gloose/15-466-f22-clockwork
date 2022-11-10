@@ -133,9 +133,9 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	enemy_units.clear();
 	create_levels();
 	init_compiler();
-	next_level();
 	energyTransforms();
 	init_sounds();
+	next_level();
 	compile_failed = false;
 	
 	text_buffer.push_back("");
@@ -875,6 +875,7 @@ void PlayMode::reset_level() {
 			}
 		}
 	}
+	reset_energy();
 }
 
 void PlayMode::next_level() {

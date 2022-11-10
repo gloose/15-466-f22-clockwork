@@ -15,6 +15,7 @@ void register_freeze_transform(Scene::Transform* t);
 void register_burn_transform(Scene::Transform* t);
 void register_arrow_transform(Scene::Transform* t);
 void register_archer_object(Object* o);
+void reset_energy();
 
 void init_sounds();
 
@@ -55,7 +56,7 @@ struct DeathAnimation : Animation {
 
 struct EnergyAnimation : Animation {
 	EnergyAnimation(EnergyType nrg, Object *target);
-	Object* health_target;
+	Object* energy_target;
 	EnergyType energy_type;
 	bool update(float update_time);
 };
