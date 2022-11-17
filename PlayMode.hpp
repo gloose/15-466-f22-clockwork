@@ -172,7 +172,7 @@ struct PlayMode : Mode {
 	glm::ivec2 health_bar_size = glm::vec2(100, 10);
 
 	// Helper functions
-	int drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
+	glm::ivec2 drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
 	void drawVertexArray(GLenum mode, const std::vector<PPUDataStream::Vertex>& vertex_array, bool use_texture);
 	void setMesh(Scene::Drawable* drawable, std::string mesh);
 	Object* makeObject(std::string name, std::string model_name = "");

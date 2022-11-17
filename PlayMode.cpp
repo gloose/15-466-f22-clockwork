@@ -957,7 +957,7 @@ void PlayMode::update(float elapsed) {
 }
 
 
-int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color, bool cursor_line) {
+glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color, bool cursor_line) {
 	std::vector< PPUDataStream::Vertex > triangle_strip;
 
 	//helper to put a single tile somewhere on the screen:
@@ -982,6 +982,8 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 		drawText("|", position, width);
 	}
 
+	glm::ivec2 ret(0, 0);
+
 	while (start_line < text.size()) {
 		line_num++;
 
@@ -1003,6 +1005,7 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 		// Draw text
 		double current_x = position.x;
 		double current_y = position.y - line_num * font_size;
+
 		for (size_t i = 0; i < len; i++)
 		{
 			if (cursor_line && i == cur_cursor_pos) {
@@ -1034,6 +1037,9 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 			// Advance position
 			current_x += pos[i].x_advance / 64.;
 			current_y += pos[i].y_advance / 64.;
+
+			ret.x = std::max(ret.x, (int)(current_x - position.x));
+			ret.y = std::max(ret.y, (int)current_y);
 			
 			// Line break on overflow (may be necessary if there are no spaces)
 			if (current_x + char_width > position.x + width || i == len - 1) {
@@ -1049,7 +1055,8 @@ int PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::
 
 	drawVertexArray(GL_TRIANGLE_STRIP, triangle_strip, true);
 	
-	return (int)(line_num * font_size);
+	//return (int)(line_num * font_size);
+	return ret;
 }
 
 void PlayMode::move_up(){
@@ -1235,6 +1242,11 @@ glm::vec2 PlayMode::worldToScreen(glm::vec3 pos) {
 void PlayMode::drawHealthBar(Object* unit) {
 	if (unit->property("health_max") > 0 && unit->health_level > 0) {
 		glm::ivec2 health_bar_pos = worldToScreen(unit->transform->position + glm::vec3(0.f, 0.f, 2.5f)) - glm::vec2(health_bar_size.x / 2.f, 0);
+		
+		int name_width = drawText(unit->name, health_bar_pos + glm::ivec2(0, health_bar_size.y + font_size), health_bar_size.x, glm::u8vec4(0xff, 0xff, 0xff, 0xff)).x;
+		drawRectangle(health_bar_pos - glm::ivec2(2, 2), glm::ivec2(name_width + 2, health_bar_size.y + font_size) + glm::ivec2(3, 3), glm::u8vec4(0, 0, 0, 255), true);
+		drawText(unit->name, health_bar_pos + glm::ivec2(0, health_bar_size.y + font_size + 2), health_bar_size.x, glm::u8vec4(0xff, 0xff, 0xff, 0xff)).x;
+		
 		drawRectangle(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), true);
 		glm::ivec2 filled_size = glm::vec2(health_bar_size.x * unit->health_level, health_bar_size.y);
 		drawRectangle(health_bar_pos, filled_size - glm::ivec2(1, 0), glm::u8vec4(0, 255, 0, 255), true);
