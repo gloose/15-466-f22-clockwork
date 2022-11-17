@@ -1245,7 +1245,7 @@ void PlayMode::drawHealthBar(Object* unit) {
 		
 		int name_width = drawText(unit->name, health_bar_pos + glm::ivec2(0, health_bar_size.y + font_size), health_bar_size.x, glm::u8vec4(0xff, 0xff, 0xff, 0xff)).x;
 		drawRectangle(health_bar_pos - glm::ivec2(2, 2), glm::ivec2(name_width + 2, health_bar_size.y + font_size) + glm::ivec2(3, 3), glm::u8vec4(0, 0, 0, 255), true);
-		drawText(unit->name, health_bar_pos + glm::ivec2(0, health_bar_size.y + font_size + 2), health_bar_size.x, glm::u8vec4(0xff, 0xff, 0xff, 0xff)).x;
+		drawText(unit->name, health_bar_pos + glm::ivec2(0, health_bar_size.y + font_size + 2), health_bar_size.x, glm::u8vec4(0xff, 0xff, 0xff, 0xff));
 		
 		drawRectangle(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), true);
 		glm::ivec2 filled_size = glm::vec2(health_bar_size.x * unit->health_level, health_bar_size.y);
