@@ -24,8 +24,9 @@ struct Object {
     std::unordered_map<std::string, int*> properties;
     std::unordered_map<std::string, Scene::Drawable*> drawables;
     Scene::Transform* transform;
-    glm::vec3 start_position;
+    glm::vec2 start_position;
     float health_level = 1.0f;
+    float floor_height = 0.f;
 
     Object(std::string name);
     void addAction(std::string action_name, ActionFunction func, float duration);

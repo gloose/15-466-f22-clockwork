@@ -41,7 +41,7 @@ void Object::reset() {
         property("ARROWS") = 8;
     }
     updateHealth();
-    transform->position = start_position;
+    transform->position = glm::vec3(start_position, floor_height);
 }
 
 // Returns a reference to the property named property_name

@@ -161,6 +161,7 @@ Object* PlayMode::makeObject(std::string name, std::string model_name) {
 
 			if (transform.name == model_name) {
 				obj->transform = new_transform;
+				obj->floor_height = obj->transform->position.z;
 			}
 			
 			if (transform.name == model_name || transform.name.rfind(model_name + "-", 0) == 0) {
@@ -253,7 +254,7 @@ void PlayMode::create_levels() {
 
 void PlayMode::init_compiler() {
 	warrior = makeObject("WARRIOR", "warrior");
-	warrior->start_position = glm::vec3(-6.f, -6.f, 1.2f);
+	warrior->start_position = glm::vec2(-6.f, -6.f);
 	warrior->addAction("ATTACK", attack_function, turn_duration());
 	warrior->addAction("DEFEND", defend_function, turn_duration());
 	warrior->addProperty("HEALTH_MAX", 100);
@@ -263,7 +264,7 @@ void PlayMode::init_compiler() {
 	warrior->addProperty("POWER", 15);
 
 	wizard = makeObject("WIZARD", "wizard");
-	wizard->start_position = glm::vec3(-6.f, 6.f, 2.3f);
+	wizard->start_position = glm::vec2(-6.f, 6.f);
 	wizard->addAction("FREEZE", freeze_function, turn_duration() * 1.5f);
 	wizard->addAction("BURN", burn_function, turn_duration() * 1.5f);
 	wizard->addProperty("HEALTH_MAX", 60);
@@ -272,7 +273,7 @@ void PlayMode::init_compiler() {
 	wizard->addProperty("ALIVE", 1);
 
 	archer = makeObject("ARCHER", "archer");
-	archer->start_position = glm::vec3(-6.f, 2.f, 1.6f);
+	archer->start_position = glm::vec2(-6.f, 2.f);
 	register_archer_object(archer);
 	archer->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
 	archer->addAction("SHOOT", shoot_function, turn_duration() * 0.5f);
@@ -284,7 +285,7 @@ void PlayMode::init_compiler() {
 	archer->addProperty("POWER", 20);
 
 	healer = makeObject("HEALER", "healer");
-	healer->start_position = glm::vec3(-6.f, -2.f, 1.4f);
+	healer->start_position = glm::vec2(-6.f, -2.f);
 	healer->addAction("HEAL", heal_function, turn_duration());
 	healer->addProperty("HEALTH_MAX", 80);
 	healer->addProperty("HEALTH", 80);
@@ -292,7 +293,7 @@ void PlayMode::init_compiler() {
 	healer->addProperty("ALIVE", 1);
 
 	Object* enemy1 = makeObject("ENEMY1", "monster");
-	enemy1->start_position = glm::vec3(6.f, 0.f, 4.f);
+	enemy1->start_position = glm::vec2(6.f, 0.f);
 	enemy1->addAction("ATTACK", attack_function, turn_duration());
 	enemy1->addAction("DEFEND", defend_function, turn_duration());
 	enemy1->addProperty("HEALTH_MAX", 15);
@@ -391,8 +392,8 @@ void PlayMode::init_compiler() {
 	enemy10->addProperty("ALIVE", 1);
 	enemy10->addProperty("POWER", 40);
 
-	Object *fargoth = makeObject("FARGOTH", "monster");
-	fargoth->start_position = glm::vec3(6.f, -3.f, 4.f);
+	Object *fargoth = makeObject("FARGOTH", "speedster");
+	fargoth->start_position = glm::vec2(6.f, -3.f);
 	fargoth->addAction("ATTACK", attack_function, turn_duration());
 	fargoth->addAction("DEFEND", defend_function, turn_duration());
 	fargoth->addProperty("HEALTH_MAX", 240);
@@ -401,8 +402,8 @@ void PlayMode::init_compiler() {
 	fargoth->addProperty("ALIVE", 1);
 	fargoth->addProperty("POWER", 20);
 
-	Object *rupol = makeObject("RUPOL", "monster");
-	rupol->start_position = glm::vec3(6.f, 3.f, 4.f);
+	Object *rupol = makeObject("RUPOL", "gunner");
+	rupol->start_position = glm::vec2(6.f, 3.f);
 	rupol->addAction("ATTACK", attack_function, turn_duration());
 	rupol->addAction("DEFEND", defend_function, turn_duration());
 	rupol->addProperty("HEALTH_MAX", 160);

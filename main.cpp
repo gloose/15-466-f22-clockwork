@@ -77,6 +77,9 @@ int main(int argc, char **argv) {
 	//prevent exceedingly tiny windows when resizing:
 	SDL_SetWindowMinimumSize(window,100,100);
 
+	// Prevent resizing entirely, because it breaks our UI (may fix later, but not a priority)
+	SDL_SetWindowResizable(window, SDL_bool(false));
+
 	if (!window) {
 		std::cerr << "Error creating SDL window: " << SDL_GetError() << std::endl;
 		return 1;
