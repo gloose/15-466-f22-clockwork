@@ -469,6 +469,8 @@ void PlayMode::init_compiler() {
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
 	if (evt.type == SDL_KEYDOWN) {
+		game_start = true;
+		// font_size = 16;
 		if (evt.key.keysym.sym == SDLK_LCTRL) {
 			lctrl.pressed = true;
 			return true;
@@ -957,6 +959,107 @@ void PlayMode::update(float elapsed) {
 	}
 }
 
+glm::ivec2 PlayMode::drawTextLarge(std::string text, glm::vec2 position, size_t width, int large_font_size, glm::u8vec4 color_large, bool cursor_line_large){
+		std::vector< PPUDataStream::Vertex > triangle_strip;
+
+	//helper to put a single tile somewhere on the screen:
+	auto draw_tile = [&](glm::ivec2 const& lower_left, uint8_t tile_index, glm::u8vec4 tile_color) {
+		//convert tile index to lower-left pixel coordinate in tile image:
+		glm::ivec2 tile_coord = glm::ivec2(tile_index * char_width, 0);
+
+		//build a quad as a (very short) triangle strip that starts and ends with degenerate triangles:
+		triangle_strip.emplace_back(glm::ivec2(lower_left.x + 0, lower_left.y - char_bottom), glm::ivec2(tile_coord.x + 0, tile_coord.y + 0), tile_color);
+		triangle_strip.emplace_back(triangle_strip.back());
+		triangle_strip.emplace_back(glm::ivec2(lower_left.x + 0, lower_left.y + char_top), glm::ivec2(tile_coord.x + 0, tile_coord.y + char_height), tile_color);
+		triangle_strip.emplace_back(glm::ivec2(lower_left.x + char_width, lower_left.y - char_bottom), glm::ivec2(tile_coord.x + char_width, tile_coord.y + 0), tile_color);
+		triangle_strip.emplace_back(glm::ivec2(lower_left.x + char_width, lower_left.y + char_top), glm::ivec2(tile_coord.x + char_width, tile_coord.y + char_height), tile_color);
+		triangle_strip.emplace_back(triangle_strip.back());
+	};
+
+	const char* text_c_str = text.c_str();
+	size_t start_line = 0;
+	size_t line_num = 0;
+
+	if (start_line == text.size() && cursor_line_large) {
+		drawText("|", position, width);
+	}
+
+	glm::ivec2 ret(0, 0);
+
+	while (start_line < text.size()) {
+		line_num++;
+
+		// Create hb-buffer and populate.
+		hb_buffer_t* hb_buffer;
+		hb_buffer = hb_buffer_create();
+		hb_buffer_add_utf8(hb_buffer, text_c_str + start_line, -1, 0, -1);
+		hb_buffer_guess_segment_properties(hb_buffer);
+
+		// Shape it!
+		hb_feature_t feature;
+		hb_feature_from_string("-liga", -1, &feature);
+		hb_shape(hb_font, hb_buffer, &feature, 1);
+
+		// Get glyph information and positions out of the buffer.
+		unsigned int len = hb_buffer_get_length(hb_buffer);
+		hb_glyph_position_t* pos = hb_buffer_get_glyph_positions(hb_buffer, NULL);
+
+		// Draw text
+		double current_x = position.x;
+		double current_y = position.y - line_num * large_font_size;
+
+		for (size_t i = 0; i < len; i++)
+		{
+			if (cursor_line_large && i == cur_cursor_pos) {
+				drawText("|", glm::vec2(current_x - 5., current_y + large_font_size), width);
+			}
+			// Line break if next word would overflow
+			if (text[start_line + i] == ' ') {
+				double cx = current_x + pos[i].x_advance / 64.;
+				bool line_break = false;
+				for (size_t j = i + 1; j < len; j++) {
+					if (text[start_line + j] == ' ') {
+						break;
+					}
+					cx += pos[j].x_advance / 64.;
+					if (cx + char_width > position.x + width) {
+						line_break = true;
+						break;
+					}
+				}
+				if (line_break) {
+					start_line = start_line + i + 1;
+					break;
+				}
+			}
+
+			// Draw character
+			draw_tile(glm::ivec2((int)(current_x + pos[i].x_offset / 64.), (int)(current_y + pos[i].y_offset / 64.)), (uint8_t)text[start_line + i] - (uint8_t)min_char, color_large);
+			
+			// Advance position
+			current_x += pos[i].x_advance / 64.;
+			current_y += pos[i].y_advance / 64.;
+
+			ret.x = std::max(ret.x, (int)(current_x - position.x));
+			ret.y = std::max(ret.y, (int)current_y);
+			
+			// Line break on overflow (may be necessary if there are no spaces)
+			if (current_x + char_width > position.x + width || i == len - 1) {
+				start_line = start_line + i + 1;
+				break;
+			}
+			
+		}
+		if (cursor_line_large && cur_cursor_pos == text.size()) {
+			drawText("|", glm::vec2(current_x - 5., current_y + large_font_size), width);
+		}
+	}
+
+	drawVertexArray(GL_TRIANGLE_STRIP, triangle_strip, true);
+	
+	//return (int)(line_num * font_size);
+	return ret;
+}
 
 glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color, bool cursor_line) {
 	std::vector< PPUDataStream::Vertex > triangle_strip;
@@ -1290,31 +1393,47 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glClearDepth(1.0f); //1.0 is actually the default value to clear the depth buffer to, but FYI you can change it.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
+	// glEnable(GL_DEPTH_TEST);
+	// glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 
-	glViewport(worldbox_pos.x, worldbox_pos.y, worldbox_size.x, worldbox_size.y);
-	scene.draw(*camera);
-	glViewport(0, 0, drawable_size.x, drawable_size.y);
+	// glViewport(worldbox_pos.x, worldbox_pos.y, worldbox_size.x, worldbox_size.y);
+	// scene.draw(*camera);
+	// glViewport(0, 0, drawable_size.x, drawable_size.y);
 
-	glDisable(GL_DEPTH_TEST);
+	if(game_start){
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 
-	drawRectangle(worldbox_pos - glm::ivec2(5, 5), worldbox_size + glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+		glViewport(worldbox_pos.x, worldbox_pos.y, worldbox_size.x, worldbox_size.y);
+		scene.draw(*camera);
+		glViewport(0, 0, drawable_size.x, drawable_size.y);
+		glDisable(GL_DEPTH_TEST);
 
-	for (size_t i = 0; i < player_units.size(); i++) {
-		drawHealthBar(player_units[i]);
+		drawRectangle(worldbox_pos - glm::ivec2(5, 5), worldbox_size + glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+
+		for (size_t i = 0; i < player_units.size(); i++) {
+			drawHealthBar(player_units[i]);
+		}
+		for (size_t i = 0; i < enemy_units[current_level].size(); i++) {
+			drawHealthBar(enemy_units[current_level][i]);
+		}
+
+		drawRectangle(input_pos, input_size, glm::u8vec4(0, 0, 0, 255), true);
+		drawRectangle(input_pos + glm::ivec2(5, 5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+		drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
+		drawRectangle(prompt_pos + glm::ivec2(5, 5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+		drawRectangle(error_pos, error_size, glm::u8vec4(0, 0, 0, 255), true);
+		drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+		render();
 	}
-	for (size_t i = 0; i < enemy_units[current_level].size(); i++) {
-		drawHealthBar(enemy_units[current_level][i]);
+	else{
+		//Draw game start here
+		int x = 600;
+		int y = 450;
+		//glm::ivec2 drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
+		glm::ivec2 new_pos = drawTextLarge("CLOCKWORK", glm::ivec2(x,y), 500, 54, default_color, false);
+		drawText("PRESS ANY KEY", glm::ivec2(new_pos.x + 500, 100), 500);
 	}
-
-	drawRectangle(input_pos, input_size, glm::u8vec4(0, 0, 0, 255), true);
-	drawRectangle(input_pos + glm::ivec2(5, 5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
-	drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
-	drawRectangle(prompt_pos + glm::ivec2(5, 5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
-	drawRectangle(error_pos, error_size, glm::u8vec4(0, 0, 0, 255), true);
-	drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
-	render();
 
 	GL_ERRORS();
 }
