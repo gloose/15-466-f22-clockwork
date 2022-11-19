@@ -32,6 +32,32 @@ Load< Scene > character_scene(LoadTagDefault, []() -> Scene const * {
 });
 
 PlayMode::PlayMode() : scene(*character_scene) {
+	for (auto &transform : scene.transforms) {
+		if(transform.name == "monster"){
+			monster = &transform;
+		}
+		if(transform.name == "monster-sclera"){
+			monster_sclera  = &transform;
+		}
+		if(transform.name == "monster-tentacle-4"){
+			monster_tentacle_4 = &transform;
+		}
+		if(transform.name == "monster-tentacle-3"){
+			monster_tentacle_3 = &transform;
+		}
+		if(transform.name == "monster-tentacle-2"){
+			monster_tentacle_2 = &transform;
+		}
+		if(transform.name == "monster-tentacle-1"){
+			monster_tentacle_1 = &transform;
+		}
+		if(transform.name == "monster-tentacle-0"){
+			monster_tentacle_0 = &transform;
+		}
+		if(transform.name == "monster-pupil"){
+			monster_pupil = &transform;
+		}
+	}
 	//get pointer to camera for convenience:
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
 	camera = &scene.cameras.front();
@@ -883,7 +909,7 @@ void PlayMode::reset_level() {
 
 void PlayMode::next_level() {
 	current_level++;
-	if(current_level == 10){
+	if(current_level == 1){
 		game_end = true;
 	}
 	if (current_level < 0) {
@@ -914,7 +940,16 @@ void PlayMode::update(float elapsed) {
 	}
 	warrior->transform->position = warrior->transform->position + glm::vec3(cos(-M_PI / 2 + warrior_theta), sin(-M_PI / 2 + warrior_theta), 0.f) * elapsed;
 	*/
-
+	if(game_start and game_end){
+		monster->position.z = -1000.0;
+		monster_sclera->position.z = -1000.0;
+		monster_tentacle_4->position.z = -1000.0;
+		monster_tentacle_3->position.z = -1000.0;
+		monster_tentacle_2->position.z = -1000.0;
+		monster_tentacle_1->position.z = -1000.0;
+		monster_tentacle_0->position.z = -1000.0;
+		monster_pupil->position.z = -1000.0;
+	}
 	if (lctrl.pressed || rctrl.pressed) {
 		update_animations(10.0f * elapsed);
 	} else {
@@ -1402,10 +1437,9 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	// glViewport(worldbox_pos.x, worldbox_pos.y, worldbox_size.x, worldbox_size.y);
 	// scene.draw(*camera);
 	// glViewport(0, 0, drawable_size.x, drawable_size.y);
-
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 	if(game_start and (!game_end)){
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 
 		glViewport(worldbox_pos.x, worldbox_pos.y, worldbox_size.x, worldbox_size.y);
 		scene.draw(*camera);
@@ -1433,12 +1467,14 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		//Draw game start here
 		int x = 450;
 		int y = 450;
+		scene.draw(*camera);
 		drawTextLarge("Congratulations! You Beat the Monsters!", glm::ivec2(x,y), 500, 54, default_color, false);
 	}
 	else if((!game_start) and (!game_end)){
 		//Draw game start here
 		int x = 600;
 		int y = 450;
+		scene.draw(*camera);
 		//not working cannot set font size
 		glm::ivec2 new_pos = drawTextLarge("CLOCKWORK", glm::ivec2(x,y), 500, 54, default_color, false);
 		drawText("PRESS ENTER", glm::ivec2(new_pos.x + 500, 100), 500);
