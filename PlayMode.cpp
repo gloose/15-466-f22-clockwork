@@ -469,7 +469,6 @@ void PlayMode::init_compiler() {
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
 	if (evt.type == SDL_KEYDOWN) {
-		game_start = true;
 		// font_size = 16;
 		if (evt.key.keysym.sym == SDLK_LCTRL) {
 			lctrl.pressed = true;
@@ -530,6 +529,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			insert("S");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_RETURN) {
+			game_start = true;
 			if (lshift.pressed || rshift.pressed) {
 				std::cout << "Submitted!\n";
 				player_exe = player_compiler.compile(text_buffer);
@@ -1430,9 +1430,9 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		//Draw game start here
 		int x = 600;
 		int y = 450;
-		//glm::ivec2 drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
+		//not working cannot set font size
 		glm::ivec2 new_pos = drawTextLarge("CLOCKWORK", glm::ivec2(x,y), 500, 54, default_color, false);
-		drawText("PRESS ANY KEY", glm::ivec2(new_pos.x + 500, 100), 500);
+		drawText("PRESS ENTER", glm::ivec2(new_pos.x + 500, 100), 500);
 	}
 
 	GL_ERRORS();
