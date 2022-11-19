@@ -201,5 +201,6 @@ struct PlayMode : Mode {
 	void insert(std::string cur_letter);
 	void render();
 	bool game_start = false;
+	bool game_end = false;
 	//end of the text rendering
 };

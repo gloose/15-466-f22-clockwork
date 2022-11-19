@@ -883,6 +883,9 @@ void PlayMode::reset_level() {
 
 void PlayMode::next_level() {
 	current_level++;
+	if(current_level == 10){
+		game_end = true;
+	}
 	if (current_level < 0) {
 		current_level = 0;
 	} else if (current_level >= (int)level_guidance.size()) {
@@ -1400,7 +1403,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	// scene.draw(*camera);
 	// glViewport(0, 0, drawable_size.x, drawable_size.y);
 
-	if(game_start){
+	if(game_start and (!game_end)){
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
 
@@ -1426,7 +1429,13 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 		render();
 	}
-	else{
+	else if(game_end and game_start){
+		//Draw game start here
+		int x = 450;
+		int y = 450;
+		drawTextLarge("Congratulations! You Beat the Monsters!", glm::ivec2(x,y), 500, 54, default_color, false);
+	}
+	else if((!game_start) and (!game_end)){
 		//Draw game start here
 		int x = 600;
 		int y = 450;
