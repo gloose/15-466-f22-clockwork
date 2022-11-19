@@ -392,7 +392,7 @@ void PlayMode::init_compiler() {
 	enemy10->addProperty("ALIVE", 1);
 	enemy10->addProperty("POWER", 40);
 
-	Object *fargoth = makeObject("FARGOTH", "speedster");
+	Object *fargoth = makeObject("FARGOTH", "tank");
 	fargoth->start_position = glm::vec2(6.f, -3.f);
 	fargoth->addAction("ATTACK", attack_function, turn_duration());
 	fargoth->addAction("DEFEND", defend_function, turn_duration());
