@@ -1219,7 +1219,7 @@ glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width
 
 			// Draw character
 			glm::u8vec4 glyph_color = color;
-			if (do_autofill && i >= autofill_word_end && i < autofill_word_offset + autofill_suggestion.size()) {
+			if (do_autofill && (int)i >= autofill_word_end && (int)i < autofill_word_offset + (int)autofill_suggestion.size()) {
 				glyph_color = glm::u8vec4(glyph_color.r / 2, glyph_color.g / 2, glyph_color.b / 2, glyph_color.a);
 			}
 			draw_tile(glm::ivec2((int)(current_x + pos[i].x_offset / 64.), (int)(current_y + pos[i].y_offset / 64.)), (uint8_t)text[start_line + i] - (uint8_t)min_char, glyph_color);
@@ -1494,7 +1494,7 @@ void PlayMode::updateAutofillSuggestion() {
 	for (int i = 0; i < (int)line.size(); i++) {
 		std::string word = line[i];
 		int offset = offsets[i];
-		if (cur_cursor_pos > offset && cur_cursor_pos <= offset + word.size()) {
+		if ((int)cur_cursor_pos > offset && (int)cur_cursor_pos <= offset + (int)word.size()) {
 			word_index = i;
 			break;
 		}
