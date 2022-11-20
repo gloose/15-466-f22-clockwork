@@ -21,7 +21,9 @@ struct Action {
 struct Object {
     std::string name = "";
     std::unordered_map<std::string, Action> actions;
+    std::vector<std::string> action_names;
     std::unordered_map<std::string, int*> properties;
+    std::vector<std::string> property_names;
     std::unordered_map<std::string, Scene::Drawable*> drawables;
     Scene::Transform* transform;
     glm::vec2 start_position;

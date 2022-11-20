@@ -19,12 +19,14 @@ Object::Object(std::string name) : name(formatCase(name)) {}
 void Object::addAction(std::string action_name, ActionFunction func, float duration) {
     action_name = formatCase(action_name);
     actions.emplace(action_name, Action(func, duration));
+    action_names.push_back(action_name);
 }
 
 // Add property to object's map of properties
 void Object::addProperty(std::string property_name, int default_value) {
     property_name = formatCase(property_name);
     properties.emplace(property_name, new int(default_value));
+    property_names.push_back(property_name);
 }
 
 void Object::updateHealth() {
@@ -37,7 +39,7 @@ void Object::reset() {
     property("BURNED") = 0;
     property("FROZEN") = 0;
     property("HEALTH") = property("HEALTH_MAX");
-    if (name == "ARCHER") {
+    if (name == "RANGER") {
         property("ARROWS") = 8;
     }
     updateHealth();

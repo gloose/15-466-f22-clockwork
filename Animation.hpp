@@ -14,7 +14,7 @@ void register_heal_transform(Scene::Transform* t);
 void register_freeze_transform(Scene::Transform* t);
 void register_burn_transform(Scene::Transform* t);
 void register_arrow_transform(Scene::Transform* t);
-void register_archer_object(Object* o);
+void register_ranger_object(Object* o);
 void reset_energy();
 
 void init_sounds();

@@ -63,6 +63,8 @@ struct PlayMode : Mode {
 		struct Vertex {
 			Vertex(glm::ivec2 const& Position_, glm::ivec2 const& TileCoord_, glm::u8vec4 Color_)
 				: Position(Position_), TileCoord(TileCoord_), Color(glm::vec4(Color_) / 255.f) { }
+			Vertex(glm::ivec2 const& Position_, glm::u8vec4 Color_)
+				: Position(Position_), TileCoord(glm::ivec2(0, 0)), Color(glm::vec4(Color_) / 255.f) { }
 			//I generally make class members lowercase, but I make an exception here because
 			// I use uppercase for vertex attributes in shader programs and want to match.
 			glm::ivec2 Position;
@@ -149,13 +151,10 @@ struct PlayMode : Mode {
 	bool level_won;
 	bool compile_failed;
 
-	Object* warrior;
-	Object* wizard;
-	Object* archer;
+	Object* brawler;
+	Object* caster;
+	Object* ranger;
 	Object* healer;
-
-	// Rotation demo
-	//float warrior_theta = 0.f;
 
 	glm::ivec2 prompt_pos = glm::ivec2(10, ScreenHeight - 190);
 	glm::ivec2 prompt_size = glm::ivec2(400, 180);
@@ -171,6 +170,13 @@ struct PlayMode : Mode {
 
 	glm::ivec2 health_bar_size = glm::vec2(100, 10);
 
+	int obj_info_box_width = 200;
+
+	std::string autofill_suggestion = "";
+	int autofill_word_offset = 0;
+	int autofill_word_end = 0;
+	Object* autofill_user;
+
 	// Helper functions
 	glm::ivec2 drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color = default_color, bool cursor_line = false);
 	glm::ivec2 drawTextLarge(std::string text, glm::vec2 position, size_t width, int large_font_size, glm::u8vec4 color_large = default_color, bool cursor_line_large = false);
@@ -182,6 +188,14 @@ struct PlayMode : Mode {
 	void drawThickRectangleOutline(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, int thickness);
 	glm::vec2 worldToScreen(glm::vec3 pos);
 	void drawHealthBar(Object* unit);
+	void updateAutofillSuggestion();
+	bool isObject(std::string name);
+	Object* getObject(std::string name);
+	std::vector<hb_glyph_position_t> getGlyphPositions(std::string text, size_t offset = 0);
+	glm::ivec2 getPositionInText(std::string text, glm::vec2 position, size_t index, size_t offset = 0);
+	void drawObjectInfoBox(Object* obj);
+	bool autofill();
+	bool isPlayer(Object* obj);
 
 	//begin of the text rendering
 	size_t line_index = 0;

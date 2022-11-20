@@ -10,8 +10,8 @@
 struct Compiler {
     std::unordered_map<std::string, Object*> objects;
 
-    typedef std::list<std::string> Line;
-    typedef std::list<Line> Program;
+    typedef std::vector<std::string> Line;
+    typedef std::vector<Line> Program;
 
     static const size_t MAX_LINE_SIZE = 1024;
 
@@ -123,6 +123,7 @@ struct Compiler {
     void addObject(Object* obj);
     Program readProgram(std::string filename);
     Program readProgram(std::vector<std::string> lines);
+    static Line readLine(std::string text, std::vector<int>* offsets = nullptr);
     void set_error(size_t line_num, std::string message);
 };
 

@@ -4,7 +4,7 @@ Scene::Transform* heal_transform;
 Scene::Transform* freeze_transform;
 Scene::Transform* burn_transform;
 Scene::Transform* arrow_transform;
-Object* archer_object;
+Object* ranger_object;
 
 void end(size_t my_id);
 
@@ -108,15 +108,15 @@ void register_arrow_transform(Scene::Transform* t) {
 	arrow_transform = t;
 }
 
-void register_archer_object(Object* o) {
-	archer_object = o;
+void register_ranger_object(Object* o) {
+	ranger_object = o;
 }
 
 void reset_energy() {
 	heal_transform->position = offscreen_position();
 	freeze_transform->position = offscreen_position();
 	burn_transform->position = offscreen_position();
-	arrow_transform->position = archer_object->transform->position + arrow_offset;
+	arrow_transform->position = ranger_object->transform->position + arrow_offset;
 }
 
 bool Animation::update(float update_time) {
@@ -135,7 +135,7 @@ MoveAnimation::MoveAnimation(Object* source, Object* target) {
 	health_target = target;
 }
 
-ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(archer_object, target) {
+ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(ranger_object, target) {
 	start_position += arrow_offset;
 	transform = arrow_transform;
 	// TODO: Some trig magic to rotate the arrow to face the enemy.

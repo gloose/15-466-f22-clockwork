@@ -11,47 +11,57 @@
 Compiler::Compiler() {
 }
 
-// Read a vector of strings into the Program format that can be compiled
-Compiler::Program Compiler::readProgram(std::vector<std::string> lines) {
-    // Vector of vectors of strings, each vector represents a line of text words
-    Program program;
-
+// Read a string of text and return a vector of words
+Compiler::Line Compiler::readLine(std::string text, std::vector<int>* offsets) {
     Line line;
     std::string word;
+    int word_start = -1;
 
     // Appends a word to the line
     auto addWord = [&]() {
         if (word.size() > 0) {
             line.push_back(word);
             word.clear();
+
+            if (offsets != nullptr) {
+                offsets->push_back(word_start);
+            }
+
+            word_start = -1;
         }
     };
 
-    // Appends a line to the program
-    auto addLine = [&]() {
-        addWord();
-        program.push_back(line);
-        line.clear();
-    };
+    for (size_t j = 0; j < text.size(); j++) {
+        char c = (char)toupper(text[j]);
+
+        if (c == ' ' || c == '\t') {
+            addWord();
+        } else if (c == '.' || c == '(' || c == ')') {
+            addWord();
+            word = c;
+            word_start = (int)j;
+            addWord();
+        } else {
+            word = word + c;
+            if (word_start < 0) {
+                word_start = (int)j;
+            }
+        }
+    }
+    addWord();
+
+    return line;
+}
+
+// Read a vector of strings into the Program format that can be compiled
+Compiler::Program Compiler::readProgram(std::vector<std::string> lines) {
+    // Vector of vectors of strings, each vector represents a line of text words
+    Program program;
 
     // Parse text into words and lines
     for (size_t i = 0; i < lines.size(); i++) {
-        for (size_t j = 0; j < lines[i].size(); j++) {
-            char c = (char)toupper(lines[i][j]);
-
-            if (c == ' ' || c == '\t') {
-                addWord();
-            } else if (c == '.' || c == '(' || c == ')') {
-                addWord();
-                word = c;
-                addWord();
-            } else {
-                word = word + c;
-            }
-        }
-        addLine();
+        program.push_back(readLine(lines[i]));
     }
-    addLine();
 
     return program;
 }

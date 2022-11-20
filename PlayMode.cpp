@@ -224,7 +224,7 @@ void PlayMode::energyTransforms() {
 			register_arrow_transform(&transform);
 			scene.drawables.emplace_back(&transform);
 			setMesh(&scene.drawables.back(), transform.name);
-			transform.position = archer->transform->position + arrow_offset;
+			transform.position = ranger->transform->position + arrow_offset;
 		} else if (transform.name == "fire") {
 			register_burn_transform(&transform);
 			scene.drawables.emplace_back(&transform);
@@ -253,15 +253,15 @@ void PlayMode::setMesh(Scene::Drawable* drawable, std::string mesh_name) {
 }
 
 void PlayMode::create_levels() {
-	level_guidance.push_back("An enemy approaches! Use \"warrior.attack(enemy1)\" to attack him with the warrior! Press shift + enter to submit your code.");
-	level_guidance.push_back("Another enemy! This one can't be hurt by the warrior...but you also have a wizard. With the same syntax, tell the \"wizard\" to \"burn\" \"enemy2\".");
-	level_guidance.push_back("Uh oh, enemy3 will survive a hit... After typing the line to have the warrior attack, press enter to move to the next line. Then have the warrior attack enemy3 again. Press shift + enter to submit both lines.");
-	level_guidance.push_back("Enemy4 has a powerful attack coming up! The wizard can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the warrior.");
-	level_guidance.push_back("Enemy5 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the warrior attacks once, use the \"healer\" to \"heal\" the \"warrior\". Then have the warrior finish him off.");
-	level_guidance.push_back("Your last unit is an archer, who can attack faster than the warrior but has limited ammo! Try having the \"archer\" \"shoot\" enemy6 twice before he has a chance to attack!");
-	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the warrior attack enemy7, and then type \"end\" below the last line to end the loop. If this fight is too slow for your taste, try holding ctrl to speed things up!");
-	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (archer.arrows > 0)\", and then use the warrior afterwards. A list of the properties can be found in the manual, but all units have alive, health, and power.");
-	level_guidance.push_back("If statements work the same way. Try checking \"if (warrior.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"!");
+	level_guidance.push_back("An enemy approaches! Use \"brawler.attack(enemy1)\" to attack him with the brawler! Press shift + enter to submit your code.");
+	level_guidance.push_back("Another enemy! This one can't be hurt by the brawler...but you also have a caster. With the same syntax, tell the \"caster\" to \"burn\" \"enemy2\".");
+	level_guidance.push_back("Uh oh, enemy3 will survive a hit... After typing the line to have the brawler attack, press enter to move to the next line. Then have the brawler attack enemy3 again. Press shift + enter to submit both lines.");
+	level_guidance.push_back("Enemy4 has a powerful attack coming up! The caster can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the brawler.");
+	level_guidance.push_back("Enemy5 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the brawler attacks once, use the \"healer\" to \"heal\" the \"brawler\". Then have the brawler finish him off.");
+	level_guidance.push_back("Your last unit is an ranger, who can attack faster than the brawler but has limited ammo! Try having the \"ranger\" \"shoot\" enemy6 twice before he has a chance to attack!");
+	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the brawler attack enemy7, and then type \"end\" below the last line to end the loop. If this fight is too slow for your taste, try holding ctrl to speed things up!");
+	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (ranger.arrows > 0)\", and then use the brawler afterwards. A list of the properties can be found in the manual, but all units have alive, health, and power.");
+	level_guidance.push_back("If statements work the same way. Try checking \"if (brawler.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"!");
 	level_guidance.push_back("Alright, time to test everything you've learned! Enemy10 is tough, but you can do it!");
 	level_guidance.push_back("Fargoth and Rupol appeared! Fargoth has a lot of health, and Rupol does a lot of damage.");
 
@@ -279,36 +279,36 @@ void PlayMode::create_levels() {
 }
 
 void PlayMode::init_compiler() {
-	warrior = makeObject("WARRIOR", "warrior");
-	warrior->start_position = glm::vec2(-6.f, -6.f);
-	warrior->addAction("ATTACK", attack_function, turn_duration());
-	warrior->addAction("DEFEND", defend_function, turn_duration());
-	warrior->addProperty("HEALTH_MAX", 100);
-	warrior->addProperty("HEALTH", 100);
-	warrior->addProperty("DEFENSE", 0);
-	warrior->addProperty("ALIVE", 1);
-	warrior->addProperty("POWER", 15);
+	brawler = makeObject("BRAWLER", "warrior");
+	brawler->start_position = glm::vec2(-6.f, -6.f);
+	brawler->addAction("ATTACK", attack_function, turn_duration());
+	brawler->addAction("DEFEND", defend_function, turn_duration());
+	brawler->addProperty("HEALTH_MAX", 100);
+	brawler->addProperty("HEALTH", 100);
+	brawler->addProperty("DEFENSE", 0);
+	brawler->addProperty("ALIVE", 1);
+	brawler->addProperty("POWER", 15);
 
-	wizard = makeObject("WIZARD", "wizard");
-	wizard->start_position = glm::vec2(-6.f, 6.f);
-	wizard->addAction("FREEZE", freeze_function, turn_duration() * 1.5f);
-	wizard->addAction("BURN", burn_function, turn_duration() * 1.5f);
-	wizard->addProperty("HEALTH_MAX", 60);
-	wizard->addProperty("HEALTH", 60);
-	wizard->addProperty("DEFENSE", 0);
-	wizard->addProperty("ALIVE", 1);
+	caster = makeObject("CASTER", "caster");
+	caster->start_position = glm::vec2(-6.f, 6.f);
+	caster->addAction("FREEZE", freeze_function, turn_duration() * 1.5f);
+	caster->addAction("BURN", burn_function, turn_duration() * 1.5f);
+	caster->addProperty("HEALTH_MAX", 60);
+	caster->addProperty("HEALTH", 60);
+	caster->addProperty("DEFENSE", 0);
+	caster->addProperty("ALIVE", 1);
 
-	archer = makeObject("ARCHER", "archer");
-	archer->start_position = glm::vec2(-6.f, 2.f);
-	register_archer_object(archer);
-	archer->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
-	archer->addAction("SHOOT", shoot_function, turn_duration() * 0.5f);
-	archer->addProperty("HEALTH_MAX", 60);
-	archer->addProperty("HEALTH", 60);
-	archer->addProperty("DEFENSE", 0);
-	archer->addProperty("ALIVE", 1);
-	archer->addProperty("ARROWS", 8);
-	archer->addProperty("POWER", 20);
+	ranger = makeObject("RANGER", "ranger");
+	ranger->start_position = glm::vec2(-6.f, 2.f);
+	register_ranger_object(ranger);
+	ranger->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
+	ranger->addAction("SHOOT", shoot_function, turn_duration() * 0.5f);
+	ranger->addProperty("HEALTH_MAX", 60);
+	ranger->addProperty("HEALTH", 60);
+	ranger->addProperty("DEFENSE", 0);
+	ranger->addProperty("ALIVE", 1);
+	ranger->addProperty("ARROWS", 8);
+	ranger->addProperty("POWER", 20);
 
 	healer = makeObject("HEALER", "healer");
 	healer->start_position = glm::vec2(-6.f, -2.f);
@@ -438,10 +438,10 @@ void PlayMode::init_compiler() {
 	rupol->addProperty("ALIVE", 1);
 	rupol->addProperty("POWER", 30);
 
-	player_units.push_back(warrior);
-	player_units.push_back(wizard);
+	player_units.push_back(brawler);
+	player_units.push_back(caster);
 	player_units.push_back(healer);
-	player_units.push_back(archer);
+	player_units.push_back(ranger);
 
 	std::vector<Object *> level1;
 	level1.push_back(enemy1);
@@ -479,18 +479,6 @@ void PlayMode::init_compiler() {
 	enemy_units.push_back(level9);
 	enemy_units.push_back(level10);
 	enemy_units.push_back(level11);
-
-	for (Object *u : player_units) {
-		player_compiler.addObject(u);
-		enemy_compiler.addObject(u);
-	}
-
-	for (auto& v : enemy_units) {
-		for (Object* u : v) {
-			player_compiler.addObject(u);
-			enemy_compiler.addObject(u);
-		}
-	}
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -542,19 +530,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	}
 
 	if (evt.type == SDL_KEYDOWN) {
-		if (evt.key.keysym.sym == SDLK_a) {
-			insert("A");
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_d) {
-			insert("D");
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_w) {
-			insert("W");
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_s) {
-			insert("S");
-			return true;
-		} else if(evt.key.keysym.sym == SDLK_RETURN) {
+		if(evt.key.keysym.sym == SDLK_RETURN) {
 			game_start = true;
 			if (lshift.pressed || rshift.pressed) {
 				std::cout << "Submitted!\n";
@@ -573,7 +549,9 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				player_time = turn_duration();
 				enemy_time = turn_duration();
 			} else {
-				line_break();
+				if (!autofill()) {
+					line_break();
+				}
 			}
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_DOWN) {
@@ -597,11 +575,17 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				move_right();
 			}
 			return true;
+		} else if (evt.key.keysym.sym == SDLK_a) {
+			insert("A");
+			return true;
 		} else if(evt.key.keysym.sym == SDLK_b) {
 			insert("B");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_c) {
 			insert("C");
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_d) {
+			insert("D");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_e) {
 			insert("E");
@@ -645,6 +629,9 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if(evt.key.keysym.sym == SDLK_r) {
 			insert("R");
 			return true;
+		} else if (evt.key.keysym.sym == SDLK_s) {
+			insert("S");
+			return true;
 		} else if(evt.key.keysym.sym == SDLK_t) {
 			insert("T");
 			return true;
@@ -653,6 +640,9 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_v) {
 			insert("V");
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_w) {
+			insert("W");
 			return true;
 		} else if(evt.key.keysym.sym == SDLK_x) {
 			insert("X");
@@ -667,6 +657,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			delete_text();
 		} else if(evt.key.keysym.sym == SDLK_0){
 			if (lshift.pressed || rshift.pressed) {
+				autofill();
 				insert(")");
 			} else{
 				insert("0");
@@ -674,6 +665,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_1) {
 			if (lshift.pressed || rshift.pressed) {
+				autofill();
 				insert("!");
 			} else {
 				insert("1");
@@ -702,19 +694,24 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_9) {
 			if (lshift.pressed || rshift.pressed) {
+				autofill();
 				insert("(");
 			} else{
 				insert("9");
 			}
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+			autofill();
 			insert(" ");
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_TAB) {
-			insert(" ");
-			insert(" ");
+			if (!autofill()) {
+				insert(" ");
+				insert(" ");
+			}
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_PERIOD){
+		} else if(evt.key.keysym.sym == SDLK_PERIOD) {
+			autofill();
 			if (lshift.pressed || rshift.pressed) {
 				insert(">");
 			} else {
@@ -722,13 +719,19 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			}
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_EQUALS) {
+			autofill();
 			insert("=");
 			return true;
-		} else if(evt.key.keysym.sym == SDLK_COMMA){
+		} else if(evt.key.keysym.sym == SDLK_COMMA) {
 			if (lshift.pressed || rshift.pressed) {
+				autofill();
 				insert("<");
 			}
 			return true;
+		} else if (evt.key.keysym.sym == SDLK_MINUS) {
+			if (lshift.pressed || rshift.pressed) {
+				insert("_");
+			}
 		}
 	}
 
@@ -917,6 +920,18 @@ void PlayMode::next_level() {
 	} else if (current_level >= (int)level_guidance.size()) {
 		current_level = (int)level_guidance.size() - 1;
 	}
+
+	// Compiler should recognize only those objects that exist in this level
+	player_compiler.objects.clear();
+	for (Object *u : player_units) {
+		player_compiler.addObject(u);
+		enemy_compiler.addObject(u);
+	}
+	for (Object* u : enemy_units[current_level]) {
+		player_compiler.addObject(u);
+		enemy_compiler.addObject(u);
+	}
+
 	reset_level();
 	text_buffer.clear();
 	text_buffer.push_back("");
@@ -926,21 +941,7 @@ void PlayMode::next_level() {
 
 
 void PlayMode::update(float elapsed) {
-	// Fun little animation for the warrior to showcase transforms
-	/*
-	warrior->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(0.f, 0.f, 1.f));
-	warrior->drawables.at("warrior-gear-head")->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(1.f, 0.f, 0.f));
-	warrior->drawables.at("warrior-gear-left-shoulder")->transform->rotation = glm::angleAxis(18.f * (float)M_PI / 180.f - warrior_theta, glm::vec3(1.f, 0.f, 0.f));
-	warrior->drawables.at("warrior-gear-neck")->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(0.f, 0.f, 1.f)) * glm::angleAxis((float)M_PI / 2, glm::vec3(0.f, 1.f, 0.f));
-	warrior->drawables.at("warrior-gear-right-shoulder")->transform->rotation = glm::angleAxis(warrior_theta, glm::vec3(1.f, 0.f, 0.f));
-	warrior->drawables.at("warrior-upper-jaw")->transform->position = glm::vec3(0.f, 0.f, 0.75f + sin(8 * warrior_theta) * 0.25f);
-	warrior_theta += elapsed;
-	if (warrior_theta > 2 * M_PI) {
-		warrior_theta -= (float)(2 * M_PI);
-	}
-	warrior->transform->position = warrior->transform->position + glm::vec3(cos(-M_PI / 2 + warrior_theta), sin(-M_PI / 2 + warrior_theta), 0.f) * elapsed;
-	*/
-	if(game_start and game_end){
+	if(game_start && game_end){
 		monster->position.z = -1000.0;
 		monster_sclera->position.z = -1000.0;
 		monster_tentacle_4->position.z = -1000.0;
@@ -1099,7 +1100,56 @@ glm::ivec2 PlayMode::drawTextLarge(std::string text, glm::vec2 position, size_t 
 	return ret;
 }
 
+std::vector<hb_glyph_position_t> PlayMode::getGlyphPositions(std::string text, size_t offset) {
+	// Create hb-buffer and populate.
+	hb_buffer_t* hb_buffer;
+	hb_buffer = hb_buffer_create();
+	hb_buffer_add_utf8(hb_buffer, text.c_str() + offset, -1, 0, -1);
+	hb_buffer_guess_segment_properties(hb_buffer);
+
+	// Shape it!
+	hb_feature_t feature;
+	hb_feature_from_string("-liga", -1, &feature);
+	hb_shape(hb_font, hb_buffer, &feature, 1);
+
+	// Get glyph information and positions out of the buffer.
+	unsigned int len = hb_buffer_get_length(hb_buffer);
+	hb_glyph_position_t* pos = hb_buffer_get_glyph_positions(hb_buffer, NULL);
+
+	// Copy the glyph positions into a vector
+	std::vector<hb_glyph_position_t> ret;
+	for (size_t i = 0; i < len; i++) {
+		ret.push_back(pos[i]);
+	}
+
+	// Deallocate the harfbuzz buffer now that it is safely copied
+	hb_buffer_destroy(hb_buffer);
+
+	return ret;
+}
+
+
+glm::ivec2 PlayMode::getPositionInText(std::string text, glm::vec2 position, size_t index, size_t offset) {
+	// Get glyph positions for the given text string
+	std::vector<hb_glyph_position_t> pos = getGlyphPositions(text, offset);
+
+	// Increment position until we reach the end of the string, or the given end index
+	glm::dvec2 ret = position;
+	for (size_t i = 0; i < pos.size() && i < index; i++) {
+		ret.x += pos[i].x_advance / 64.;
+		ret.y += pos[i].y_advance / 64.;
+	}
+
+	// Return the final position
+	return ret;
+}
+
+
 glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width, glm::u8vec4 color, bool cursor_line) {
+	// Width of 0 means no width limit, just make it ridiculously big
+	if (width == 0) {
+		width = (size_t)1e6;
+	}
 	std::vector< PPUDataStream::Vertex > triangle_strip;
 
 	//helper to put a single tile somewhere on the screen:
@@ -1116,7 +1166,6 @@ glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width
 		triangle_strip.emplace_back(triangle_strip.back());
 	};
 
-	const char* text_c_str = text.c_str();
 	size_t start_line = 0;
 	size_t line_num = 0;
 
@@ -1124,31 +1173,25 @@ glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width
 		drawText("|", position, width);
 	}
 
+	bool do_autofill = false;
+	if (cursor_line && !autofill_suggestion.empty() && text.size() - (autofill_word_end - autofill_word_offset) + autofill_suggestion.size() <= max_line_chars) {
+		text.erase(autofill_word_offset, autofill_word_end - autofill_word_offset);
+		text.insert(autofill_word_offset, autofill_suggestion);
+		do_autofill = true;
+	}
+
 	glm::ivec2 ret(0, 0);
 
 	while (start_line < text.size()) {
 		line_num++;
 
-		// Create hb-buffer and populate.
-		hb_buffer_t* hb_buffer;
-		hb_buffer = hb_buffer_create();
-		hb_buffer_add_utf8(hb_buffer, text_c_str + start_line, -1, 0, -1);
-		hb_buffer_guess_segment_properties(hb_buffer);
-
-		// Shape it!
-		hb_feature_t feature;
-		hb_feature_from_string("-liga", -1, &feature);
-		hb_shape(hb_font, hb_buffer, &feature, 1);
-
-		// Get glyph information and positions out of the buffer.
-		unsigned int len = hb_buffer_get_length(hb_buffer);
-		hb_glyph_position_t* pos = hb_buffer_get_glyph_positions(hb_buffer, NULL);
+		std::vector<hb_glyph_position_t> pos = getGlyphPositions(text, start_line);
 
 		// Draw text
 		double current_x = position.x;
 		double current_y = position.y - line_num * font_size;
 
-		for (size_t i = 0; i < len; i++)
+		for (size_t i = 0; i < pos.size(); i++)
 		{
 			if (cursor_line && i == cur_cursor_pos) {
 				drawText("|", glm::vec2(current_x - 5., current_y + font_size), width);
@@ -1157,12 +1200,12 @@ glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width
 			if (text[start_line + i] == ' ') {
 				double cx = current_x + pos[i].x_advance / 64.;
 				bool line_break = false;
-				for (size_t j = i + 1; j < len; j++) {
+				for (size_t j = i + 1; j < pos.size(); j++) {
 					if (text[start_line + j] == ' ') {
 						break;
 					}
 					cx += pos[j].x_advance / 64.;
-					if (cx + char_width > position.x + width) {
+					if (cx > position.x + width) {
 						line_break = true;
 						break;
 					}
@@ -1174,17 +1217,21 @@ glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width
 			}
 
 			// Draw character
-			draw_tile(glm::ivec2((int)(current_x + pos[i].x_offset / 64.), (int)(current_y + pos[i].y_offset / 64.)), (uint8_t)text[start_line + i] - (uint8_t)min_char, color);
+			glm::u8vec4 glyph_color = color;
+			if (do_autofill && i >= autofill_word_end && i < autofill_word_offset + autofill_suggestion.size()) {
+				glyph_color = glm::u8vec4(glyph_color.r / 2, glyph_color.g / 2, glyph_color.b / 2, glyph_color.a);
+			}
+			draw_tile(glm::ivec2((int)(current_x + pos[i].x_offset / 64.), (int)(current_y + pos[i].y_offset / 64.)), (uint8_t)text[start_line + i] - (uint8_t)min_char, glyph_color);
 			
 			// Advance position
 			current_x += pos[i].x_advance / 64.;
 			current_y += pos[i].y_advance / 64.;
 
 			ret.x = std::max(ret.x, (int)(current_x - position.x));
-			ret.y = std::max(ret.y, (int)current_y);
+			ret.y = std::max(ret.y, -(int)(current_y - position.y));
 			
 			// Line break on overflow (may be necessary if there are no spaces)
-			if (current_x + char_width > position.x + width || i == len - 1) {
+			if (current_x + char_width > position.x + width || i == pos.size() - 1) {
 				start_line = start_line + i + 1;
 				break;
 			}
@@ -1197,7 +1244,6 @@ glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width
 
 	drawVertexArray(GL_TRIANGLE_STRIP, triangle_strip, true);
 	
-	//return (int)(line_num * font_size);
 	return ret;
 }
 
@@ -1271,7 +1317,7 @@ void PlayMode::render(){
 		} else {
 			pen_color = default_line_color;
 		}
-		drawText(text_buffer[i], glm::vec2(x, y - i * font_size), max_line_length, pen_color, i == line_index);
+		drawText(text_buffer[i], glm::vec2(x, y - i * font_size), 0, pen_color, i == line_index);
 	}
 	if (compile_failed) {
 		drawText(player_compiler.error_message, glm::ivec2(error_pos.x + text_margin.x, error_pos.y + error_size.y + text_margin.y), error_size.x - 2 * text_margin.x);
@@ -1408,6 +1454,195 @@ void PlayMode::drawHealthBar(Object* unit) {
 }
 
 
+bool PlayMode::isObject(std::string name) {
+	return player_compiler.objects.find(name) != player_compiler.objects.end();
+}
+
+
+Object* PlayMode::getObject(std::string name) {
+	auto it = player_compiler.objects.find(name);
+	if (it != player_compiler.objects.end()) {
+		return it->second;
+	}
+	return nullptr;
+}
+
+
+bool PlayMode::isPlayer(Object* obj) {
+	return std::find(player_units.begin(), player_units.end(), obj) != player_units.end();
+}
+
+
+void PlayMode::updateAutofillSuggestion() {
+	// Reset various autofill properties
+	autofill_suggestion = "";
+	autofill_word_offset = 0;
+	autofill_word_end = 0;
+	autofill_user = nullptr;
+
+	// Parse the current line into a vector of words
+	std::vector<int> offsets;
+	Compiler::Line line = Compiler::readLine(text_buffer[line_index], &offsets);
+	assert(offsets.size() == line.size());
+
+	// Determine whether this line is a conditional statement (as opposed to an action)
+	bool is_condition = line.size() > 0 && (line[0] == "IF" || line[0] == "WHILE" || line[0] == "AND" || line[0] == "OR");
+
+	// Find the index of the word that the cursor is inside or at the end of
+	int word_index = -1;
+	for (int i = 0; i < (int)line.size(); i++) {
+		std::string word = line[i];
+		int offset = offsets[i];
+		if (cur_cursor_pos > offset && cur_cursor_pos <= offset + word.size()) {
+			word_index = i;
+			break;
+		}
+	}
+
+	// Continue if the cursor is inside a word
+	if (word_index >= 0) {
+		std::string word = line[word_index];
+		autofill_word_offset = offsets[word_index];
+		autofill_word_end = autofill_word_offset + (int)word.size();
+
+		bool suggestion_is_player = false;
+
+		// Update suggestion if new word starts with word and is shorter than the current suggestion
+		auto updateSuggestion = [&](std::string new_word, bool is_player = false) {
+			bool starts_with_word = new_word.size() >= word.size() && new_word.substr(0, word.size()) == word;
+			bool priority = ((autofill_suggestion.empty())
+			              || (new_word.size() < autofill_suggestion.size())
+						  || (is_player && !suggestion_is_player))
+						  && (is_player || !suggestion_is_player);
+			if (starts_with_word && priority) {
+				autofill_suggestion = new_word;
+				suggestion_is_player = is_player;
+			}
+		};
+
+		// Find the object whose name comes before the ".", if applicable
+		if (word_index >= 2 && line[word_index - 1] == ".") {
+			autofill_user = getObject(line[word_index - 2]);
+		} else if (word_index >= 1 && word == ".") {
+			autofill_user = getObject(line[word_index - 1]);
+		}
+
+		// Generate the autofill suggestion
+		if (autofill_user) {
+			// If we already have an object, attempt to autofill an action or property
+			if (is_condition) {
+				// For a condition line, attempt to autofill a property
+				for (const auto& prop : autofill_user->properties) {
+					updateSuggestion(prop.first);
+				}
+			} else {
+				// For an action line, attempt to autofill an action
+				for (const auto& action : autofill_user->actions) {
+					updateSuggestion(action.first);
+				}
+			}
+		} else {
+			// Otherwise, attempt to autofill an object name
+			for (const auto& obj : player_compiler.objects) {
+				updateSuggestion(obj.first, isPlayer(obj.second));
+			}
+			if (is_condition) {
+				updateSuggestion("TRUE");
+				updateSuggestion("FALSE");
+			}
+			if (word_index == 0) {
+				updateSuggestion("IF");
+				updateSuggestion("WHILE");
+				updateSuggestion("AND");
+				updateSuggestion("OR");
+				updateSuggestion("END");
+			}
+		}
+	}
+}
+
+
+// Replace the word at the cursor position with the autofill suggestion
+bool PlayMode::autofill() {
+	if (!autofill_suggestion.empty()) {
+		std::string& line = text_buffer[line_index];
+		std::string old_line = line;
+		line.erase(autofill_word_offset, autofill_word_end - autofill_word_offset);
+		line.insert(autofill_word_offset, autofill_suggestion);
+		cur_cursor_pos = autofill_word_offset + autofill_suggestion.size();
+		return old_line != line;
+	}
+
+	return false;
+}
+
+
+void PlayMode::drawObjectInfoBox(Object* obj) {
+	// Size of box
+	glm::ivec2 size = glm::ivec2(obj_info_box_width, (obj->properties.size() + obj->actions.size() + 3) * font_size + 2 * abs(text_margin.y));
+
+	// Determine whether the object is a player or an enemy
+	bool is_player = std::find(player_units.begin(), player_units.end(), obj) != player_units.end();
+	
+	// Draw box on the right side for players, and the left side for enemies
+	glm::ivec2 offset;
+	if (is_player) {
+		offset = glm::vec2(100, -size.y / 2);
+	} else {
+		offset = glm::vec2(-100 - size.x, -size.y / 2);
+	}
+
+	// Position of lower left corner of box
+	glm::ivec2 pos = (glm::ivec2)worldToScreen(obj->transform->position) + offset;
+	
+	// Draw box
+	drawRectangle(pos, size, glm::u8vec4(0x00, 0x00, 0x00, 0xff), true);
+	drawRectangle(pos + glm::ivec2(5, 5), size - glm::ivec2(10, 10), glm::u8vec4(0xff, 0xff, 0xff, 0xff), false);
+
+	// Draw triangle pointing to the object
+	std::vector<PPUDataStream::Vertex> triangle;
+	glm::ivec2 midpoint;
+	if (is_player) {
+		midpoint = glm::ivec2(pos.x, pos.y + size.y / 2);
+		triangle.emplace_back(midpoint - glm::ivec2(20, 0), glm::u8vec4(0x00, 0x00, 0x00, 0xff));
+	} else {
+		midpoint = glm::ivec2(pos.x + size.x, pos.y + size.y / 2);
+		triangle.emplace_back(midpoint + glm::ivec2(20, 0), glm::u8vec4(0x00, 0x00, 0x00, 0xff));
+	}
+	triangle.emplace_back(midpoint + glm::ivec2(0, 10), glm::u8vec4(0x00, 0x00, 0x00, 0xff));
+	triangle.emplace_back(midpoint + glm::ivec2(0, -10), glm::u8vec4(0x00, 0x00, 0x00, 0xff));
+	drawVertexArray(GL_TRIANGLES, triangle, false);
+
+	// Position at which to write new lines of text
+	glm::ivec2 text_pos = pos + glm::ivec2(0, size.y) + text_margin;
+
+	// Add a line of text to the box, indented if not a header
+	auto writeLine = [&](std::string text, bool header = false) {
+		text_pos.y -= drawText((header ? "" : "  ") + text, text_pos, obj_info_box_width - 2 * text_margin.x).y;
+	};
+
+	// Write actions
+	writeLine("ACTIONS:", true);
+	for (auto& action : obj->action_names) {
+		writeLine(action);
+	}
+
+	// Write properties
+	writeLine(" ");
+	writeLine("PROPERTIES:", true);
+	size_t val_offset = 16;
+	for (auto& prop : obj->property_names) {
+		std::string prop_line = prop;
+		std::string val_string = std::to_string(obj->property(prop));
+		while(prop_line.size() + val_string.size() < val_offset) {
+			prop_line.append(" ");
+		}
+		prop_line.append(val_string);
+		writeLine(prop_line);
+	}
+}
+
+
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//update camera aspect ratio for drawable:
 	//camera->aspect = float(drawable_size.x) / float(drawable_size.y);
@@ -1439,7 +1674,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	// glViewport(0, 0, drawable_size.x, drawable_size.y);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
-	if(game_start and (!game_end)){
+	if(game_start && (!game_end)){
 
 		glViewport(worldbox_pos.x, worldbox_pos.y, worldbox_size.x, worldbox_size.y);
 		scene.draw(*camera);
@@ -1463,14 +1698,14 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 		render();
 	}
-	else if(game_end and game_start){
+	else if(game_end && game_start){
 		//Draw game start here
 		int x = 450;
 		int y = 450;
 		scene.draw(*camera);
 		drawTextLarge("Congratulations! You Beat the Monsters!", glm::ivec2(x,y), 500, 54, default_color, false);
 	}
-	else if((!game_start) and (!game_end)){
+	else if((!game_start) && (!game_end)){
 		//Draw game start here
 		int x = 600;
 		int y = 450;
@@ -1479,6 +1714,21 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		glm::ivec2 new_pos = drawTextLarge("CLOCKWORK", glm::ivec2(x,y), 500, 54, default_color, false);
 		drawText("PRESS ENTER", glm::ivec2(new_pos.x + 500, 100), 500);
 	}
+
+	drawRectangle(input_pos, input_size, glm::u8vec4(0, 0, 0, 255), true);
+	drawRectangle(input_pos + glm::ivec2(5, 5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+	drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
+	drawRectangle(prompt_pos + glm::ivec2(5, 5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+	drawRectangle(error_pos, error_size, glm::u8vec4(0, 0, 0, 255), true);
+	drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+
+	updateAutofillSuggestion();
+
+	if (autofill_user && turn_done) {
+		drawObjectInfoBox(autofill_user);
+	}
+
+	render();
 
 	GL_ERRORS();
 }
