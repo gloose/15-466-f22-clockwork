@@ -909,7 +909,7 @@ void PlayMode::reset_level() {
 
 void PlayMode::next_level() {
 	current_level++;
-	if(current_level == 1){
+	if(current_level == 10){
 		game_end = true;
 	}
 	if (current_level < 0) {
