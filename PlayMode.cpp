@@ -531,8 +531,9 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 	if (evt.type == SDL_KEYDOWN) {
 		if(evt.key.keysym.sym == SDLK_RETURN) {
-			game_start = true;
-			if (lshift.pressed || rshift.pressed) {
+			if (!game_start) {
+				game_start = true;
+			} else if (lshift.pressed || rshift.pressed) {
 				std::cout << "Submitted!\n";
 				player_exe = player_compiler.compile(text_buffer);
 				if (player_exe == nullptr) {
@@ -912,7 +913,7 @@ void PlayMode::reset_level() {
 
 void PlayMode::next_level() {
 	current_level++;
-	if(current_level == 10){
+	if(current_level == 11){
 		game_end = true;
 	}
 	if (current_level < 0) {
