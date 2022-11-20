@@ -1706,6 +1706,13 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		drawRectangle(prompt_pos + glm::ivec2(5, 5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 		drawRectangle(error_pos, error_size, glm::u8vec4(0, 0, 0, 255), true);
 		drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
+
+		updateAutofillSuggestion();
+
+		if (autofill_user && turn_done) {
+			drawObjectInfoBox(autofill_user);
+		}
+
 		render();
 	}
 	else if(game_end && game_start){
@@ -1724,21 +1731,6 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		glm::ivec2 new_pos = drawTextLarge("CLOCKWORK", glm::ivec2(x,y), 500, 54, default_color, false);
 		drawText("PRESS ENTER", glm::ivec2(new_pos.x + 500, 100), 500);
 	}
-
-	drawRectangle(input_pos, input_size, glm::u8vec4(0, 0, 0, 255), true);
-	drawRectangle(input_pos + glm::ivec2(5, 5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
-	drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
-	drawRectangle(prompt_pos + glm::ivec2(5, 5), prompt_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
-	drawRectangle(error_pos, error_size, glm::u8vec4(0, 0, 0, 255), true);
-	drawRectangle(error_pos + glm::ivec2(5, 5), error_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
-
-	updateAutofillSuggestion();
-
-	if (autofill_user && turn_done) {
-		drawObjectInfoBox(autofill_user);
-	}
-
-	render();
 
 	GL_ERRORS();
 }
