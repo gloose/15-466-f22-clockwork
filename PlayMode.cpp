@@ -482,6 +482,17 @@ void PlayMode::init_compiler() {
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
+	if (game_end) {
+		return false;
+	} else if (!game_start) {
+		if (evt.type == SDL_KEYDOWN) {
+			if (evt.key.keysym.sym == SDLK_RETURN) {
+				game_start = true;
+				return true;
+			}
+		}
+		return false;
+	}
 	if (evt.type == SDL_KEYDOWN) {
 		// font_size = 16;
 		if (evt.key.keysym.sym == SDLK_LCTRL) {
@@ -531,9 +542,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 	if (evt.type == SDL_KEYDOWN) {
 		if(evt.key.keysym.sym == SDLK_RETURN) {
-			if (!game_start) {
-				game_start = true;
-			} else if (lshift.pressed || rshift.pressed) {
+			if (lshift.pressed || rshift.pressed) {
 				std::cout << "Submitted!\n";
 				player_exe = player_compiler.compile(text_buffer);
 				if (player_exe == nullptr) {
@@ -1433,7 +1442,7 @@ void PlayMode::drawHealthBar(Object* unit) {
 		glm::ivec2 health_bar_pos = worldToScreen(unit->transform->position + glm::vec3(0.f, 0.f, 2.5f)) - glm::vec2(health_bar_size.x / 2.f, 0);
 		
 		int name_width = drawText(unit->name, health_bar_pos + glm::ivec2(0, health_bar_size.y + font_size), health_bar_size.x, glm::u8vec4(0xff, 0xff, 0xff, 0xff)).x;
-		drawRectangle(health_bar_pos - glm::ivec2(2, 2), glm::ivec2(name_width + 2, health_bar_size.y + font_size) + glm::ivec2(3, 3), glm::u8vec4(0, 0, 0, 255), true);
+		drawRectangle(health_bar_pos - glm::ivec2(2, 1), glm::ivec2(name_width + 2, health_bar_size.y + font_size) + glm::ivec2(3, 3), glm::u8vec4(0, 0, 0, 255), true);
 		drawText(unit->name, health_bar_pos + glm::ivec2(0, health_bar_size.y + font_size + 2), health_bar_size.x, glm::u8vec4(0xff, 0xff, 0xff, 0xff));
 		
 		drawRectangle(health_bar_pos, health_bar_size, glm::u8vec4(0, 0, 0, 255), true);
