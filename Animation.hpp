@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Object.hpp"
 #include "Scene.hpp"
 #include <iostream>

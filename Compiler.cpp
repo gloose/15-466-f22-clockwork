@@ -155,14 +155,15 @@ Compiler::Statement* Compiler::parseStatement(Program& program, Program::iterato
 Compiler::ActionStatement* Compiler::parseActionStatement(Program& program, Program::iterator& line_it) {
     size_t line_num = std::distance(program.begin(), line_it);
     Line::iterator word_it = line_it->begin();
-    ActionStatement* out = new ActionStatement();
+    ActionStatement* out = new ActionStatement(this);
 
     std::string obj = *word_it;
     if (parseObject(line_it, word_it, &out->object)) {
         if (parseWord(line_it, word_it, ".")) {
-            if (parseAction(line_it, word_it, out->object, &out->func, &out->base_duration)) {
+            if (parseAction(line_it, word_it, out->object, &out->func, &out->base_duration, &out->has_target)) {
                 if (parseWord(line_it, word_it, "(")) {
-                    if (parseObject(line_it, word_it, &out->target)) {
+                    out->target = nullptr;
+                    if (!out->has_target || parseObject(line_it, word_it, &out->target)) {
                         if (parseWord(line_it, word_it, ")")) {
                             if (word_it == line_it->end()) {
                                 line_it++;
@@ -204,7 +205,7 @@ Compiler::IfStatement* Compiler::parseIfStatement(Program& program, Program::ite
 
     size_t line_num = std::distance(program.begin(), line_it);
     Line::iterator word_it = line_it->begin();
-    IfStatement* out = new IfStatement();
+    IfStatement* out = new IfStatement(this);
 
     // Check if the first line matches the if statement format
     if (parseWord(line_it, word_it, "IF")) {
@@ -247,7 +248,7 @@ Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Progra
 
     size_t line_num = std::distance(program.begin(), line_it);
     Line::iterator word_it = line_it->begin();
-    WhileStatement* out = new WhileStatement();
+    WhileStatement* out = new WhileStatement(this);
 
     // Check if the first line matches the if statement format
     if (parseWord(line_it, word_it, "WHILE")) {
@@ -287,7 +288,7 @@ Compiler::WhileStatement* Compiler::parseWhileStatement(Program& program, Progra
 Compiler::CompoundStatement* Compiler::parseCompoundStatement(Program& program, Program::iterator& line_it) {
     size_t line_num = std::distance(program.begin(), line_it);
     Line::iterator word_it = line_it->begin();
-    CompoundStatement* out = new CompoundStatement();
+    CompoundStatement* out = new CompoundStatement(this);
 
     CompoundType compound_type = INVALID_COMPOUND;
     if (parseWord(line_it, word_it, "AND")) {
@@ -403,7 +404,7 @@ bool Compiler::parseObject(Program::iterator& line_it, Line::iterator& word_it, 
 
 // Attempts to parse a word as the name of a legal action for the given object.
 // Advances the word iterator if successful.
-bool Compiler::parseAction(Program::iterator& line_it, Line::iterator& word_it, Object* obj, ActionFunction* out_func, float* out_dur) {
+bool Compiler::parseAction(Program::iterator& line_it, Line::iterator& word_it, Object* obj, ActionFunction* out_func, float* out_dur, bool* out_has_target) {
     if (word_it == line_it->end()) {
         return false;
     }
@@ -413,6 +414,9 @@ bool Compiler::parseAction(Program::iterator& line_it, Line::iterator& word_it, 
         *out_func = act->second.func;
         if (out_dur != nullptr) {
             *out_dur = act->second.duration;
+        }
+        if (out_has_target != nullptr) {
+            *out_has_target = act->second.has_target;
         }
         word_it++;
         return true;
@@ -618,27 +622,29 @@ bool Compiler::parseWord(Program::iterator& line_it, Line::iterator& word_it, st
 Compiler::Statement::~Statement() {
 }
 
+Compiler::Statement::Statement(Compiler* compiler) : compiler(compiler) {}
+
 // Action statement constructor
-Compiler::ActionStatement::ActionStatement() {
+Compiler::ActionStatement::ActionStatement(Compiler* compiler) : Statement(compiler) {
     type = ACTION_STATEMENT;
 }
 
 // If statement constructor
-Compiler::IfStatement::IfStatement() {
+Compiler::IfStatement::IfStatement(Compiler* compiler) : Statement(compiler) {
     type = IF_STATEMENT;
     base_duration = 0.25f;
     duration = 0.25f;
 }
 
 // While statement constructor
-Compiler::WhileStatement::WhileStatement() {
+Compiler::WhileStatement::WhileStatement(Compiler* compiler) : Statement(compiler) {
     type = WHILE_STATEMENT;
     base_duration = 0.25f;
     duration = 0.25f;
 }
 
 // Compound statement constructor
-Compiler::CompoundStatement::CompoundStatement() {
+Compiler::CompoundStatement::CompoundStatement(Compiler* compiler) : Statement(compiler) {
     type = COMPOUND_STATEMENT;
     base_duration = 0.f;
     duration = 0.f;
@@ -672,7 +678,7 @@ Compiler::Statement* Compiler::ActionStatement::next() {
 
 // Execute action statement by calling the action function with arguments object, target
 void Compiler::ActionStatement::execute() {
-    func(object, target);
+    func(compiler, object, target);
 }
 
 // First call returns the if line itself.
@@ -851,6 +857,11 @@ Compiler::Statement* Compiler::Executable::next() {
 // Add object to compiler's object map
 void Compiler::addObject(Object* obj) {
     objects.emplace(obj->name, obj);
+    if (obj->team == Team::PLAYER) {
+        players.push_back(obj);
+    } else if (obj->team == Team::ENEMY) {
+        enemies.push_back(obj);
+    }
 }
 
 // Sets the error message

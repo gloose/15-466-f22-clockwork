@@ -46,7 +46,7 @@ bool check_freeze(Object* user) {
 	return false;
 }
 
-void attack_function(Object* user, Object* target) {
+void attack_function(Compiler* compiler, Object* user, Object* target) {
 	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
@@ -59,7 +59,7 @@ void attack_function(Object* user, Object* target) {
 	attack(damage, target);
 }
 
-void defend_function(Object* user, Object* target) {
+void defend_function(Compiler* compiler, Object* user, Object* target) {
 	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
@@ -71,7 +71,7 @@ void defend_function(Object* user, Object* target) {
 	user->property("DEFENDING") = 1;
 }
 
-void freeze_function(Object* user, Object* target) {
+void freeze_function(Compiler* compiler, Object* user, Object* target) {
 	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
@@ -88,7 +88,7 @@ void freeze_function(Object* user, Object* target) {
 	}
 }
 
-void burn_function(Object* user, Object* target) {
+void burn_function(Compiler* compiler, Object* user, Object* target) {
 	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
@@ -100,7 +100,7 @@ void burn_function(Object* user, Object* target) {
 	target->property("BURNED") = 1;
 }
 
-void heal_function(Object* user, Object* target) {
+void heal_function(Compiler* compiler, Object* user, Object* target) {
 	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
@@ -117,7 +117,7 @@ void heal_function(Object* user, Object* target) {
 	effect_string = target->name + " has " + std::to_string(target->property("HEALTH")) + " health.";
 }
 
-void shoot_function(Object* user, Object* target) {
+void shoot_function(Compiler* compiler, Object* user, Object* target) {
 	if (check_burn(user) || check_freeze(user)) {
 		return;
 	}
@@ -132,6 +132,20 @@ void shoot_function(Object* user, Object* target) {
 		action_string = user->name + " shot " + target->name + " for " + std::to_string(user->property("POWER")) + " damage, and has " + std::to_string(user->property("ARROWS")) + " arrows remaining.";
 	} else {
 		action_string = user->name + " tried to shoot " + target->name + ", but was out of arrows!";
+	}
+}
+
+void destroy_function(Compiler* compiler, Object* user, Object* target) {
+	if (user->team == Team::PLAYER) {
+		for (size_t i = 0; i < compiler->enemies.size(); i++) {
+			attack(50, compiler->enemies[i]);
+			compiler->enemies[i]->updateHealth();
+		}
+	} else if (user->team == Team::ENEMY) {
+		for (size_t i = 0; i < compiler->players.size(); i++) {
+			attack(50, compiler->players[i]);
+			compiler->players[i]->updateHealth();
+		}
 	}
 }
 

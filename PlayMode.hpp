@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Mode.hpp"
 
 #include "Scene.hpp"
@@ -182,7 +184,7 @@ struct PlayMode : Mode {
 	glm::ivec2 drawTextLarge(std::string text, glm::vec2 position, size_t width, int large_font_size, glm::u8vec4 color_large = default_color, bool cursor_line_large = false);
 	void drawVertexArray(GLenum mode, const std::vector<PPUDataStream::Vertex>& vertex_array, bool use_texture);
 	void setMesh(Scene::Drawable* drawable, std::string mesh);
-	Object* makeObject(std::string name, std::string model_name = "");
+	Object* makeObject(std::string name, std::string model_name, Team team = Team::NONE);
 	void energyTransforms();
 	void drawRectangle(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, bool filled);
 	void drawThickRectangleOutline(glm::ivec2 pos, glm::ivec2 size, glm::u8vec4 color, int thickness);

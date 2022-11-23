@@ -1,3 +1,5 @@
+#pragma once
+
 #include <unordered_map>
 #include <vector>
 #include <list>
@@ -9,6 +11,9 @@
 
 struct Compiler {
     std::unordered_map<std::string, Object*> objects;
+
+    std::vector<Object*> players;
+    std::vector<Object*> enemies;
 
     typedef std::vector<std::string> Line;
     typedef std::vector<Line> Program;
@@ -42,7 +47,9 @@ struct Compiler {
         float base_duration = 1.f;
         float duration = 1.f;
         size_t line_num = 0;
+        Compiler* compiler;
 
+        Statement(Compiler* compiler);
         virtual ~Statement();
         virtual Statement* next();
         virtual void execute();
@@ -53,8 +60,9 @@ struct Compiler {
         Object* object;
         ActionFunction func;
         Object* target;
+        bool has_target;
 
-        ActionStatement();
+        ActionStatement(Compiler* compiler);
         Statement* next();
         void execute();
     };
@@ -63,7 +71,7 @@ struct Compiler {
         Condition condition;
         CompoundType compound_type;
 
-        CompoundStatement();
+        CompoundStatement(Compiler* compiler);
     };
 
     struct IfStatement : Statement {
@@ -72,7 +80,7 @@ struct Compiler {
         std::vector<CompoundStatement*> compounds;
         bool truth = false;
 
-        IfStatement();
+        IfStatement(Compiler* compiler);
         Statement* next();
         void execute();
         void reset();
@@ -84,7 +92,7 @@ struct Compiler {
         std::vector<CompoundStatement*> compounds;
         bool truth = false;
 
-        WhileStatement();
+        WhileStatement(Compiler* compiler);
         Statement* next();
         void execute();
         void reset();
@@ -106,7 +114,7 @@ struct Compiler {
     WhileStatement* parseWhileStatement(Program& program, Program::iterator& line_it);
     CompoundStatement* parseCompoundStatement(Program& program, Program::iterator& line_it);
     bool parseObject(Program::iterator& line_it, Line::iterator& word_it, Object** out);
-    bool parseAction(Program::iterator& line_it, Line::iterator& word_it, Object* obj, ActionFunction* out_func, float* out_dur);
+    bool parseAction(Program::iterator& line_it, Line::iterator& word_it, Object* obj, ActionFunction* out_func, float* out_dur, bool* out_has_target);
     bool parseStatementBlock(Program& program, Program::iterator& line_it, std::vector<Statement*>* out, std::string end = "END");
     bool parseCompoundBlock(Program& program, Program::iterator& line_it, std::vector<CompoundStatement*>* out);
     bool parseWord(Program::iterator& line_it, Line::iterator& word_it, std::string word);

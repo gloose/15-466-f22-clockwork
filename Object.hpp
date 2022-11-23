@@ -1,3 +1,5 @@
+#pragma once
+
 #include <unordered_map>
 #include <vector>
 #include <list>
@@ -7,15 +9,24 @@
 #ifndef _OBJECT_H_
 #define _OBJECT_H_
 
+struct Compiler;
+
 struct Object;
 
-typedef void (*ActionFunction)(Object*, Object*);
+typedef void (*ActionFunction)(Compiler*, Object*, Object*);
 
 struct Action {
     ActionFunction func;
     float duration;
+    bool has_target;
 
-    Action(ActionFunction func, float duration);
+    Action(ActionFunction func, float duration, bool has_target = true);
+};
+
+enum Team {
+    NONE,
+    PLAYER,
+    ENEMY
 };
 
 struct Object {
@@ -29,9 +40,10 @@ struct Object {
     glm::vec2 start_position;
     float health_level = 1.0f;
     float floor_height = 0.f;
+    Team team;
 
-    Object(std::string name);
-    void addAction(std::string action_name, ActionFunction func, float duration);
+    Object(std::string name, Team team);
+    void addAction(std::string action_name, ActionFunction func, float duration, bool has_target = true);
     void addProperty(std::string property_name, int default_value);
     void reset();
     int& property(std::string property_name);

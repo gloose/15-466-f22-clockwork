@@ -10,15 +10,15 @@ std::string formatCase(std::string str) {
 }
 
 // Construct action with function and duration
-Action::Action(ActionFunction func, float duration) : func(func), duration(duration) {}
+Action::Action(ActionFunction func, float duration, bool has_target) : func(func), duration(duration), has_target(has_target) {}
 
 // Construct object with name
-Object::Object(std::string name) : name(formatCase(name)) {}
+Object::Object(std::string name, Team team) : name(formatCase(name)), team(team) {}
 
 // Add action to object's map of valid actions
-void Object::addAction(std::string action_name, ActionFunction func, float duration) {
+void Object::addAction(std::string action_name, ActionFunction func, float duration, bool has_target) {
     action_name = formatCase(action_name);
-    actions.emplace(action_name, Action(func, duration));
+    actions.emplace(action_name, Action(func, duration, has_target));
     action_names.push_back(action_name);
 }
 
