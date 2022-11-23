@@ -24,9 +24,9 @@ struct Action {
 };
 
 enum Team {
-    NONE,
-    PLAYER,
-    ENEMY
+    TEAM_NONE,
+    TEAM_PLAYER,
+    TEAM_ENEMY
 };
 
 struct Object {

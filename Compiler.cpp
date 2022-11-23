@@ -857,9 +857,9 @@ Compiler::Statement* Compiler::Executable::next() {
 // Add object to compiler's object map
 void Compiler::addObject(Object* obj) {
     objects.emplace(obj->name, obj);
-    if (obj->team == Team::PLAYER) {
+    if (obj->team == Team::TEAM_PLAYER) {
         players.push_back(obj);
-    } else if (obj->team == Team::ENEMY) {
+    } else if (obj->team == Team::TEAM_ENEMY) {
         enemies.push_back(obj);
     }
 }

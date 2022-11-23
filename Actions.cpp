@@ -136,12 +136,12 @@ void shoot_function(Compiler* compiler, Object* user, Object* target) {
 }
 
 void destroy_function(Compiler* compiler, Object* user, Object* target) {
-	if (user->team == Team::PLAYER) {
+	if (user->team == Team::TEAM_PLAYER) {
 		for (size_t i = 0; i < compiler->enemies.size(); i++) {
 			attack(50, compiler->enemies[i]);
 			compiler->enemies[i]->updateHealth();
 		}
-	} else if (user->team == Team::ENEMY) {
+	} else if (user->team == Team::TEAM_ENEMY) {
 		for (size_t i = 0; i < compiler->players.size(); i++) {
 			attack(50, compiler->players[i]);
 			compiler->players[i]->updateHealth();

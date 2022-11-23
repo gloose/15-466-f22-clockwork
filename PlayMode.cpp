@@ -279,7 +279,7 @@ void PlayMode::create_levels() {
 }
 
 void PlayMode::init_compiler() {
-	brawler = makeObject("BRAWLER", "warrior", Team::PLAYER);
+	brawler = makeObject("BRAWLER", "warrior", Team::TEAM_PLAYER);
 	brawler->start_position = glm::vec2(-6.f, -6.f);
 	brawler->addAction("ATTACK", attack_function, turn_duration());
 	brawler->addAction("DEFEND", defend_function, turn_duration());
@@ -289,7 +289,7 @@ void PlayMode::init_compiler() {
 	brawler->addProperty("ALIVE", 1);
 	brawler->addProperty("POWER", 15);
 
-	caster = makeObject("CASTER", "caster", Team::PLAYER);
+	caster = makeObject("CASTER", "caster", Team::TEAM_PLAYER);
 	caster->start_position = glm::vec2(-6.f, 6.f);
 	caster->addAction("FREEZE", freeze_function, turn_duration() * 1.5f);
 	caster->addAction("BURN", burn_function, turn_duration() * 1.5f);
@@ -298,7 +298,7 @@ void PlayMode::init_compiler() {
 	caster->addProperty("DEFENSE", 0);
 	caster->addProperty("ALIVE", 1);
 
-	ranger = makeObject("RANGER", "ranger", Team::PLAYER);
+	ranger = makeObject("RANGER", "ranger", Team::TEAM_PLAYER);
 	ranger->start_position = glm::vec2(-6.f, 2.f);
 	register_ranger_object(ranger);
 	ranger->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
@@ -310,7 +310,7 @@ void PlayMode::init_compiler() {
 	ranger->addProperty("ARROWS", 8);
 	ranger->addProperty("POWER", 20);
 
-	healer = makeObject("HEALER", "healer", Team::PLAYER);
+	healer = makeObject("HEALER", "healer", Team::TEAM_PLAYER);
 	healer->start_position = glm::vec2(-6.f, -2.f);
 	healer->addAction("HEAL", heal_function, turn_duration());
 	healer->addProperty("HEALTH_MAX", 80);
@@ -318,7 +318,7 @@ void PlayMode::init_compiler() {
 	healer->addProperty("DEFENSE", 0);
 	healer->addProperty("ALIVE", 1);
 
-	Object* enemy1 = makeObject("ENEMY1", "monster", Team::ENEMY);
+	Object* enemy1 = makeObject("ENEMY1", "monster", Team::TEAM_ENEMY);
 	enemy1->start_position = glm::vec2(6.f, 0.f);
 	// For a demonstration of the destroy function, uncomment this line and change enemy1.txt to "ENEMY1.DESTROY()"
 	//enemy1->addAction("DESTROY", destroy_function, turn_duration(), false);
@@ -330,7 +330,7 @@ void PlayMode::init_compiler() {
 	enemy1->addProperty("ALIVE", 1);
 	enemy1->addProperty("POWER", 0);
 
-	Object* enemy2 = makeObject("ENEMY2", "monster", Team::ENEMY);
+	Object* enemy2 = makeObject("ENEMY2", "monster", Team::TEAM_ENEMY);
 	enemy2->start_position = enemy1->start_position;
 	enemy2->addAction("ATTACK", attack_function, turn_duration());
 	enemy2->addAction("DEFEND", defend_function, turn_duration());
@@ -340,7 +340,7 @@ void PlayMode::init_compiler() {
 	enemy2->addProperty("ALIVE", 1);
 	enemy2->addProperty("POWER", 10);
 
-	Object* enemy3 = makeObject("ENEMY3", "monster", Team::ENEMY);
+	Object* enemy3 = makeObject("ENEMY3", "monster", Team::TEAM_ENEMY);
 	enemy3->start_position = enemy1->start_position;
 	enemy3->addAction("ATTACK", attack_function, turn_duration());
 	enemy3->addAction("DEFEND", defend_function, turn_duration());
@@ -350,7 +350,7 @@ void PlayMode::init_compiler() {
 	enemy3->addProperty("ALIVE", 1);
 	enemy3->addProperty("POWER", 10);
 
-	Object* enemy4 = makeObject("ENEMY4", "monster", Team::ENEMY);
+	Object* enemy4 = makeObject("ENEMY4", "monster", Team::TEAM_ENEMY);
 	enemy4->start_position = enemy1->start_position;
 	enemy4->addAction("ATTACK", attack_function, turn_duration());
 	enemy4->addAction("DEFEND", defend_function, turn_duration());
@@ -360,7 +360,7 @@ void PlayMode::init_compiler() {
 	enemy4->addProperty("ALIVE", 1);
 	enemy4->addProperty("POWER", 200);
 
-	Object* enemy5 = makeObject("ENEMY5", "monster", Team::ENEMY);
+	Object* enemy5 = makeObject("ENEMY5", "monster", Team::TEAM_ENEMY);
 	enemy5->start_position = enemy1->start_position;
 	enemy5->addAction("ATTACK", attack_function, turn_duration());
 	enemy5->addAction("DEFEND", defend_function, turn_duration());
@@ -370,7 +370,7 @@ void PlayMode::init_compiler() {
 	enemy5->addProperty("ALIVE", 1);
 	enemy5->addProperty("POWER", 50);
 
-	Object* enemy6 = makeObject("ENEMY6", "monster", Team::ENEMY);
+	Object* enemy6 = makeObject("ENEMY6", "monster", Team::TEAM_ENEMY);
 	enemy6->start_position = enemy1->start_position;
 	enemy6->addAction("ATTACK", attack_function, turn_duration());
 	enemy6->addAction("DEFEND", defend_function, turn_duration());
@@ -380,7 +380,7 @@ void PlayMode::init_compiler() {
 	enemy6->addProperty("ALIVE", 1);
 	enemy6->addProperty("POWER", 100);
 
-	Object* enemy7 = makeObject("ENEMY7", "monster", Team::ENEMY);
+	Object* enemy7 = makeObject("ENEMY7", "monster", Team::TEAM_ENEMY);
 	enemy7->start_position = enemy1->start_position;
 	enemy7->addAction("ATTACK", attack_function, turn_duration());
 	enemy7->addAction("DEFEND", defend_function, turn_duration());
@@ -390,7 +390,7 @@ void PlayMode::init_compiler() {
 	enemy7->addProperty("ALIVE", 1);
 	enemy7->addProperty("POWER", 10);
 
-	Object* enemy8 = makeObject("ENEMY8", "monster", Team::ENEMY);
+	Object* enemy8 = makeObject("ENEMY8", "monster", Team::TEAM_ENEMY);
 	enemy8->start_position = enemy1->start_position;
 	enemy8->addAction("ATTACK", attack_function, turn_duration());
 	enemy8->addAction("DEFEND", defend_function, turn_duration());
@@ -400,7 +400,7 @@ void PlayMode::init_compiler() {
 	enemy8->addProperty("ALIVE", 1);
 	enemy8->addProperty("POWER", 10);
 
-	Object* enemy9 = makeObject("ENEMY9", "monster", Team::ENEMY);
+	Object* enemy9 = makeObject("ENEMY9", "monster", Team::TEAM_ENEMY);
 	enemy9->start_position = enemy1->start_position;
 	enemy9->addAction("ATTACK", attack_function, turn_duration());
 	enemy9->addAction("DEFEND", defend_function, turn_duration());
@@ -410,7 +410,7 @@ void PlayMode::init_compiler() {
 	enemy9->addProperty("ALIVE", 1);
 	enemy9->addProperty("POWER", 50);
 
-	Object* enemy10 = makeObject("ENEMY10", "monster", Team::ENEMY);
+	Object* enemy10 = makeObject("ENEMY10", "monster", Team::TEAM_ENEMY);
 	enemy10->start_position = enemy1->start_position;
 	enemy10->addAction("ATTACK", attack_function, turn_duration());
 	enemy10->addAction("DEFEND", defend_function, turn_duration());
@@ -420,7 +420,7 @@ void PlayMode::init_compiler() {
 	enemy10->addProperty("ALIVE", 1);
 	enemy10->addProperty("POWER", 40);
 
-	Object *fargoth = makeObject("FARGOTH", "tank", Team::ENEMY);
+	Object *fargoth = makeObject("FARGOTH", "tank", Team::TEAM_ENEMY);
 	fargoth->start_position = glm::vec2(6.f, -3.f);
 	fargoth->addAction("ATTACK", attack_function, turn_duration());
 	fargoth->addAction("DEFEND", defend_function, turn_duration());
@@ -430,7 +430,7 @@ void PlayMode::init_compiler() {
 	fargoth->addProperty("ALIVE", 1);
 	fargoth->addProperty("POWER", 20);
 
-	Object *rupol = makeObject("RUPOL", "gunner", Team::ENEMY);
+	Object *rupol = makeObject("RUPOL", "gunner", Team::TEAM_ENEMY);
 	rupol->start_position = glm::vec2(6.f, 3.f);
 	rupol->addAction("ATTACK", attack_function, turn_duration());
 	rupol->addAction("DEFEND", defend_function, turn_duration());
