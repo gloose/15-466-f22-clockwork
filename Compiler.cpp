@@ -49,10 +49,17 @@ Compiler::Line Compiler::readLine(std::string text, std::vector<int>* offsets) {
 
         if (c == ' ' || c == '\t') {
             addWord();
-        } else if (c == '.' || c == '(' || c == ')') {
+        } else if (c == '.' || c == '(' || c == ')' || c == '<' || c == '>' || c == '!' || c == '=') {
             addWord();
             word = c;
             word_start = (int)j;
+            if ((c == '=' || c == '<' || c == '>' || c == '!') && j < text.size() - 1) {
+                c = (char)toupper(text[j + 1]);
+                if (c == '=') {
+                    word = word + c;
+                    j++;
+                }
+            }
             addWord();
         } else {
             word = word + c;
