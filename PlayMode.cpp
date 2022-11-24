@@ -760,10 +760,11 @@ void PlayMode::execute_player_statement() {
 			Compiler::ActionStatement *action_statement = dynamic_cast<Compiler::ActionStatement *>(player_statement);
 			obj = std::find(player_units.begin(), player_units.end(), action_statement->object);
 			if (action_statement->has_target) {
-				tgt = std::find(enemy_units[current_level].begin(), enemy_units[current_level].end(), action_statement->target);
+				Object* target = action_statement->getRealTarget();
+				tgt = std::find(enemy_units[current_level].begin(), enemy_units[current_level].end(), target);
 				// Could be that it's a heal action
 				if (tgt == enemy_units[current_level].end()) {
-					tgt = std::find(player_units.begin(), player_units.end(), action_statement->target);
+					tgt = std::find(player_units.begin(), player_units.end(), target);
 				}
 			}
 		} else {
@@ -936,12 +937,8 @@ void PlayMode::next_level() {
 	}
 
 	// Compiler should recognize only those objects that exist in this level
-	player_compiler.objects.clear();
-	player_compiler.players.clear();
-	player_compiler.enemies.clear();
-	enemy_compiler.objects.clear();
-	enemy_compiler.players.clear();
-	enemy_compiler.enemies.clear();
+	player_compiler.clearObjects();
+	enemy_compiler.clearObjects();
 	for (Object *u : player_units) {
 		player_compiler.addObject(u);
 		enemy_compiler.addObject(u);

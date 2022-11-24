@@ -7,8 +7,21 @@
 #include <memory>
 #include <algorithm>
 
-// Constructor doesn't do anything at the moment
 Compiler::Compiler() {
+    initSpecialObjects();
+}
+
+void Compiler::initSpecialObjects() {
+    random_player = new Object("GOOD_RANDOM", TEAM_PLAYER);
+    random_enemy = new Object("EVIL_RANDOM", TEAM_ENEMY);
+
+    random_player->transform = new Scene::Transform();
+    random_player->transform->position.z = 100;
+    random_enemy->transform = new Scene::Transform();
+    random_enemy->transform->position.z = 100;
+
+    addObject(random_player);
+    addObject(random_enemy);
 }
 
 // Read a string of text and return a vector of words
@@ -678,7 +691,37 @@ Compiler::Statement* Compiler::ActionStatement::next() {
 
 // Execute action statement by calling the action function with arguments object, target
 void Compiler::ActionStatement::execute() {
-    func(compiler, object, target);
+    func(compiler, object, getRealTarget());
+}
+
+Object* Compiler::ActionStatement::getRealTarget() {
+    if (target == compiler->random_player) {
+        std::vector<Object*> living_players;
+        for (size_t i = 0; i < compiler->players.size(); i++) {
+            if (compiler->players[i]->property("ALIVE")) {
+                living_players.push_back(compiler->players[i]);
+            }
+        }
+        if (living_players.size() > 0) {
+            return living_players[rand() % living_players.size()];
+        } else {
+            return compiler->players[rand() % compiler->players.size()];
+        }
+    } else if (target == compiler->random_enemy) {
+        std::vector<Object*> living_enemies;
+        for (size_t i = 0; i < compiler->enemies.size(); i++) {
+            if (compiler->enemies[i]->property("ALIVE")) {
+                living_enemies.push_back(compiler->enemies[i]);
+            }
+        }
+        if (living_enemies.size() > 0) {
+            return living_enemies[rand() % living_enemies.size()];
+        } else {
+            return compiler->enemies[rand() % compiler->enemies.size()];
+        }
+    }
+
+    return target;
 }
 
 // First call returns the if line itself.
@@ -867,4 +910,12 @@ void Compiler::addObject(Object* obj) {
 // Sets the error message
 void Compiler::set_error(size_t line_num, std::string message) {
     error_message = "ERROR (line " + std::to_string(line_num + 1) + "): " + message;
+}
+
+void Compiler::clearObjects() {
+    objects.clear();
+    players.clear();
+    enemies.clear();
+
+    initSpecialObjects();
 }

@@ -65,6 +65,7 @@ struct Compiler {
         ActionStatement(Compiler* compiler);
         Statement* next();
         void execute();
+        Object* getRealTarget();
     };
 
     struct CompoundStatement : Statement {
@@ -107,6 +108,9 @@ struct Compiler {
 
     std::string error_message = "";
 
+    Object* random_player;
+    Object* random_enemy;
+
     Compiler();
     Statement* parseStatement(Program& program, Program::iterator& line_it);
     ActionStatement* parseActionStatement(Program& program, Program::iterator& line_it);
@@ -133,6 +137,8 @@ struct Compiler {
     Program readProgram(std::vector<std::string> lines);
     static Line readLine(std::string text, std::vector<int>* offsets = nullptr);
     void set_error(size_t line_num, std::string message);
+    void initSpecialObjects();
+    void clearObjects();
 };
 
 #endif
