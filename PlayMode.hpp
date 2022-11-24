@@ -158,14 +158,16 @@ struct PlayMode : Mode {
 	Object* ranger;
 	Object* healer;
 
-	glm::ivec2 prompt_pos = glm::ivec2(10, ScreenHeight - 190);
-	glm::ivec2 prompt_size = glm::ivec2(400, 180);
-	glm::ivec2 input_pos = glm::ivec2(10, 100);
-	glm::ivec2 input_size = glm::ivec2(prompt_size.x, prompt_pos.y - input_pos.y - 10);
 	glm::ivec2 error_pos = glm::ivec2(10, 10);
-	glm::ivec2 error_size = glm::ivec2(prompt_size.x, input_pos.y - 20);
-	glm::ivec2 worldbox_pos = glm::ivec2(input_pos.x + input_size.x + 20, 20);
-	glm::ivec2 worldbox_size = glm::ivec2(ScreenWidth - (input_pos.x + input_size.x) - 40, ScreenHeight - 40);
+	glm::ivec2 error_size = glm::ivec2(400, 80);
+	glm::ivec2 input_pos = glm::ivec2(10, error_pos.y + error_size.y + 10);
+	glm::ivec2 input_size = glm::ivec2(400, (ScreenHeight - input_pos.y - 20) / 2);
+	glm::ivec2 enemy_pos = glm::ivec2(10, input_pos.y + input_size.y + 10);
+	glm::ivec2 enemy_size = glm::ivec2(400, ScreenHeight - enemy_pos.y - 10);
+	glm::ivec2 prompt_pos = glm::ivec2(input_pos.x + input_size.x + 10, ScreenHeight - 110);
+	glm::ivec2 prompt_size = glm::ivec2(ScreenWidth - prompt_pos.x - 10, 100);
+	glm::ivec2 worldbox_pos = glm::ivec2(prompt_pos.x + 10, 20);
+	glm::ivec2 worldbox_size = glm::ivec2(prompt_size.x - 20, ScreenHeight - prompt_size.y - 40);
 	glm::ivec2 text_margin = glm::ivec2(10, -10);
 
 	glm::mat4 world_to_screen;
@@ -198,15 +200,18 @@ struct PlayMode : Mode {
 	void drawObjectInfoBox(Object* obj);
 	bool autofill();
 	bool isPlayer(Object* obj);
+	void drawEnemyCode();
 
 	//begin of the text rendering
 	size_t line_index = 0;
 	size_t cur_cursor_pos = 0;
 	std::vector< std::string > text_buffer;
+	std::vector< std::string > enemy_text_buffer;
 	int execution_line_index = -1;
+	int enemy_execution_line_index = -1;
 	size_t max_line_length = 400;
 	size_t max_line_chars = 40;
-	size_t max_lines = 25;
+	size_t max_lines = 17;
 	std::string cur_str;
 	void move_up();
 	void move_down();

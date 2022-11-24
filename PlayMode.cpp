@@ -778,6 +778,7 @@ void PlayMode::execute_player_statement() {
 			player_statement->execute();
 		}
 		execution_line_index = (int)player_statement->line_num;
+		enemy_execution_line_index = -1;
 		bool enemies_alive = false;
 		bool players_alive = false;
 		for (auto& enemy : enemy_units[current_level]) {
@@ -842,6 +843,7 @@ void PlayMode::execute_enemy_statement() {
 		get_action_string() = "The enemy is thinking...";
 		enemy_statement->execute();
 		execution_line_index = -1;
+		enemy_execution_line_index = (int)enemy_statement->line_num;
 		bool enemies_alive = false;
 		bool players_alive = false;
 		for (auto& enemy : enemy_units[current_level]) {
@@ -948,6 +950,8 @@ void PlayMode::next_level() {
 		enemy_compiler.addObject(u);
 	}
 
+	enemy_text_buffer = Compiler::readFile(level_enemy_code[current_level]);
+
 	reset_level();
 	text_buffer.clear();
 	text_buffer.push_back("");
@@ -989,6 +993,7 @@ void PlayMode::update(float elapsed) {
 			if (turn_time <= 0.0f) {
 				turn_done = true;
 				execution_line_index = -1;
+				enemy_execution_line_index = -1;
 				get_action_string() = "";
 				if (!level_lost && !level_won) {
 					get_effect_string() = "Your code didn't solve the puzzle...";
@@ -1217,12 +1222,12 @@ glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width
 				double cx = current_x + pos[i].x_advance / 64.;
 				bool line_break = false;
 				for (size_t j = i + 1; j < pos.size(); j++) {
-					if (text[start_line + j] == ' ') {
-						break;
-					}
 					cx += pos[j].x_advance / 64.;
 					if (cx > position.x + width) {
 						line_break = true;
+						break;
+					}
+					if (text[start_line + j] == ' ') {
 						break;
 					}
 				}
@@ -1251,7 +1256,6 @@ glm::ivec2 PlayMode::drawText(std::string text, glm::vec2 position, size_t width
 				start_line = start_line + i + 1;
 				break;
 			}
-			
 		}
 		if (cursor_line && cur_cursor_pos == text.size()) {
 			drawText("|", glm::vec2(current_x - 5., current_y + font_size), width);
@@ -1324,6 +1328,10 @@ void PlayMode::insert(std::string cur_letter){
 void PlayMode::render(){
 	int x = input_pos.x + text_margin.x;
 	int y = input_pos.y + input_size.y + text_margin.y;
+
+	drawText("Your Code", glm::vec2(x, y), 0, glm::u8vec4(0x80, 0x80, 0x80, 0xff));
+	y -= font_size;
+
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < text_buffer.size(); i++){
 		if (!player_done && (int)i == execution_line_index) {
@@ -1659,6 +1667,25 @@ void PlayMode::drawObjectInfoBox(Object* obj) {
 }
 
 
+void PlayMode::drawEnemyCode() {
+	int x = enemy_pos.x + text_margin.x;
+	int y = enemy_pos.y + enemy_size.y + text_margin.y;
+
+	drawText("Enemy Code", glm::vec2(x, y), 0, glm::u8vec4(0x80, 0x80, 0x80, 0xff));
+	y -= font_size;
+
+	glm::u8vec4 pen_color = default_line_color;
+	for(size_t i = 0; i < enemy_text_buffer.size(); i++){
+		if (!enemy_done && (int)i == enemy_execution_line_index) {
+			pen_color = execute_line_color;
+		} else {
+			pen_color = default_line_color;
+		}
+		drawText(enemy_text_buffer[i], glm::vec2(x, y - i * font_size), 0, pen_color);
+	}
+}
+
+
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//update camera aspect ratio for drawable:
 	//camera->aspect = float(drawable_size.x) / float(drawable_size.y);
@@ -1706,6 +1733,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 			drawHealthBar(enemy_units[current_level][i]);
 		}
 
+		drawRectangle(enemy_pos, enemy_size, glm::u8vec4(0, 0, 0, 255), true);
+		drawRectangle(enemy_pos + glm::ivec2(5, 5), enemy_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 		drawRectangle(input_pos, input_size, glm::u8vec4(0, 0, 0, 255), true);
 		drawRectangle(input_pos + glm::ivec2(5, 5), input_size - glm::ivec2(10, 10), glm::u8vec4(255, 255, 255, 255), false);
 		drawRectangle(prompt_pos, prompt_size, glm::u8vec4(0, 0, 0, 255), true);
@@ -1720,6 +1749,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		}
 
 		render();
+
+		drawEnemyCode();
 	}
 	else if(game_end && game_start){
 		//Draw game start here

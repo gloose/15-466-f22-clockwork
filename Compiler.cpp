@@ -86,8 +86,7 @@ Compiler::Program Compiler::readProgram(std::vector<std::string> lines) {
     return program;
 }
 
-// Read a file into the Program format that can be compiled
-Compiler::Program Compiler::readProgram(std::string filename) {
+std::vector<std::string> Compiler::readFile(std::string filename) {
     // Open file at dist/filename
     std::ifstream ifile(data_path(filename), std::ios::binary);
 
@@ -102,8 +101,12 @@ Compiler::Program Compiler::readProgram(std::string filename) {
         lines.push_back(str);
     }
 
-    // Pass the lines to the usual readProgram function
-    return readProgram(lines);
+    return lines;
+}
+
+// Read a file into the Program format that can be compiled
+Compiler::Program Compiler::readProgram(std::string filename) {
+    return readProgram(readFile(filename));
 }
 
 // Compiles a program into an Executable struct.

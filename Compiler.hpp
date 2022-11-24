@@ -139,6 +139,7 @@ struct Compiler {
     void set_error(size_t line_num, std::string message);
     void initSpecialObjects();
     void clearObjects();
+    static std::vector<std::string> readFile(std::string filename);
 };
 
 #endif
