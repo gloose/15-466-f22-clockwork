@@ -263,19 +263,37 @@ void PlayMode::create_levels() {
 	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (ranger.arrows > 0)\", and then use the brawler afterwards. A list of the properties can be found in the manual, but all units have alive, health, and power.");
 	level_guidance.push_back("If statements work the same way. Try checking \"if (brawler.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"!");
 	level_guidance.push_back("Alright, time to test everything you've learned! Enemy10 is tough, but you can do it!");
-	level_guidance.push_back("Fargoth and Rupol appeared! Fargoth has a lot of health, and Rupol does a lot of damage.");
+	level_guidance.push_back("Gunners are very powerful! Be careful of Vrop's attacks.");
+	level_guidance.push_back("Speedsters like Grum can attack multiple times in a row! Make sure your code is efficient.");
+	level_guidance.push_back("Tanks take a lot of damage. Be patient and make sure your code is robust enough to last a while against Yormun.");
+	level_guidance.push_back("Not all monsters are the same. Gunner VropVrop is even more powerful!");
+	level_guidance.push_back("You can face multiple enemies at once! Make sure your code handles both Fargoth and Rupol.");
+	level_guidance.push_back("Great job. Now how about a different pair of enemies?");
+	level_guidance.push_back("You're doing great! Keep it up!");
+	level_guidance.push_back("You can also face multiple enemies of the same type. You may need a nap in a war against two tanks... Or you can use the ctrl skip.");
+	level_guidance.push_back("If two tanks was too easy for you, how about three speedsters?");
+	level_guidance.push_back("To finish off this set of 10 levels, beat one of each enemy!");
 
-	level_enemy_code.push_back("enemy1.txt");
-	level_enemy_code.push_back("enemy2.txt");
-	level_enemy_code.push_back("enemy3.txt");
-	level_enemy_code.push_back("enemy4.txt");
-	level_enemy_code.push_back("enemy5.txt");
-	level_enemy_code.push_back("enemy6.txt");
-	level_enemy_code.push_back("enemy7.txt");
-	level_enemy_code.push_back("enemy8.txt");
-	level_enemy_code.push_back("enemy9.txt");
-	level_enemy_code.push_back("enemy10.txt");
-	level_enemy_code.push_back("enemy-test.txt");
+	level_enemy_code.push_back("EnemyCode/enemy1.txt");
+	level_enemy_code.push_back("EnemyCode/enemy2.txt");
+	level_enemy_code.push_back("EnemyCode/enemy3.txt");
+	level_enemy_code.push_back("EnemyCode/enemy4.txt");
+	level_enemy_code.push_back("EnemyCode/enemy5.txt");
+	level_enemy_code.push_back("EnemyCode/enemy6.txt");
+	level_enemy_code.push_back("EnemyCode/enemy7.txt");
+	level_enemy_code.push_back("EnemyCode/enemy8.txt");
+	level_enemy_code.push_back("EnemyCode/enemy9.txt");
+	level_enemy_code.push_back("EnemyCode/enemy10.txt");
+	level_enemy_code.push_back("EnemyCode/enemy11.txt");
+	level_enemy_code.push_back("EnemyCode/enemy12.txt");
+	level_enemy_code.push_back("EnemyCode/enemy13.txt");
+	level_enemy_code.push_back("EnemyCode/enemy14.txt");
+	level_enemy_code.push_back("EnemyCode/enemy15.txt");
+	level_enemy_code.push_back("EnemyCode/enemy16.txt");
+	level_enemy_code.push_back("EnemyCode/enemy17.txt");
+	level_enemy_code.push_back("EnemyCode/enemy18.txt");
+	level_enemy_code.push_back("EnemyCode/enemy19.txt");
+	level_enemy_code.push_back("EnemyCode/enemy20.txt");
 }
 
 void PlayMode::init_compiler() {
@@ -320,8 +338,6 @@ void PlayMode::init_compiler() {
 
 	Object* enemy1 = makeObject("ENEMY1", "monster", Team::TEAM_ENEMY);
 	enemy1->start_position = glm::vec2(6.f, 0.f);
-	// For a demonstration of the destroy function, uncomment this line and change enemy1.txt to "ENEMY1.DESTROY()"
-	//enemy1->addAction("DESTROY", destroy_function, turn_duration(), false);
 	enemy1->addAction("ATTACK", attack_function, turn_duration());
 	enemy1->addAction("DEFEND", defend_function, turn_duration());
 	enemy1->addProperty("HEALTH_MAX", 15);
@@ -418,14 +434,54 @@ void PlayMode::init_compiler() {
 	enemy10->addProperty("HEALTH", 100);
 	enemy10->addProperty("DEFENSE", 0);
 	enemy10->addProperty("ALIVE", 1);
-	enemy10->addProperty("POWER", 40);
+	enemy10->addProperty("POWER", 30);
+
+	Object* vrop = makeObject("VROP", "gunner", Team::TEAM_ENEMY);
+	vrop->start_position = enemy1->start_position;
+	vrop->addAction("ATTACK", attack_function, turn_duration());
+	vrop->addAction("DEFEND", defend_function, turn_duration());
+	vrop->addProperty("HEALTH_MAX", 100);
+	vrop->addProperty("HEALTH", 100);
+	vrop->addProperty("DEFENSE", 0);
+	vrop->addProperty("ALIVE", 1);
+	vrop->addProperty("POWER", 50);
+
+	Object* grum = makeObject("GRUM", "speedster", Team::TEAM_ENEMY);
+	grum->start_position = enemy1->start_position;
+	grum->addAction("ATTACK", attack_function, 0.25f * turn_duration());
+	grum->addAction("DEFEND", defend_function, 0.25f * turn_duration());
+	grum->addProperty("HEALTH_MAX", 80);
+	grum->addProperty("HEALTH", 80);
+	grum->addProperty("DEFENSE", 0);
+	grum->addProperty("ALIVE", 1);
+	grum->addProperty("POWER", 20);
+
+	Object* yormun = makeObject("YORMUN", "tank", Team::TEAM_ENEMY);
+	yormun->start_position = enemy1->start_position;
+	yormun->addAction("ATTACK", attack_function, 1.5f * turn_duration());
+	yormun->addAction("DEFEND", defend_function, 1.5f * turn_duration());
+	yormun->addProperty("HEALTH_MAX", 200);
+	yormun->addProperty("HEALTH", 200);
+	yormun->addProperty("DEFENSE", 0);
+	yormun->addProperty("ALIVE", 1);
+	yormun->addProperty("POWER", 30);
+
+	Object* vropvrop = makeObject("VROPVROP", "gunner", Team::TEAM_ENEMY);
+	vropvrop->start_position = enemy1->start_position;
+	vropvrop->addAction("ATTACK", attack_function, turn_duration());
+	vropvrop->addAction("DEFEND", defend_function, turn_duration());
+	vropvrop->addProperty("HEALTH_MAX", 100);
+	vropvrop->addProperty("HEALTH", 100);
+	vropvrop->addProperty("DEFENSE", 0);
+	vropvrop->addProperty("ALIVE", 1);
+	vropvrop->addProperty("POWER", 60);
 
 	Object *fargoth = makeObject("FARGOTH", "tank", Team::TEAM_ENEMY);
 	fargoth->start_position = glm::vec2(6.f, -3.f);
 	fargoth->addAction("ATTACK", attack_function, turn_duration());
 	fargoth->addAction("DEFEND", defend_function, turn_duration());
-	fargoth->addProperty("HEALTH_MAX", 240);
-	fargoth->addProperty("HEALTH", 240);
+	fargoth->addProperty("HEALTH_MAX", 225);
+	fargoth->addProperty("HEALTH", 225);
 	fargoth->addProperty("DEFENSE", 0);
 	fargoth->addProperty("ALIVE", 1);
 	fargoth->addProperty("POWER", 20);
@@ -434,11 +490,131 @@ void PlayMode::init_compiler() {
 	rupol->start_position = glm::vec2(6.f, 3.f);
 	rupol->addAction("ATTACK", attack_function, turn_duration());
 	rupol->addAction("DEFEND", defend_function, turn_duration());
-	rupol->addProperty("HEALTH_MAX", 160);
-	rupol->addProperty("HEALTH", 160);
+	rupol->addProperty("HEALTH_MAX", 150);
+	rupol->addProperty("HEALTH", 150);
 	rupol->addProperty("DEFENSE", 0);
 	rupol->addProperty("ALIVE", 1);
 	rupol->addProperty("POWER", 30);
+
+	Object* blurok = makeObject("BLUROK", "speedster", Team::TEAM_ENEMY);
+	blurok->start_position = fargoth->start_position;
+	blurok->addAction("ATTACK", attack_function, 0.25f * turn_duration());
+	blurok->addAction("DEFEND", defend_function, 0.25f * turn_duration());
+	blurok->addProperty("HEALTH_MAX", 100);
+	blurok->addProperty("HEALTH", 100);
+	blurok->addProperty("DEFENSE", 0);
+	blurok->addProperty("ALIVE", 1);
+	blurok->addProperty("POWER", 10);
+
+	Object* qerbi = makeObject("QERBI", "tank", Team::TEAM_ENEMY);
+	qerbi->start_position = rupol->start_position;
+	qerbi->addAction("ATTACK", attack_function, turn_duration());
+	qerbi->addAction("DEFEND", defend_function, turn_duration());
+	qerbi->addProperty("HEALTH_MAX", 200);
+	qerbi->addProperty("HEALTH", 200);
+	qerbi->addProperty("DEFENSE", 0);
+	qerbi->addProperty("ALIVE", 1);
+	qerbi->addProperty("POWER", 30);
+
+	Object* norver = makeObject("NORVER", "speedster", Team::TEAM_ENEMY);
+	norver->start_position = fargoth->start_position;
+	norver->addAction("ATTACK", attack_function, 0.5f * turn_duration());
+	norver->addAction("DEFEND", defend_function, 0.5f * turn_duration());
+	norver->addProperty("HEALTH_MAX", 120);
+	norver->addProperty("HEALTH", 120);
+	norver->addProperty("DEFENSE", 0);
+	norver->addProperty("ALIVE", 1);
+	norver->addProperty("POWER", 15);
+
+	Object* almo = makeObject("ALMO", "gunner", Team::TEAM_ENEMY);
+	almo->start_position = rupol->start_position;
+	almo->addAction("ATTACK", attack_function, turn_duration());
+	almo->addAction("DEFEND", defend_function, turn_duration());
+	almo->addProperty("HEALTH_MAX", 130);
+	almo->addProperty("HEALTH", 130);
+	almo->addProperty("DEFENSE", 0);
+	almo->addProperty("ALIVE", 1);
+	almo->addProperty("POWER", 40);
+
+	Object* harky = makeObject("HARKY", "tank", Team::TEAM_ENEMY);
+	harky->start_position = fargoth->start_position;
+	harky->addAction("ATTACK", attack_function, turn_duration());
+	harky->addAction("DEFEND", defend_function, turn_duration());
+	harky->addProperty("HEALTH_MAX", 250);
+	harky->addProperty("HEALTH", 250);
+	harky->addProperty("DEFENSE", 0);
+	harky->addProperty("ALIVE", 1);
+	harky->addProperty("POWER", 15);
+
+	Object* marky = makeObject("MARKY", "tank", Team::TEAM_ENEMY);
+	marky->start_position = rupol->start_position;
+	marky->addAction("ATTACK", attack_function, turn_duration());
+	marky->addAction("DEFEND", defend_function, turn_duration());
+	marky->addProperty("HEALTH_MAX", 250);
+	marky->addProperty("HEALTH", 250);
+	marky->addProperty("DEFENSE", 0);
+	marky->addProperty("ALIVE", 1);
+	marky->addProperty("POWER", 15);
+
+	Object* boro = makeObject("BORO", "speedster", Team::TEAM_ENEMY);
+	boro->start_position = glm::vec2(6.f, -5.f);
+	boro->addAction("ATTACK", attack_function, 0.5f * turn_duration());
+	boro->addAction("DEFEND", defend_function, 0.5f * turn_duration());
+	boro->addProperty("HEALTH_MAX", 100);
+	boro->addProperty("HEALTH", 100);
+	boro->addProperty("DEFENSE", 0);
+	boro->addProperty("ALIVE", 1);
+	boro->addProperty("POWER", 10);
+
+	Object* coro = makeObject("CORO", "speedster", Team::TEAM_ENEMY);
+	coro->start_position = glm::vec2(6.f, 0.f);
+	coro->addAction("ATTACK", attack_function, 0.5f * turn_duration());
+	coro->addAction("DEFEND", defend_function, 0.5f * turn_duration());
+	coro->addProperty("HEALTH_MAX", 100);
+	coro->addProperty("HEALTH", 100);
+	coro->addProperty("DEFENSE", 0);
+	coro->addProperty("ALIVE", 1);
+	coro->addProperty("POWER", 10);
+
+	Object* zoro = makeObject("ZORO", "speedster", Team::TEAM_ENEMY);
+	zoro->start_position = glm::vec2(6.f, 5.f);
+	zoro->addAction("ATTACK", attack_function, 0.5f * turn_duration());
+	zoro->addAction("DEFEND", defend_function, 0.5f * turn_duration());
+	zoro->addProperty("HEALTH_MAX", 100);
+	zoro->addProperty("HEALTH", 100);
+	zoro->addProperty("DEFENSE", 0);
+	zoro->addProperty("ALIVE", 1);
+	zoro->addProperty("POWER", 10);
+
+	Object* poryo = makeObject("PORYO", "speedster", Team::TEAM_ENEMY);
+	poryo->start_position = glm::vec2(6.f, -5.f);
+	poryo->addAction("ATTACK", attack_function, 0.5f * turn_duration());
+	poryo->addAction("DEFEND", defend_function, 0.5f * turn_duration());
+	poryo->addProperty("HEALTH_MAX", 100);
+	poryo->addProperty("HEALTH", 100);
+	poryo->addProperty("DEFENSE", 0);
+	poryo->addProperty("ALIVE", 1);
+	poryo->addProperty("POWER", 10);
+
+	Object* therfu = makeObject("THERFU", "gunner", Team::TEAM_ENEMY);
+	therfu->start_position = glm::vec2(6.f, 0.f);
+	therfu->addAction("ATTACK", attack_function, turn_duration());
+	therfu->addAction("DEFEND", defend_function, turn_duration());
+	therfu->addProperty("HEALTH_MAX", 120);
+	therfu->addProperty("HEALTH", 120);
+	therfu->addProperty("DEFENSE", 0);
+	therfu->addProperty("ALIVE", 1);
+	therfu->addProperty("POWER", 30);
+
+	Object* wurmp = makeObject("WURMP", "tank", Team::TEAM_ENEMY);
+	wurmp->start_position = glm::vec2(6.f, 5.f);
+	wurmp->addAction("ATTACK", attack_function, 1.5f * turn_duration());
+	wurmp->addAction("DEFEND", defend_function, 1.5f * turn_duration());
+	wurmp->addProperty("HEALTH_MAX", 200);
+	wurmp->addProperty("HEALTH", 200);
+	wurmp->addProperty("DEFENSE", 0);
+	wurmp->addProperty("ALIVE", 1);
+	wurmp->addProperty("POWER", 20);
 
 	player_units.push_back(brawler);
 	player_units.push_back(caster);
@@ -465,10 +641,34 @@ void PlayMode::init_compiler() {
 	level9.push_back(enemy9);
 	std::vector<Object*> level10;
 	level10.push_back(enemy10);
-
 	std::vector<Object*> level11;
-	level11.push_back(fargoth);
-	level11.push_back(rupol);
+	level11.push_back(vrop);
+	std::vector<Object*> level12;
+	level12.push_back(grum);
+	std::vector<Object*> level13;
+	level13.push_back(yormun);
+	std::vector<Object*> level14;
+	level14.push_back(vropvrop);
+	std::vector<Object*> level15;
+	level15.push_back(fargoth);
+	level15.push_back(rupol);
+	std::vector<Object*> level16;
+	level16.push_back(blurok);
+	level16.push_back(qerbi);
+	std::vector<Object*> level17;
+	level17.push_back(norver);
+	level17.push_back(almo);
+	std::vector<Object*> level18;
+	level18.push_back(harky);
+	level18.push_back(marky);
+	std::vector<Object*> level19;
+	level19.push_back(boro);
+	level19.push_back(coro);
+	level19.push_back(zoro);
+	std::vector<Object*> level20;
+	level20.push_back(poryo);
+	level20.push_back(therfu);
+	level20.push_back(wurmp);
 
 	enemy_units.push_back(level1);
 	enemy_units.push_back(level2);
@@ -481,6 +681,15 @@ void PlayMode::init_compiler() {
 	enemy_units.push_back(level9);
 	enemy_units.push_back(level10);
 	enemy_units.push_back(level11);
+	enemy_units.push_back(level12);
+	enemy_units.push_back(level13);
+	enemy_units.push_back(level14);
+	enemy_units.push_back(level15);
+	enemy_units.push_back(level16);
+	enemy_units.push_back(level17);
+	enemy_units.push_back(level18);
+	enemy_units.push_back(level19);
+	enemy_units.push_back(level20);
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -929,7 +1138,7 @@ void PlayMode::reset_level() {
 
 void PlayMode::next_level() {
 	current_level++;
-	if(current_level == 11){
+	if(current_level == 20){
 		game_end = true;
 	}
 	if (current_level < 0) {
