@@ -164,7 +164,6 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	next_level();
 	compile_failed = false;
 	
-	text_buffer.push_back("");
 	lshift.pressed = false;
 	rshift.pressed = false;
 	get_action_string() = "";

@@ -211,7 +211,7 @@ struct PlayMode : Mode {
 	int enemy_execution_line_index = -1;
 	size_t max_line_length = 400;
 	size_t max_line_chars = 40;
-	size_t max_lines = 17;
+	size_t max_lines = 16;
 	std::string cur_str;
 	void move_up();
 	void move_down();
