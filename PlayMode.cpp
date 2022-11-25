@@ -253,14 +253,14 @@ void PlayMode::setMesh(Scene::Drawable* drawable, std::string mesh_name) {
 
 void PlayMode::create_levels() {
 	level_guidance.push_back("An enemy approaches! Use \"brawler.attack(enemy1)\" to attack him with the brawler! Press shift + enter to submit your code.");
-	level_guidance.push_back("Another enemy! This one can't be hurt by the brawler...but you also have a caster. With the same syntax, tell the \"caster\" to \"burn\" \"enemy2\".");
+	level_guidance.push_back("Another enemy! This one can't be hurt by the brawler...but you also have a caster. With the same syntax, tell the \"caster\" to \"burn\" \"enemy2\". It will take damage whenever it moves.");
 	level_guidance.push_back("Uh oh, enemy3 will survive a hit... After typing the line to have the brawler attack, press enter to move to the next line. Then have the brawler attack enemy3 again. Press shift + enter to submit both lines.");
 	level_guidance.push_back("Enemy4 has a powerful attack coming up! The caster can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the brawler.");
 	level_guidance.push_back("Enemy5 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the brawler attacks once, use the \"healer\" to \"heal\" the \"brawler\". Then have the brawler finish him off.");
 	level_guidance.push_back("Your last unit is an ranger, who can attack faster than the brawler but has limited ammo! Try having the \"ranger\" \"shoot\" enemy6 twice before he has a chance to attack!");
 	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the brawler attack enemy7, and then type \"end\" below the last line to end the loop. If this fight is too slow for your taste, try holding ctrl to speed things up!");
 	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (ranger.arrows > 0)\", and then use the brawler afterwards. A list of the properties can be found in the manual, but all units have alive, health, and power.");
-	level_guidance.push_back("If statements work the same way. Try checking \"if (brawler.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"!");
+	level_guidance.push_back("If statements work the same way. Try checking \"if (brawler.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"! You can also chain conditions with \"if (this) and (that)\". Or works too.");
 	level_guidance.push_back("Alright, time to test everything you've learned! Enemy10 is tough, but you can do it!");
 	level_guidance.push_back("Gunners are very powerful! Be careful of Vrop's attacks.");
 	level_guidance.push_back("Speedsters like Grum can attack multiple times in a row! Make sure your code is efficient.");
@@ -272,6 +272,16 @@ void PlayMode::create_levels() {
 	level_guidance.push_back("You can also face multiple enemies of the same type. You may need a nap in a war against two tanks... Or you can use the ctrl skip.");
 	level_guidance.push_back("If two tanks was too easy for you, how about three speedsters?");
 	level_guidance.push_back("To finish off this set of 10 levels, beat one of each enemy!");
+	level_guidance.push_back("The scientist has gotten smarter, so the next ten levels are puzzles! You'll have to think carefully about your solution... Shockwave will bring your whole team down to 10 health.");
+	level_guidance.push_back("The scientist has developed an enemy with the capability to strike a critical point and kill a robot in one hit! Get rid of it quickly.");
+	level_guidance.push_back("Now he's learned from you, and the units can heal each other. Don't let them stay at full health, or destroy_all will deal massive damage to all your units!");
+	level_guidance.push_back("He's combined his kill and destroy ideas, and Garthon can defeat everybody with a single attack!");
+	level_guidance.push_back("The sceintist has determined that the ranger and healer are your most valuable units. What will you do without them?");
+	level_guidance.push_back("It has been discovered that the tanks are vulernable to a burn strategy. Not this one!");
+	level_guidance.push_back("He's figured out that you like to deal a lot of damage early and has deployed some countermeasures...");
+	level_guidance.push_back("Uh oh, they've figured out how to heal burns!");
+	level_guidance.push_back("The enemies can burn you now! You're really getting a taste of your own medicine.");
+	level_guidance.push_back("You'll need to use all of your units wisely to beat this last one...");
 
 	level_enemy_code.push_back("EnemyCode/enemy1.txt");
 	level_enemy_code.push_back("EnemyCode/enemy2.txt");
@@ -293,6 +303,16 @@ void PlayMode::create_levels() {
 	level_enemy_code.push_back("EnemyCode/enemy18.txt");
 	level_enemy_code.push_back("EnemyCode/enemy19.txt");
 	level_enemy_code.push_back("EnemyCode/enemy20.txt");
+	level_enemy_code.push_back("EnemyCode/enemy21.txt");
+	level_enemy_code.push_back("EnemyCode/enemy22.txt");
+	level_enemy_code.push_back("EnemyCode/enemy23.txt");
+	level_enemy_code.push_back("EnemyCode/enemy24.txt");
+	level_enemy_code.push_back("EnemyCode/enemy25.txt");
+	level_enemy_code.push_back("EnemyCode/enemy26.txt");
+	level_enemy_code.push_back("EnemyCode/enemy27.txt");
+	level_enemy_code.push_back("EnemyCode/enemy28.txt");
+	level_enemy_code.push_back("EnemyCode/enemy29.txt");
+	level_enemy_code.push_back("EnemyCode/enemy30.txt");
 }
 
 void PlayMode::init_compiler() {
@@ -596,7 +616,7 @@ void PlayMode::init_compiler() {
 	poryo->addProperty("POWER", 10);
 
 	Object* therfu = makeObject("THERFU", "gunner", Team::TEAM_ENEMY);
-	therfu->start_position = glm::vec2(6.f, 0.f);
+	therfu->start_position = glm::vec2(6.f, -2.f);
 	therfu->addAction("ATTACK", attack_function, turn_duration());
 	therfu->addAction("DEFEND", defend_function, turn_duration());
 	therfu->addProperty("HEALTH_MAX", 120);
@@ -614,6 +634,142 @@ void PlayMode::init_compiler() {
 	wurmp->addProperty("DEFENSE", 0);
 	wurmp->addProperty("ALIVE", 1);
 	wurmp->addProperty("POWER", 20);
+
+	Object* bardor = makeObject("BARDOR", "tank", Team::TEAM_ENEMY);
+	bardor->start_position = enemy1->start_position;
+	bardor->addAction("ATTACK", attack_function, turn_duration());
+	bardor->addAction("SHOCKWAVE", shockwave_function, turn_duration(), false);
+	bardor->addProperty("HEALTH_MAX", 200);
+	bardor->addProperty("HEALTH", 200);
+	bardor->addProperty("DEFENSE", 90);
+	bardor->addProperty("ALIVE", 1);
+	bardor->addProperty("POWER", 20);
+
+	Object* girof = makeObject("GIROF", "gunner", Team::TEAM_ENEMY);
+	girof->start_position = enemy1->start_position;
+	girof->addAction("KILL", kill_function, turn_duration());
+	girof->addProperty("HEALTH_MAX", 80);
+	girof->addProperty("HEALTH", 80);
+	girof->addProperty("DEFENSE", 0);
+	girof->addProperty("ALIVE", 1);
+	girof->addProperty("POWER", 1000000);
+
+	Object* vernie = makeObject("VERNIE", "speedster", Team::TEAM_ENEMY);
+	vernie->start_position = fargoth->start_position;
+	vernie->addAction("HEAL", heal_function, turn_duration());
+	vernie->addAction("DESTROY_ALL", destroy_function, turn_duration(), false);
+	vernie->addProperty("HEALTH_MAX", 180);
+	vernie->addProperty("HEALTH", 180);
+	vernie->addProperty("DEFENSE", 0);
+	vernie->addProperty("ALIVE", 1);
+	vernie->addProperty("POWER", 50);
+
+	Object* purgen = makeObject("PURGEN", "speedster", Team::TEAM_ENEMY);
+	purgen->start_position = rupol->start_position;
+	purgen->addAction("HEAL", heal_function, turn_duration());
+	purgen->addAction("DESTROY_ALL", destroy_function, turn_duration(), false);
+	purgen->addProperty("HEALTH_MAX", 180);
+	purgen->addProperty("HEALTH", 180);
+	purgen->addProperty("DEFENSE", 0);
+	purgen->addProperty("ALIVE", 1);
+	purgen->addProperty("POWER", 50);
+
+	Object* vurly = makeObject("VURLY", "speedster", Team::TEAM_ENEMY);
+	vurly->start_position = fargoth->start_position;
+	vurly->addAction("ATTACK", attack_function, turn_duration());
+	vurly->addProperty("HEALTH_MAX", 200);
+	vurly->addProperty("HEALTH", 200);
+	vurly->addProperty("DEFENSE", 0);
+	vurly->addProperty("ALIVE", 1);
+	vurly->addProperty("POWER", 35);
+
+	Object* garthon = makeObject("GARTHON", "gunner", Team::TEAM_ENEMY);
+	garthon->start_position = rupol->start_position;
+	garthon->addAction("ANNIHILATE", annihilate_function, 2.0f * turn_duration(), false);
+	garthon->addProperty("HEALTH_MAX", 150);
+	garthon->addProperty("HEALTH", 150);
+	garthon->addProperty("DEFENSE", 0);
+	garthon->addProperty("ALIVE", 1);
+	garthon->addProperty("POWER", 1000000);
+
+	Object* kerqul = makeObject("KERQUL", "gunner", Team::TEAM_ENEMY);
+	kerqul->start_position = enemy1->start_position;
+	kerqul->addAction("KILL", kill_function, turn_duration());
+	kerqul->addProperty("HEALTH_MAX", 100);
+	kerqul->addProperty("HEALTH", 100);
+	kerqul->addProperty("DEFENSE", 0);
+	kerqul->addProperty("ALIVE", 1);
+	kerqul->addProperty("POWER", 1000000);
+
+	Object* flammy = makeObject("FLAMMY", "tank", Team::TEAM_ENEMY);
+	flammy->start_position = enemy1->start_position;
+	flammy->addAction("ATTACK", attack_function, 0.75f * turn_duration());
+	flammy->addProperty("HEALTH_MAX", 50);
+	flammy->addProperty("HEALTH", 50);
+	flammy->addProperty("DEFENSE", 90);
+	flammy->addProperty("ALIVE", 1);
+	flammy->addProperty("POWER", 10);
+
+	Object* turpin = makeObject("TURPIN", "speedster", Team::TEAM_ENEMY);
+	turpin->start_position = enemy1->start_position;
+	turpin->addAction("ATTACK", attack_function, turn_duration());
+	turpin->addAction("KILL", kill_function, turn_duration());
+	turpin->addAction("FULL_HEAL", full_heal_function, turn_duration());
+	turpin->addProperty("HEALTH_MAX", 160);
+	turpin->addProperty("HEALTH", 160);
+	turpin->addProperty("DEFENSE", 0);
+	turpin->addProperty("ALIVE", 1);
+	turpin->addProperty("POWER", 20);
+
+	Object* rentol = makeObject("RENTOL", "tank", Team::TEAM_ENEMY);
+	rentol->start_position = enemy1->start_position;
+	rentol->addAction("ATTACK", attack_function, turn_duration());
+	rentol->addAction("BURN_HEAL", burn_heal_function, turn_duration());
+	rentol->addProperty("HEALTH_MAX", 200);
+	rentol->addProperty("HEALTH", 200);
+	rentol->addProperty("DEFENSE", 100);
+	rentol->addProperty("ALIVE", 1);
+	rentol->addProperty("POWER", 20);
+
+	Object* dingo = makeObject("DINGO", "speedster", Team::TEAM_ENEMY);
+	dingo->start_position = fargoth->start_position;
+	dingo->addAction("ATTACK", attack_function, turn_duration());
+	dingo->addAction("BURN", burn_function, turn_duration());
+	dingo->addAction("HEAL", heal_function, turn_duration());
+	dingo->addProperty("HEALTH_MAX", 100);
+	dingo->addProperty("HEALTH", 100);
+	dingo->addProperty("DEFENSE", 50);
+	dingo->addProperty("ALIVE", 1);
+	dingo->addProperty("POWER", 20);
+
+	Object* wingo = makeObject("WINGO", "speedster", Team::TEAM_ENEMY);
+	wingo->start_position = rupol->start_position;
+	wingo->addAction("ATTACK", attack_function, turn_duration());
+	wingo->addAction("BURN", burn_function, turn_duration());
+	wingo->addAction("HEAL", heal_function, turn_duration());
+	wingo->addProperty("HEALTH_MAX", 100);
+	wingo->addProperty("HEALTH", 100);
+	wingo->addProperty("DEFENSE", 50);
+	wingo->addProperty("ALIVE", 1);
+	wingo->addProperty("POWER", 20);
+
+	Object* shrolin = makeObject("SHROLIN", "gunner", Team::TEAM_ENEMY);
+	shrolin->start_position = fargoth->start_position;
+	shrolin->addAction("ATTACK", attack_function, turn_duration());
+	shrolin->addProperty("HEALTH_MAX", 100);
+	shrolin->addProperty("HEALTH", 100);
+	shrolin->addProperty("DEFENSE", 0);
+	shrolin->addProperty("ALIVE", 1);
+	shrolin->addProperty("POWER", 40);
+
+	Object* mingar = makeObject("MINGAR", "tank", Team::TEAM_ENEMY);
+	mingar->start_position = rupol->start_position;
+	mingar->addAction("ATTACK", attack_function, turn_duration());
+	mingar->addProperty("HEALTH_MAX", 200);
+	mingar->addProperty("HEALTH", 200);
+	mingar->addProperty("DEFENSE", 0);
+	mingar->addProperty("ALIVE", 1);
+	mingar->addProperty("POWER", 10);
 
 	player_units.push_back(brawler);
 	player_units.push_back(caster);
@@ -668,6 +824,30 @@ void PlayMode::init_compiler() {
 	level20.push_back(poryo);
 	level20.push_back(therfu);
 	level20.push_back(wurmp);
+	std::vector<Object*> level21;
+	level21.push_back(bardor);
+	std::vector<Object*> level22;
+	level22.push_back(girof);
+	std::vector<Object*> level23;
+	level23.push_back(vernie);
+	level23.push_back(purgen);
+	std::vector<Object*> level24;
+	level24.push_back(vurly);
+	level24.push_back(garthon);
+	std::vector<Object*> level25;
+	level25.push_back(kerqul);
+	std::vector<Object*> level26;
+	level26.push_back(flammy);
+	std::vector<Object*> level27;
+	level27.push_back(turpin);
+	std::vector<Object*> level28;
+	level28.push_back(rentol);
+	std::vector<Object*> level29;
+	level29.push_back(dingo);
+	level29.push_back(wingo);
+	std::vector<Object*> level30;
+	level30.push_back(shrolin);
+	level30.push_back(mingar);
 
 	enemy_units.push_back(level1);
 	enemy_units.push_back(level2);
@@ -689,6 +869,16 @@ void PlayMode::init_compiler() {
 	enemy_units.push_back(level18);
 	enemy_units.push_back(level19);
 	enemy_units.push_back(level20);
+	enemy_units.push_back(level21);
+	enemy_units.push_back(level22);
+	enemy_units.push_back(level23);
+	enemy_units.push_back(level24);
+	enemy_units.push_back(level25);
+	enemy_units.push_back(level26);
+	enemy_units.push_back(level27);
+	enemy_units.push_back(level28);
+	enemy_units.push_back(level29);
+	enemy_units.push_back(level30);
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -1137,7 +1327,7 @@ void PlayMode::reset_level() {
 
 void PlayMode::next_level() {
 	current_level++;
-	if(current_level == 20){
+	if(current_level == 30){
 		game_end = true;
 	}
 	if (current_level < 0) {
