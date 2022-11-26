@@ -16,6 +16,8 @@
 #include <freetype/fttypes.h>
 
 #include <random>
+#include <sstream>
+#include <iomanip>
 
 Load< PlayMode::PPUTileProgram > tile_program(LoadTagEarly); //will 'new PPUTileProgram()' by default
 Load< PlayMode::PPUDataStream > data_stream(LoadTagDefault);
@@ -2044,14 +2046,23 @@ void PlayMode::drawObjectInfoBox(Object* obj) {
 	};
 
 	// Write actions
-	writeLine("ACTIONS:", true);
+	writeLine("ACTION       TURNS", true);
+	size_t dur_offset = 16;
 	for (auto& action : obj->action_names) {
-		writeLine(action);
+		std::string action_line = action;
+		std::stringstream dur_ss;
+		dur_ss << std::setprecision(2) << obj->actions.at(action).duration / turn_duration();
+		std::string dur_string = dur_ss.str();
+		while(action_line.size() + dur_string.size() < dur_offset) {
+			action_line.append(" ");
+		}
+		action_line.append(dur_string);
+		writeLine(action_line);
 	}
 
 	// Write properties
 	writeLine(" ");
-	writeLine("PROPERTIES:", true);
+	writeLine("PROPERTY     VALUE", true);
 	size_t val_offset = 16;
 	for (auto& prop : obj->property_names) {
 		std::string prop_line = prop;

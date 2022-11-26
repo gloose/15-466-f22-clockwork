@@ -12,8 +12,8 @@ Compiler::Compiler() {
 }
 
 void Compiler::initSpecialObjects() {
-    random_player = new Object("GOOD_RANDOM", TEAM_PLAYER);
-    random_enemy = new Object("EVIL_RANDOM", TEAM_ENEMY);
+    random_player = new Object("RANDOM_PLAYER", TEAM_PLAYER);
+    random_enemy = new Object("RANDOM_ENEMY", TEAM_ENEMY);
 
     random_player->transform = new Scene::Transform();
     random_player->transform->position.z = 100;
