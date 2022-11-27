@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Object.hpp"
+#include "Compiler.hpp"
 #include "Scene.hpp"
 #include <iostream>
 #include <random>
@@ -16,6 +17,7 @@ void register_heal_transform(Scene::Transform* t);
 void register_freeze_transform(Scene::Transform* t);
 void register_burn_transform(Scene::Transform* t);
 void register_arrow_transform(Scene::Transform* t);
+void register_wave_transform(Scene::Transform* t);
 void register_ranger_object(Object* o);
 void reset_energy();
 
@@ -25,7 +27,8 @@ enum AnimationType {
 	MOVE,
 	DEATH,
 	ENERGY,
-	SHOOT
+	SHOOT,
+	WAVE
 };
 
 enum EnergyType {
@@ -66,6 +69,14 @@ struct EnergyAnimation : Animation {
 struct ShootAnimation : MoveAnimation {
 	ShootAnimation(Object* target);
 	Object* health_target;
+	bool update(float update_time);
+};
+
+struct WaveAnimation : Animation {
+	WaveAnimation(Object* target, Compiler* input_compiler);
+	Object* wave_target;
+	bool wave_hit;
+	Compiler* compiler;
 	bool update(float update_time);
 };
 

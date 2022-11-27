@@ -236,6 +236,11 @@ void PlayMode::energyTransforms() {
 			scene.drawables.emplace_back(&transform);
 			setMesh(&scene.drawables.back(), transform.name);
 			transform.position = offscreen_position();
+		} else if (transform.name == "shockwave") {
+			register_wave_transform(&transform);
+			scene.drawables.emplace_back(&transform);
+			setMesh(&scene.drawables.back(), transform.name);
+			transform.position = offscreen_position();
 		}
 	}
 }
@@ -1325,6 +1330,7 @@ void PlayMode::reset_level() {
 		}
 	}
 	reset_energy();
+	clear_animations();
 }
 
 void PlayMode::next_level() {

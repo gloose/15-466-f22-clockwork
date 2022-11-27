@@ -4,6 +4,7 @@ Scene::Transform* heal_transform;
 Scene::Transform* freeze_transform;
 Scene::Transform* burn_transform;
 Scene::Transform* arrow_transform;
+Scene::Transform* wave_transform;
 Object* ranger_object;
 
 void end(size_t my_id);
@@ -19,6 +20,7 @@ Sound::Sample *freeze_sample;
 Sound::Sample *burn_sample;
 Sound::Sample *arrow_sample;
 Sound::Sample *heal_sample;
+Sound::Sample *wave_sample;
 
 void init_sounds() {
 	attack_sample = new Sound::Sample(data_path("Sounds/Attack.wav"));
@@ -26,6 +28,7 @@ void init_sounds() {
 	burn_sample = new Sound::Sample(data_path("Sounds/Burn.wav"));
 	arrow_sample = new Sound::Sample(data_path("Sounds/Arrow.wav"));
 	heal_sample = new Sound::Sample(data_path("Sounds/Heal.wav"));
+	wave_sample = new Sound::Sample(data_path("Sounds/Shockwave.wav"));
 }
 
 float turn_duration() {
@@ -48,6 +51,7 @@ void update_animations(float time) {
 		DeathAnimation* death;
 		EnergyAnimation* energy;
 		ShootAnimation* shoot;
+		WaveAnimation* wave;
 		switch (animation->type) {
 		case MOVE:
 			move = (MoveAnimation*)animation;
@@ -81,6 +85,14 @@ void update_animations(float time) {
 				iter = active_animations.erase(iter);
 			}
 			break;
+		case WAVE:
+			wave = (WaveAnimation*)animation;
+			if (wave->update(time)) {
+				iter++;
+			} else {
+				iter = active_animations.erase(iter);
+			}
+			break;
 		default:
 			iter = active_animations.end();
 			break;
@@ -108,6 +120,10 @@ void register_arrow_transform(Scene::Transform* t) {
 	arrow_transform = t;
 }
 
+void register_wave_transform(Scene::Transform* t) {
+	wave_transform = t;
+}
+
 void register_ranger_object(Object* o) {
 	ranger_object = o;
 }
@@ -116,6 +132,7 @@ void reset_energy() {
 	heal_transform->position = offscreen_position();
 	freeze_transform->position = offscreen_position();
 	burn_transform->position = offscreen_position();
+	wave_transform->position = offscreen_position();
 	arrow_transform->position = ranger_object->transform->position + arrow_offset;
 }
 
@@ -179,6 +196,21 @@ EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
 	elapsed_time = 0.0f;
 }
 
+WaveAnimation::WaveAnimation(Object* target, Compiler *input_compiler) {
+	start_position = target->transform->position;
+	wave_target = target;
+	type = AnimationType::WAVE;
+	id = animation_id++;
+	compiler = input_compiler;
+	sound_playing = true;
+	wave_hit = false;
+	play(*wave_sample);
+	transform = wave_transform;
+	transform->position = start_position;
+	transform->scale = glm::vec3(0, 0, 1.0f);
+	elapsed_time = 0.0f;
+}
+
 bool MoveAnimation::update(float update_time) {
 	elapsed_time += update_time;
 	if (elapsed_time <= turn_length / 2.0f) {
@@ -217,7 +249,7 @@ bool DeathAnimation::update(float update_time) {
 	if (elapsed_time < (turn_length / 2.0f)) {
 		return true;
 	} else if ((turn_length / 2.0f) <= elapsed_time && elapsed_time < turn_length) {
-		transform->position -= 0.5f * (elapsed_time / (turn_length / 2.0f));
+		transform->position.z -= 0.5f * (elapsed_time / (turn_length / 2.0f));
 		return true;
 	} else {
 		return false;
@@ -250,6 +282,30 @@ bool EnergyAnimation::update(float update_time) {
 			}
 		}
 		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) - glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f);
+		return true;
+	} else {
+		transform->position = offscreen_position();
+		return false;
+	}
+}
+
+bool WaveAnimation::update(float update_time) {
+	elapsed_time += update_time;
+	transform->position = wave_target->transform->position;
+	if (elapsed_time < turn_length) {
+		transform->scale = glm::vec3(25.0f, 25.0f, 10.0f) * (elapsed_time / turn_length);
+		if (elapsed_time >= turn_length / 2.0f && !wave_hit) {
+			wave_hit = true;
+			if (wave_target->team == Team::TEAM_PLAYER) {
+				for (size_t i = 0; i < compiler->enemies.size(); i++) {
+					compiler->enemies[i]->updateHealth();
+				}
+			} else if (wave_target->team == Team::TEAM_ENEMY) {
+				for (size_t i = 0; i < compiler->players.size(); i++) {
+					compiler->players[i]->updateHealth();
+				}
+			}
+		}
 		return true;
 	} else {
 		transform->position = offscreen_position();
