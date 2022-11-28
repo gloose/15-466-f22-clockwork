@@ -170,7 +170,9 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	rshift.pressed = false;
 	get_action_string() = "";
 	get_effect_string() = "";
-
+	//TODO: begining of the ambient sample
+	ambient_sample = new Sound::Sample(data_path("Sounds/ambient.wav"));
+	loop(*ambient_sample);
 	makeObject("DUNGEON", "dungeon");
 }
 
@@ -210,7 +212,6 @@ Object* PlayMode::makeObject(std::string name, std::string model_name, Team team
 			}
 		}
 	}
-
 	return obj;
 }
 

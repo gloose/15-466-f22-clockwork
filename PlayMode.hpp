@@ -232,5 +232,6 @@ struct PlayMode : Mode {
 	Scene::Transform *monster_tentacle_1 = nullptr;
 	Scene::Transform *monster_tentacle_0 = nullptr;
 	Scene::Transform *monster_pupil = nullptr;
+	Sound::Sample *ambient_sample;
 	//end of the text rendering
 };
