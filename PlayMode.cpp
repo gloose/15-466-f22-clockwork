@@ -261,7 +261,7 @@ void PlayMode::create_levels() {
 	level_guidance.push_back("You can face multiple enemies at once! Make sure your code handles both Fargoth and Rupol.");
 	level_guidance.push_back("Great job. Now how about a different pair of enemies?");
 	level_guidance.push_back("You're doing great! Keep it up!");
-	level_guidance.push_back("You can also face multiple enemies of the same type. You may need a nap in a war against two tanks... Or you can use the ctrl skip.");
+	level_guidance.push_back("You can also face multiple enemies of the same type. You may need a nap in a war against two tanks... Or you can use the ctrl skip. If that's still too slow for you, hold both left and right control for super speed!");
 	level_guidance.push_back("If two tanks was too easy for you, how about three speedsters?");
 	level_guidance.push_back("To finish off this set of 10 levels, beat one of each enemy!");
 	level_guidance.push_back("The scientist has gotten smarter, so the next ten levels are puzzles! You'll have to think carefully about your solution... Shockwave will bring your whole team down to 10 health.");
