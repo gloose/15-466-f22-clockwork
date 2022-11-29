@@ -233,5 +233,10 @@ struct PlayMode : Mode {
 	Scene::Transform *monster_tentacle_0 = nullptr;
 	Scene::Transform *monster_pupil = nullptr;
 	Sound::Sample *ambient_sample;
-	//end of the text rendering
+	
+	Object* dungeon_scene;
+	Object* cave_scene;
+	Object* forest_scene;
+	glm::vec3 scene_position;
+	glm::vec3 offscreen_scene_position;
 };

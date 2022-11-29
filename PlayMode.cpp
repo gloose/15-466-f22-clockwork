@@ -163,6 +163,11 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	init_compiler();
 	energyTransforms();
 	init_sounds();
+	dungeon_scene = makeObject("DUNGEON", "dungeon");
+	cave_scene = makeObject("CAVE", "cave");
+	forest_scene = makeObject("FOREST", "forest");
+	scene_position = dungeon_scene->transform->position;
+	offscreen_scene_position = cave_scene->transform->position;
 	next_level();
 	compile_failed = false;
 	
@@ -173,7 +178,6 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	//TODO: begining of the ambient sample
 	ambient_sample = new Sound::Sample(data_path("Sounds/ambient.wav"));
 	loop(*ambient_sample);
-	makeObject("DUNGEON", "dungeon");
 }
 
 Object* PlayMode::makeObject(std::string name, std::string model_name, Team team) {
@@ -1341,11 +1345,22 @@ void PlayMode::reset_level() {
 
 void PlayMode::next_level() {
 	current_level++;
-	if(current_level == 30){
-		game_end = true;
-	}
 	if (current_level < 0) {
 		current_level = 0;
+	} else if (current_level < 10) {
+		dungeon_scene->transform->position = scene_position;
+		cave_scene->transform->position = offscreen_scene_position;
+		forest_scene->transform->position = offscreen_scene_position;
+	} else if (current_level < 20) {
+		dungeon_scene->transform->position = offscreen_scene_position;
+		cave_scene->transform->position = scene_position;
+		forest_scene->transform->position = offscreen_scene_position;
+	} else if (current_level < 30) {
+		dungeon_scene->transform->position = offscreen_scene_position;
+		cave_scene->transform->position = offscreen_scene_position;
+		forest_scene->transform->position = scene_position;
+	} else if (current_level == 30) {
+		game_end = true;
 	} else if (current_level >= (int)level_guidance.size()) {
 		current_level = (int)level_guidance.size() - 1;
 	}
