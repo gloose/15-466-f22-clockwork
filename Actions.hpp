@@ -10,6 +10,7 @@
 #define _ACTIONS_H_
 
 void attack_function(Compiler* compiler, Object* user, Object* target);
+void gunner_attack_function(Compiler* compiler, Object* user, Object* target);
 void defend_function(Compiler* compiler, Object* user, Object* target);
 void freeze_function(Compiler* compiler, Object* user, Object* target);
 void burn_function(Compiler* compiler, Object* user, Object* target);

@@ -5,6 +5,7 @@ Scene::Transform* freeze_transform;
 Scene::Transform* burn_transform;
 Scene::Transform* arrow_transform;
 Scene::Transform* wave_transform;
+Scene::Transform* bolt_transform;
 Object* ranger_object;
 
 void end(size_t my_id);
@@ -21,6 +22,7 @@ Sound::Sample *burn_sample;
 Sound::Sample *arrow_sample;
 Sound::Sample *heal_sample;
 Sound::Sample *wave_sample;
+Sound::Sample* bolt_sample;
 
 void init_sounds() {
 	attack_sample = new Sound::Sample(data_path("Sounds/Attack.wav"));
@@ -29,6 +31,7 @@ void init_sounds() {
 	arrow_sample = new Sound::Sample(data_path("Sounds/Arrow.wav"));
 	heal_sample = new Sound::Sample(data_path("Sounds/Heal.wav"));
 	wave_sample = new Sound::Sample(data_path("Sounds/Shockwave.wav"));
+	bolt_sample = new Sound::Sample(data_path("Sounds/Bolt.wav"));
 }
 
 float turn_duration() {
@@ -52,6 +55,7 @@ void update_animations(float time) {
 		EnergyAnimation* energy;
 		ShootAnimation* shoot;
 		WaveAnimation* wave;
+		BoltAnimation* bolt;
 		switch (animation->type) {
 		case MOVE:
 			move = (MoveAnimation*)animation;
@@ -93,6 +97,14 @@ void update_animations(float time) {
 				iter = active_animations.erase(iter);
 			}
 			break;
+		case BOLT:
+			bolt = (BoltAnimation*)animation;
+			if (bolt->update(time)) {
+				iter++;
+			} else {
+				iter = active_animations.erase(iter);
+			}
+			break;
 		default:
 			iter = active_animations.end();
 			break;
@@ -124,6 +136,10 @@ void register_wave_transform(Scene::Transform* t) {
 	wave_transform = t;
 }
 
+void register_bolt_transform(Scene::Transform* t) {
+	bolt_transform = t;
+}
+
 void register_ranger_object(Object* o) {
 	ranger_object = o;
 }
@@ -133,6 +149,7 @@ void reset_energy() {
 	freeze_transform->position = offscreen_position();
 	burn_transform->position = offscreen_position();
 	wave_transform->position = offscreen_position();
+	bolt_transform->position = offscreen_position();
 	arrow_transform->position = ranger_object->transform->position + arrow_offset;
 }
 
@@ -159,7 +176,14 @@ ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(ranger_object, ta
 	type = AnimationType::SHOOT;
 	play(*arrow_sample);
 	sound_playing = true;
-	health_target = target;
+}
+
+BoltAnimation::BoltAnimation(Object* source, Object* target) : MoveAnimation(source, target) {
+	type = AnimationType::BOLT;
+	start_position.x -= 1.0f;
+	transform = bolt_transform;
+	play(*bolt_sample);
+	sound_playing = true;
 }
 
 DeathAnimation::DeathAnimation(Object* victim) {
@@ -238,6 +262,19 @@ bool ShootAnimation::update(float update_time) {
 	} else {
 		health_target->updateHealth();
 		transform->position = start_position;
+		play(*attack_sample);
+		return false;
+	}
+}
+
+bool BoltAnimation::update(float update_time) {
+	elapsed_time += update_time;
+	if (elapsed_time <= turn_length / 2.0f) {
+		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_length / 2.0f));
+		return true;
+	} else {
+		health_target->updateHealth();
+		transform->position = offscreen_position();
 		play(*attack_sample);
 		return false;
 	}

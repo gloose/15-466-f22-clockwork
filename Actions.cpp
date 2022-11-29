@@ -60,6 +60,19 @@ void attack_function(Compiler* compiler, Object* user, Object* target) {
 	attack(damage, target);
 }
 
+void gunner_attack_function(Compiler* compiler, Object* user, Object* target) {
+	if (check_burn(user) || check_freeze(user)) {
+		return;
+	}
+	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+		return;
+	}
+	int damage = user->property("POWER");
+	action_string = user->name + " attacked " + target->name + " for " + std::to_string(calc_damage(damage, target)) + " damage.";
+	add_animation(new BoltAnimation(user, target));
+	attack(damage, target);
+}
+
 void defend_function(Compiler* compiler, Object* user, Object* target) {
 	if (check_burn(user) || check_freeze(user)) {
 		return;

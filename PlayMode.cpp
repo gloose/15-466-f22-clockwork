@@ -242,6 +242,11 @@ void PlayMode::energyTransforms() {
 			scene.drawables.emplace_back(&transform);
 			setMesh(&scene.drawables.back(), transform.name);
 			transform.position = offscreen_position();
+		} else if (transform.name == "bolt") {
+			register_bolt_transform(&transform);
+			scene.drawables.emplace_back(&transform);
+			setMesh(&scene.drawables.back(), transform.name);
+			transform.position = offscreen_position();
 		}
 	}
 }
@@ -465,7 +470,7 @@ void PlayMode::init_compiler() {
 
 	Object* vrop = makeObject("VROP", "gunner", Team::TEAM_ENEMY);
 	vrop->start_position = enemy1->start_position;
-	vrop->addAction("ATTACK", attack_function, turn_duration());
+	vrop->addAction("ATTACK", gunner_attack_function, turn_duration());
 	vrop->addAction("DEFEND", defend_function, turn_duration());
 	vrop->addProperty("HEALTH_MAX", 100);
 	vrop->addProperty("HEALTH", 100);
@@ -495,7 +500,7 @@ void PlayMode::init_compiler() {
 
 	Object* vropvrop = makeObject("VROPVROP", "gunner", Team::TEAM_ENEMY);
 	vropvrop->start_position = enemy1->start_position;
-	vropvrop->addAction("ATTACK", attack_function, turn_duration());
+	vropvrop->addAction("ATTACK", gunner_attack_function, turn_duration());
 	vropvrop->addAction("DEFEND", defend_function, turn_duration());
 	vropvrop->addProperty("HEALTH_MAX", 100);
 	vropvrop->addProperty("HEALTH", 100);
@@ -515,7 +520,7 @@ void PlayMode::init_compiler() {
 
 	Object *rupol = makeObject("RUPOL", "gunner", Team::TEAM_ENEMY);
 	rupol->start_position = glm::vec2(6.f, 3.f);
-	rupol->addAction("ATTACK", attack_function, turn_duration());
+	rupol->addAction("ATTACK", gunner_attack_function, turn_duration());
 	rupol->addAction("DEFEND", defend_function, turn_duration());
 	rupol->addProperty("HEALTH_MAX", 150);
 	rupol->addProperty("HEALTH", 150);
@@ -555,7 +560,7 @@ void PlayMode::init_compiler() {
 
 	Object* almo = makeObject("ALMO", "gunner", Team::TEAM_ENEMY);
 	almo->start_position = rupol->start_position;
-	almo->addAction("ATTACK", attack_function, turn_duration());
+	almo->addAction("ATTACK", gunner_attack_function, turn_duration());
 	almo->addAction("DEFEND", defend_function, turn_duration());
 	almo->addProperty("HEALTH_MAX", 130);
 	almo->addProperty("HEALTH", 130);
@@ -625,7 +630,7 @@ void PlayMode::init_compiler() {
 
 	Object* therfu = makeObject("THERFU", "gunner", Team::TEAM_ENEMY);
 	therfu->start_position = glm::vec2(6.f, -2.f);
-	therfu->addAction("ATTACK", attack_function, turn_duration());
+	therfu->addAction("ATTACK", gunner_attack_function, turn_duration());
 	therfu->addAction("DEFEND", defend_function, turn_duration());
 	therfu->addProperty("HEALTH_MAX", 120);
 	therfu->addProperty("HEALTH", 120);
@@ -763,7 +768,7 @@ void PlayMode::init_compiler() {
 
 	Object* shrolin = makeObject("SHROLIN", "gunner", Team::TEAM_ENEMY);
 	shrolin->start_position = fargoth->start_position;
-	shrolin->addAction("ATTACK", attack_function, turn_duration());
+	shrolin->addAction("ATTACK", gunner_attack_function, turn_duration());
 	shrolin->addProperty("HEALTH_MAX", 100);
 	shrolin->addProperty("HEALTH", 100);
 	shrolin->addProperty("DEFENSE", 0);
