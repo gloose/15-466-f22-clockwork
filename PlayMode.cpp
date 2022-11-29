@@ -1760,7 +1760,7 @@ void PlayMode::render(){
 		drawText(player_compiler.error_message, glm::ivec2(error_pos.x + text_margin.x, error_pos.y + error_size.y + text_margin.y), error_size.x - 2 * text_margin.x);
 	} else {
 		//drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
-		drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
+		//drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
 	}
 	drawText(level_guidance[current_level], prompt_pos + glm::ivec2(0, prompt_size.y) + text_margin, prompt_size.x - 2 * text_margin.x);
 }
