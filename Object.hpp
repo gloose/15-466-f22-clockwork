@@ -49,6 +49,7 @@ struct Object {
     void reset();
     int& property(std::string property_name);
     void updateHealth();
+    glm::vec3 getStartPosition();
 };
 
 #endif

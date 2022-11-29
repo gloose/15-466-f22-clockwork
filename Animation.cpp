@@ -150,7 +150,7 @@ void reset_energy() {
 	burn_transform->position = offscreen_position();
 	wave_transform->position = offscreen_position();
 	bolt_transform->position = offscreen_position();
-	arrow_transform->position = ranger_object->transform->position + arrow_offset;
+	arrow_transform->position = ranger_object->getStartPosition() + arrow_offset;
 }
 
 bool Animation::update(float update_time) {
@@ -159,8 +159,8 @@ bool Animation::update(float update_time) {
 }
 
 MoveAnimation::MoveAnimation(Object* source, Object* target) {
-	start_position = source->transform->position;
-	target_position = target->transform->position;
+	start_position = source->getStartPosition();
+	target_position = target->getStartPosition();
 	type = AnimationType::MOVE;
 	id = animation_id++;
 	transform = source->transform;
@@ -187,7 +187,7 @@ BoltAnimation::BoltAnimation(Object* source, Object* target) : MoveAnimation(sou
 }
 
 DeathAnimation::DeathAnimation(Object* victim) {
-	start_position = victim->transform->position;
+	start_position = victim->getStartPosition();
 	type = AnimationType::DEATH;
 	id = animation_id++;
 	transform = victim->transform;
@@ -215,7 +215,7 @@ DeathAnimation::DeathAnimation(Object* victim) {
 }
 
 EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
-	start_position = target->transform->position;
+	start_position = target->getStartPosition();
 	type = AnimationType::ENERGY;
 	id = animation_id++;
 	sound_playing = false;
@@ -241,7 +241,7 @@ EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
 }
 
 WaveAnimation::WaveAnimation(Object* target, Compiler *input_compiler) {
-	start_position = target->transform->position;
+	start_position = target->getStartPosition();
 	wave_target = target;
 	type = AnimationType::WAVE;
 	id = animation_id++;
@@ -315,8 +315,7 @@ bool DeathAnimation::update(float update_time) {
 		}
 		return true;
 	} else {
-		transform->position.z = start_position.z - 4.0f;
-		transform->position.x = start_position.x - 2.0f;
+		transform->position = offscreen_position();
 		transform->rotation = target->start_rotation + delta;
 		return false;
 	}
@@ -325,7 +324,7 @@ bool DeathAnimation::update(float update_time) {
 // Note, define a constant to be some scale that will make an energy ball approximately the size of a character. I'll call it 2 for now.
 bool EnergyAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	transform->position = energy_target->transform->position;
+	transform->position = energy_target->getStartPosition();
 	if (elapsed_time <= turn_length / 2.0f) {
 		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time / (turn_length / 2.0f));
 		return true;
@@ -357,7 +356,7 @@ bool EnergyAnimation::update(float update_time) {
 
 bool WaveAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	transform->position = wave_target->transform->position;
+	transform->position = wave_target->getStartPosition();
 	if (elapsed_time < turn_length) {
 		transform->scale = glm::vec3(25.0f, 25.0f, 10.0f) * (elapsed_time / turn_length);
 		if (elapsed_time >= turn_length / 2.0f && !wave_hit) {
