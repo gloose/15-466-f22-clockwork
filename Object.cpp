@@ -38,6 +38,15 @@ void Object::reset() {
     property("ALIVE") = 1;
     property("BURNED") = 0;
     property("FROZEN") = 0;
+    if (properties.find("FREEZE_COUNTDOWN") != properties.end()) {
+        properties.erase("FREEZE_COUNTDOWN");
+        for (size_t i = 0; i < property_names.size(); i++) {
+            if (property_names[i] == "FREEZE_COUNTDOWN") {
+                property_names.erase(property_names.begin() + i);
+                break;
+            }
+        }
+    }
     property("HEALTH") = property("HEALTH_MAX");
     if (name == "RANGER") {
         property("ARROWS") = 8;
