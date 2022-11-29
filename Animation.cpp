@@ -306,15 +306,18 @@ bool DeathAnimation::update(float update_time) {
 	if (elapsed_time < (turn_length / 2.0f)) {
 		return true;
 	} else if ((turn_length / 2.0f) <= elapsed_time && elapsed_time < turn_length) {
-		transform->position.z -= 0.25f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+		transform->position.z = start_position.z - 4.0f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
 		transform->rotation = target->start_rotation + delta * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
 		if (target->team == Team::TEAM_PLAYER) {
-			transform->position.x -= 0.1f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+			transform->position.x = start_position.x - 2.0f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
 		} else if (target->team == Team::TEAM_ENEMY) {
-			transform->position.x += 0.1f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+			transform->position.x = start_position.x - 2.0f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
 		}
 		return true;
 	} else {
+		transform->position.z = start_position.z - 4.0f;
+		transform->position.x = start_position.x - 2.0f;
+		transform->rotation = target->start_rotation + delta;
 		return false;
 	}
 }
