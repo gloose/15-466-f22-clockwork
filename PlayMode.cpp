@@ -34,32 +34,6 @@ Load< Scene > character_scene(LoadTagDefault, []() -> Scene const * {
 });
 
 PlayMode::PlayMode() : scene(*character_scene) {
-	for (auto &transform : scene.transforms) {
-		if(transform.name == "monster"){
-			monster = &transform;
-		}
-		if(transform.name == "monster-sclera"){
-			monster_sclera  = &transform;
-		}
-		if(transform.name == "monster-tentacle-4"){
-			monster_tentacle_4 = &transform;
-		}
-		if(transform.name == "monster-tentacle-3"){
-			monster_tentacle_3 = &transform;
-		}
-		if(transform.name == "monster-tentacle-2"){
-			monster_tentacle_2 = &transform;
-		}
-		if(transform.name == "monster-tentacle-1"){
-			monster_tentacle_1 = &transform;
-		}
-		if(transform.name == "monster-tentacle-0"){
-			monster_tentacle_0 = &transform;
-		}
-		if(transform.name == "monster-pupil"){
-			monster_pupil = &transform;
-		}
-	}
 	//get pointer to camera for convenience:
 	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
 	camera = &scene.cameras.front();
@@ -1388,15 +1362,23 @@ void PlayMode::next_level() {
 
 
 void PlayMode::update(float elapsed) {
-	if(game_start && game_end){
-		monster->position.z = -1000.0;
-		monster_sclera->position.z = -1000.0;
-		monster_tentacle_4->position.z = -1000.0;
-		monster_tentacle_3->position.z = -1000.0;
-		monster_tentacle_2->position.z = -1000.0;
-		monster_tentacle_1->position.z = -1000.0;
-		monster_tentacle_0->position.z = -1000.0;
-		monster_pupil->position.z = -1000.0;
+	if (game_end) {
+		brawler->transform->rotation = glm::quat(0.0f, 0.0f, 0.0f, 0.0f);
+		brawler->transform->position = glm::vec3(-6.0f, -3.0f, brawler->floor_height);
+		caster->transform->rotation = glm::quat(sqrt(0.5f), 0.0f, 0.0f, sqrt(0.5f));
+		caster->transform->position = glm::vec3(-2.0f, -3.0f, caster->floor_height);
+		ranger->transform->rotation = glm::quat(0.0f, 0.0f, 0.0f, 0.0f);
+		ranger->transform->position = glm::vec3(2.0f, -3.0f, ranger->floor_height);
+		healer->transform->rotation = glm::quat(0.0f, 0.0f, 0.0f, 0.0f);
+		healer->transform->position = glm::vec3(6.0f, -3.0f, healer->floor_height);
+		for (Object* u : enemy_units[current_level]) {
+			u->transform->position = offscreen_position();
+		}
+		for (auto& transform : scene.transforms) {
+			if (transform.name == "arrow") {
+				transform.position = offscreen_position();
+			}
+		}
 	}
 	if (lctrl.pressed || rctrl.pressed) {
 		update_animations(10.0f * elapsed);

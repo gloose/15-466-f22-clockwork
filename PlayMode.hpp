@@ -223,15 +223,6 @@ struct PlayMode : Mode {
 	void render();
 	bool game_start = false;
 	bool game_end = false;
-
-	Scene::Transform *monster = nullptr; 
-	Scene::Transform *monster_sclera = nullptr;
-	Scene::Transform *monster_tentacle_4 = nullptr;
-	Scene::Transform *monster_tentacle_3 = nullptr;
-	Scene::Transform *monster_tentacle_2 = nullptr;
-	Scene::Transform *monster_tentacle_1 = nullptr;
-	Scene::Transform *monster_tentacle_0 = nullptr;
-	Scene::Transform *monster_pupil = nullptr;
 	Sound::Sample *ambient_sample;
 	
 	Object* dungeon_scene;
