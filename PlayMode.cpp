@@ -1359,9 +1359,8 @@ void PlayMode::next_level() {
 		dungeon_scene->transform->position = offscreen_scene_position;
 		cave_scene->transform->position = offscreen_scene_position;
 		forest_scene->transform->position = scene_position;
-	} else if (current_level == 30) {
+	} else if (current_level >= 30) {
 		game_end = true;
-	} else if (current_level >= (int)level_guidance.size()) {
 		current_level = (int)level_guidance.size() - 1;
 	}
 
