@@ -58,6 +58,8 @@ struct MoveAnimation : Animation {
 
 struct DeathAnimation : Animation {
 	DeathAnimation(Object* victim);
+	Object* target;
+	glm::quat delta;
 	bool update(float update_time);
 };
 

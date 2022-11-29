@@ -38,6 +38,7 @@ struct Object {
     std::unordered_map<std::string, Scene::Drawable*> drawables;
     Scene::Transform* transform;
     glm::vec2 start_position;
+    glm::quat start_rotation;
     float health_level = 1.0f;
     float floor_height = 0.f;
     Team team;

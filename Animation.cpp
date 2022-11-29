@@ -192,6 +192,26 @@ DeathAnimation::DeathAnimation(Object* victim) {
 	id = animation_id++;
 	transform = victim->transform;
 	elapsed_time = 0.0f;
+	target = victim;
+	glm::quat start_quat = target->start_rotation;
+	glm::quat end_quat = start_quat;
+	if (transform->name.find("caster") != std::string::npos) {
+		end_quat = glm::quat(0.0f, sqrt(0.5f), 0.0f, -sqrt(0.5f));
+	} else if (transform->name.find("warrior") != std::string::npos || transform->name.find("healer") != std::string::npos || transform->name.find("ranger") != std::string::npos) {
+		if (transform->name.find("ranger") != std::string::npos) {
+			arrow_transform->position = offscreen_position();
+		}
+		end_quat = glm::quat(0.5f, -0.5f, -0.5f, 0.5f);
+	} else if (transform->name.find("monster") != std::string::npos) {
+		end_quat = glm::quat(0.5f, 0.5f, 0.5f, 0.5f);
+	} else if (transform->name.find("gunner") != std::string::npos) {
+		end_quat = glm::quat(0.0f, -sqrt(0.5f), 0.0f, -sqrt(0.5f));
+	} else if (transform->name.find("speedster") != std::string::npos) {
+		end_quat = glm::quat(0.0f, -sqrt(0.5f), 0.0f, -sqrt(0.5f));
+	} else if (transform->name.find("tank") != std::string::npos) {
+		end_quat = glm::quat(0.5f, -0.5f, 0.5f, -0.5f);
+	}
+	delta = end_quat - start_quat;
 }
 
 EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
@@ -286,7 +306,13 @@ bool DeathAnimation::update(float update_time) {
 	if (elapsed_time < (turn_length / 2.0f)) {
 		return true;
 	} else if ((turn_length / 2.0f) <= elapsed_time && elapsed_time < turn_length) {
-		transform->position.z -= 0.5f * (elapsed_time / (turn_length / 2.0f));
+		transform->position.z -= 0.25f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+		transform->rotation = target->start_rotation + delta * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+		if (target->team == Team::TEAM_PLAYER) {
+			transform->position.x -= 0.1f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+		} else if (target->team == Team::TEAM_ENEMY) {
+			transform->position.x += 0.1f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+		}
 		return true;
 	} else {
 		return false;

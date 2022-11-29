@@ -195,6 +195,7 @@ Object* PlayMode::makeObject(std::string name, std::string model_name, Team team
 			if (transform.name == model_name) {
 				obj->transform = new_transform;
 				obj->floor_height = obj->transform->position.z;
+				obj->start_rotation = new_transform->rotation;
 			}
 			
 			if (transform.name == model_name || transform.name.rfind(model_name + "-", 0) == 0) {

@@ -44,6 +44,7 @@ void Object::reset() {
     }
     updateHealth();
     transform->position = glm::vec3(start_position, floor_height);
+    transform->rotation = start_rotation;
 }
 
 // Returns a reference to the property named property_name
