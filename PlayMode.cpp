@@ -247,12 +247,12 @@ void PlayMode::create_levels() {
 	level_guidance.push_back("An enemy approaches! Use \"brawler.attack(enemy1)\" to attack him with the brawler! Press shift + enter to submit your code.");
 	level_guidance.push_back("Another enemy! This one can't be hurt by the brawler...but you also have a caster. With the same syntax, tell the \"caster\" to \"burn\" \"enemy2\". It will take damage whenever it moves.");
 	level_guidance.push_back("Uh oh, enemy3 will survive a hit... After typing the line to have the brawler attack, press enter to move to the next line. Then have the brawler attack enemy3 again. Press shift + enter to submit both lines.");
-	level_guidance.push_back("Enemy4 has a powerful attack coming up! The caster can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the brawler.");
+	level_guidance.push_back("Enemy4 has a powerful attack coming up! The caster can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the brawler. If you get tired of typing, just enter the first few letters of a word and let autocompletion take care of the rest!");
 	level_guidance.push_back("Enemy5 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the brawler attacks once, use the \"healer\" to \"heal\" the \"brawler\". Then have the brawler finish him off.");
 	level_guidance.push_back("Your last unit is an ranger, who can attack faster than the brawler but has limited ammo! Try having the \"ranger\" \"shoot\" enemy6 twice before he has a chance to attack!");
 	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the brawler attack enemy7, and then type \"end\" below the last line to end the loop. If this fight is too slow for your taste, try holding ctrl to speed things up!");
-	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (ranger.arrows > 0)\", and then use the brawler afterwards. A list of the properties can be found in the manual, but all units have alive, health, and power.");
-	level_guidance.push_back("If statements work the same way. Try checking \"if (brawler.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"! You can also chain conditions with \"if (this) and (that)\". Or works too.");
+	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (ranger.arrows > 0)\", and then use the brawler afterwards. Try typing just 'RANGER.' (or 'ENEMY8.', 'BRAWLER.', etc.) and check out the full property list in the info box; see if you can guess how many arrows and attacks it will take to score a kill!");
+	level_guidance.push_back("If statements work the same way. Try checking \"if (brawler.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"! You can also chain conditions with \"IF (this)\" \"AND (that)\", with the AND on a new line. OR works too.");
 	level_guidance.push_back("Alright, time to test everything you've learned! Enemy10 is tough, but you can do it!");
 	level_guidance.push_back("Gunners are very powerful! Be careful of Vrop's attacks.");
 	level_guidance.push_back("Speedsters like Grum can attack multiple times in a row! Make sure your code is efficient.");
@@ -421,7 +421,7 @@ void PlayMode::init_compiler() {
 	enemy8->start_position = enemy1->start_position;
 	enemy8->addAction("ATTACK", attack_function, turn_duration());
 	enemy8->addAction("DEFEND", defend_function, turn_duration());
-	enemy8->addProperty("HEALTH_MAX", 175);
+	enemy8->addProperty("HEALTH_MAX", 220);
 	enemy8->addProperty("HEALTH", 175);
 	enemy8->addProperty("DEFENSE", 0);
 	enemy8->addProperty("ALIVE", 1);
