@@ -1113,7 +1113,6 @@ void PlayMode::execute_player_statement() {
 	execution_result = ExecutionResult::NONE;
 	if (player_time >= time) {
 		auto obj = player_units.begin();
-		auto tgt = enemy_units[current_level].begin();
 		if (player_statement->type == Compiler::ACTION_STATEMENT) {
 			Compiler::ActionStatement *action_statement = dynamic_cast<Compiler::ActionStatement *>(player_statement);
 			obj = std::find(player_units.begin(), player_units.end(), action_statement->object);
