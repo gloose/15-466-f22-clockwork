@@ -144,11 +144,10 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	offscreen_scene_position = cave_scene->transform->position;
 	next_level();
 	compile_failed = false;
+	execution_result = ExecutionResult::NONE;
 	
 	lshift.pressed = false;
 	rshift.pressed = false;
-	get_action_string() = "";
-	get_effect_string() = "";
 	//TODO: begining of the ambient sample
 	ambient_sample = new Sound::Sample(data_path("Sounds/ambient.wav"));
 	loop(*ambient_sample);
@@ -311,7 +310,6 @@ void PlayMode::init_compiler() {
 	brawler = makeObject("BRAWLER", "warrior", Team::TEAM_PLAYER);
 	brawler->start_position = glm::vec2(-6.f, -6.f);
 	brawler->addAction("ATTACK", attack_function, turn_duration());
-	brawler->addAction("DEFEND", defend_function, turn_duration());
 	brawler->addProperty("HEALTH_MAX", 100);
 	brawler->addProperty("HEALTH", 100);
 	brawler->addProperty("DEFENSE", 0);
@@ -330,7 +328,6 @@ void PlayMode::init_compiler() {
 	ranger = makeObject("RANGER", "ranger", Team::TEAM_PLAYER);
 	ranger->start_position = glm::vec2(-6.f, 2.f);
 	register_ranger_object(ranger);
-	ranger->addAction("ATTACK", shoot_function, turn_duration() * 0.5f);
 	ranger->addAction("SHOOT", shoot_function, turn_duration() * 0.5f);
 	ranger->addProperty("HEALTH_MAX", 60);
 	ranger->addProperty("HEALTH", 60);
@@ -350,7 +347,6 @@ void PlayMode::init_compiler() {
 	Object* enemy1 = makeObject("ENEMY1", "monster", Team::TEAM_ENEMY);
 	enemy1->start_position = glm::vec2(6.f, 0.f);
 	enemy1->addAction("ATTACK", attack_function, turn_duration());
-	enemy1->addAction("DEFEND", defend_function, turn_duration());
 	enemy1->addProperty("HEALTH_MAX", 15);
 	enemy1->addProperty("HEALTH", 15);
 	enemy1->addProperty("DEFENSE", 0);
@@ -360,7 +356,6 @@ void PlayMode::init_compiler() {
 	Object* enemy2 = makeObject("ENEMY2", "monster", Team::TEAM_ENEMY);
 	enemy2->start_position = enemy1->start_position;
 	enemy2->addAction("ATTACK", attack_function, turn_duration());
-	enemy2->addAction("DEFEND", defend_function, turn_duration());
 	enemy2->addProperty("HEALTH_MAX", 10);
 	enemy2->addProperty("HEALTH", 10);
 	enemy2->addProperty("DEFENSE", 100);
@@ -370,7 +365,6 @@ void PlayMode::init_compiler() {
 	Object* enemy3 = makeObject("ENEMY3", "monster", Team::TEAM_ENEMY);
 	enemy3->start_position = enemy1->start_position;
 	enemy3->addAction("ATTACK", attack_function, turn_duration());
-	enemy3->addAction("DEFEND", defend_function, turn_duration());
 	enemy3->addProperty("HEALTH_MAX", 30);
 	enemy3->addProperty("HEALTH", 30);
 	enemy3->addProperty("DEFENSE", 0);
@@ -380,7 +374,6 @@ void PlayMode::init_compiler() {
 	Object* enemy4 = makeObject("ENEMY4", "monster", Team::TEAM_ENEMY);
 	enemy4->start_position = enemy1->start_position;
 	enemy4->addAction("ATTACK", attack_function, turn_duration());
-	enemy4->addAction("DEFEND", defend_function, turn_duration());
 	enemy4->addProperty("HEALTH_MAX", 75);
 	enemy4->addProperty("HEALTH", 75);
 	enemy4->addProperty("DEFENSE", 0);
@@ -390,7 +383,6 @@ void PlayMode::init_compiler() {
 	Object* enemy5 = makeObject("ENEMY5", "monster", Team::TEAM_ENEMY);
 	enemy5->start_position = enemy1->start_position;
 	enemy5->addAction("ATTACK", attack_function, turn_duration());
-	enemy5->addAction("DEFEND", defend_function, turn_duration());
 	enemy5->addProperty("HEALTH_MAX", 45);
 	enemy5->addProperty("HEALTH", 45);
 	enemy5->addProperty("DEFENSE", 0);
@@ -400,7 +392,6 @@ void PlayMode::init_compiler() {
 	Object* enemy6 = makeObject("ENEMY6", "monster", Team::TEAM_ENEMY);
 	enemy6->start_position = enemy1->start_position;
 	enemy6->addAction("ATTACK", attack_function, turn_duration());
-	enemy6->addAction("DEFEND", defend_function, turn_duration());
 	enemy6->addProperty("HEALTH_MAX", 40);
 	enemy6->addProperty("HEALTH", 40);
 	enemy6->addProperty("DEFENSE", 0);
@@ -410,7 +401,6 @@ void PlayMode::init_compiler() {
 	Object* enemy7 = makeObject("ENEMY7", "monster", Team::TEAM_ENEMY);
 	enemy7->start_position = enemy1->start_position;
 	enemy7->addAction("ATTACK", attack_function, turn_duration());
-	enemy7->addAction("DEFEND", defend_function, turn_duration());
 	enemy7->addProperty("HEALTH_MAX", 200);
 	enemy7->addProperty("HEALTH", 200);
 	enemy7->addProperty("DEFENSE", 0);
@@ -420,7 +410,6 @@ void PlayMode::init_compiler() {
 	Object* enemy8 = makeObject("ENEMY8", "monster", Team::TEAM_ENEMY);
 	enemy8->start_position = enemy1->start_position;
 	enemy8->addAction("ATTACK", attack_function, turn_duration());
-	enemy8->addAction("DEFEND", defend_function, turn_duration());
 	enemy8->addProperty("HEALTH_MAX", 220);
 	enemy8->addProperty("HEALTH", 175);
 	enemy8->addProperty("DEFENSE", 0);
@@ -430,7 +419,6 @@ void PlayMode::init_compiler() {
 	Object* enemy9 = makeObject("ENEMY9", "monster", Team::TEAM_ENEMY);
 	enemy9->start_position = enemy1->start_position;
 	enemy9->addAction("ATTACK", attack_function, turn_duration());
-	enemy9->addAction("DEFEND", defend_function, turn_duration());
 	enemy9->addProperty("HEALTH_MAX", 90);
 	enemy9->addProperty("HEALTH", 90);
 	enemy9->addProperty("DEFENSE", 0);
@@ -440,7 +428,6 @@ void PlayMode::init_compiler() {
 	Object* enemy10 = makeObject("ENEMY10", "monster", Team::TEAM_ENEMY);
 	enemy10->start_position = enemy1->start_position;
 	enemy10->addAction("ATTACK", attack_function, turn_duration());
-	enemy10->addAction("DEFEND", defend_function, turn_duration());
 	enemy10->addProperty("HEALTH_MAX", 100);
 	enemy10->addProperty("HEALTH", 100);
 	enemy10->addProperty("DEFENSE", 0);
@@ -450,7 +437,6 @@ void PlayMode::init_compiler() {
 	Object* vrop = makeObject("VROP", "gunner", Team::TEAM_ENEMY);
 	vrop->start_position = enemy1->start_position;
 	vrop->addAction("ATTACK", gunner_attack_function, turn_duration());
-	vrop->addAction("DEFEND", defend_function, turn_duration());
 	vrop->addProperty("HEALTH_MAX", 100);
 	vrop->addProperty("HEALTH", 100);
 	vrop->addProperty("DEFENSE", 0);
@@ -460,7 +446,6 @@ void PlayMode::init_compiler() {
 	Object* grum = makeObject("GRUM", "speedster", Team::TEAM_ENEMY);
 	grum->start_position = enemy1->start_position;
 	grum->addAction("ATTACK", attack_function, 0.25f * turn_duration());
-	grum->addAction("DEFEND", defend_function, 0.25f * turn_duration());
 	grum->addProperty("HEALTH_MAX", 80);
 	grum->addProperty("HEALTH", 80);
 	grum->addProperty("DEFENSE", 0);
@@ -470,7 +455,6 @@ void PlayMode::init_compiler() {
 	Object* yormun = makeObject("YORMUN", "tank", Team::TEAM_ENEMY);
 	yormun->start_position = enemy1->start_position;
 	yormun->addAction("ATTACK", attack_function, 1.5f * turn_duration());
-	yormun->addAction("DEFEND", defend_function, 1.5f * turn_duration());
 	yormun->addProperty("HEALTH_MAX", 200);
 	yormun->addProperty("HEALTH", 200);
 	yormun->addProperty("DEFENSE", 0);
@@ -480,7 +464,6 @@ void PlayMode::init_compiler() {
 	Object* vropvrop = makeObject("VROPVROP", "gunner", Team::TEAM_ENEMY);
 	vropvrop->start_position = enemy1->start_position;
 	vropvrop->addAction("ATTACK", gunner_attack_function, turn_duration());
-	vropvrop->addAction("DEFEND", defend_function, turn_duration());
 	vropvrop->addProperty("HEALTH_MAX", 100);
 	vropvrop->addProperty("HEALTH", 100);
 	vropvrop->addProperty("DEFENSE", 0);
@@ -490,7 +473,6 @@ void PlayMode::init_compiler() {
 	Object *fargoth = makeObject("FARGOTH", "tank", Team::TEAM_ENEMY);
 	fargoth->start_position = glm::vec2(6.f, -3.f);
 	fargoth->addAction("ATTACK", attack_function, turn_duration());
-	fargoth->addAction("DEFEND", defend_function, turn_duration());
 	fargoth->addProperty("HEALTH_MAX", 225);
 	fargoth->addProperty("HEALTH", 225);
 	fargoth->addProperty("DEFENSE", 0);
@@ -500,7 +482,6 @@ void PlayMode::init_compiler() {
 	Object *rupol = makeObject("RUPOL", "gunner", Team::TEAM_ENEMY);
 	rupol->start_position = glm::vec2(6.f, 3.f);
 	rupol->addAction("ATTACK", gunner_attack_function, turn_duration());
-	rupol->addAction("DEFEND", defend_function, turn_duration());
 	rupol->addProperty("HEALTH_MAX", 150);
 	rupol->addProperty("HEALTH", 150);
 	rupol->addProperty("DEFENSE", 0);
@@ -510,7 +491,6 @@ void PlayMode::init_compiler() {
 	Object* blurok = makeObject("BLUROK", "speedster", Team::TEAM_ENEMY);
 	blurok->start_position = fargoth->start_position;
 	blurok->addAction("ATTACK", attack_function, 0.25f * turn_duration());
-	blurok->addAction("DEFEND", defend_function, 0.25f * turn_duration());
 	blurok->addProperty("HEALTH_MAX", 100);
 	blurok->addProperty("HEALTH", 100);
 	blurok->addProperty("DEFENSE", 0);
@@ -520,7 +500,6 @@ void PlayMode::init_compiler() {
 	Object* qerbi = makeObject("QERBI", "tank", Team::TEAM_ENEMY);
 	qerbi->start_position = rupol->start_position;
 	qerbi->addAction("ATTACK", attack_function, turn_duration());
-	qerbi->addAction("DEFEND", defend_function, turn_duration());
 	qerbi->addProperty("HEALTH_MAX", 200);
 	qerbi->addProperty("HEALTH", 200);
 	qerbi->addProperty("DEFENSE", 0);
@@ -530,7 +509,6 @@ void PlayMode::init_compiler() {
 	Object* norver = makeObject("NORVER", "speedster", Team::TEAM_ENEMY);
 	norver->start_position = fargoth->start_position;
 	norver->addAction("ATTACK", attack_function, 0.5f * turn_duration());
-	norver->addAction("DEFEND", defend_function, 0.5f * turn_duration());
 	norver->addProperty("HEALTH_MAX", 120);
 	norver->addProperty("HEALTH", 120);
 	norver->addProperty("DEFENSE", 0);
@@ -540,7 +518,6 @@ void PlayMode::init_compiler() {
 	Object* almo = makeObject("ALMO", "gunner", Team::TEAM_ENEMY);
 	almo->start_position = rupol->start_position;
 	almo->addAction("ATTACK", gunner_attack_function, turn_duration());
-	almo->addAction("DEFEND", defend_function, turn_duration());
 	almo->addProperty("HEALTH_MAX", 130);
 	almo->addProperty("HEALTH", 130);
 	almo->addProperty("DEFENSE", 0);
@@ -550,7 +527,6 @@ void PlayMode::init_compiler() {
 	Object* harky = makeObject("HARKY", "tank", Team::TEAM_ENEMY);
 	harky->start_position = fargoth->start_position;
 	harky->addAction("ATTACK", attack_function, turn_duration());
-	harky->addAction("DEFEND", defend_function, turn_duration());
 	harky->addProperty("HEALTH_MAX", 250);
 	harky->addProperty("HEALTH", 250);
 	harky->addProperty("DEFENSE", 0);
@@ -560,7 +536,6 @@ void PlayMode::init_compiler() {
 	Object* marky = makeObject("MARKY", "tank", Team::TEAM_ENEMY);
 	marky->start_position = rupol->start_position;
 	marky->addAction("ATTACK", attack_function, turn_duration());
-	marky->addAction("DEFEND", defend_function, turn_duration());
 	marky->addProperty("HEALTH_MAX", 250);
 	marky->addProperty("HEALTH", 250);
 	marky->addProperty("DEFENSE", 0);
@@ -570,7 +545,6 @@ void PlayMode::init_compiler() {
 	Object* boro = makeObject("BORO", "speedster", Team::TEAM_ENEMY);
 	boro->start_position = glm::vec2(6.f, -5.f);
 	boro->addAction("ATTACK", attack_function, 0.5f * turn_duration());
-	boro->addAction("DEFEND", defend_function, 0.5f * turn_duration());
 	boro->addProperty("HEALTH_MAX", 100);
 	boro->addProperty("HEALTH", 100);
 	boro->addProperty("DEFENSE", 0);
@@ -580,7 +554,6 @@ void PlayMode::init_compiler() {
 	Object* coro = makeObject("CORO", "speedster", Team::TEAM_ENEMY);
 	coro->start_position = glm::vec2(6.f, 0.f);
 	coro->addAction("ATTACK", attack_function, 0.5f * turn_duration());
-	coro->addAction("DEFEND", defend_function, 0.5f * turn_duration());
 	coro->addProperty("HEALTH_MAX", 100);
 	coro->addProperty("HEALTH", 100);
 	coro->addProperty("DEFENSE", 0);
@@ -590,7 +563,6 @@ void PlayMode::init_compiler() {
 	Object* zoro = makeObject("ZORO", "speedster", Team::TEAM_ENEMY);
 	zoro->start_position = glm::vec2(6.f, 5.f);
 	zoro->addAction("ATTACK", attack_function, 0.5f * turn_duration());
-	zoro->addAction("DEFEND", defend_function, 0.5f * turn_duration());
 	zoro->addProperty("HEALTH_MAX", 100);
 	zoro->addProperty("HEALTH", 100);
 	zoro->addProperty("DEFENSE", 0);
@@ -600,7 +572,6 @@ void PlayMode::init_compiler() {
 	Object* poryo = makeObject("PORYO", "speedster", Team::TEAM_ENEMY);
 	poryo->start_position = glm::vec2(6.f, -5.f);
 	poryo->addAction("ATTACK", attack_function, 0.5f * turn_duration());
-	poryo->addAction("DEFEND", defend_function, 0.5f * turn_duration());
 	poryo->addProperty("HEALTH_MAX", 100);
 	poryo->addProperty("HEALTH", 100);
 	poryo->addProperty("DEFENSE", 0);
@@ -610,7 +581,6 @@ void PlayMode::init_compiler() {
 	Object* therfu = makeObject("THERFU", "gunner", Team::TEAM_ENEMY);
 	therfu->start_position = glm::vec2(6.f, -2.f);
 	therfu->addAction("ATTACK", gunner_attack_function, turn_duration());
-	therfu->addAction("DEFEND", defend_function, turn_duration());
 	therfu->addProperty("HEALTH_MAX", 120);
 	therfu->addProperty("HEALTH", 120);
 	therfu->addProperty("DEFENSE", 0);
@@ -620,7 +590,6 @@ void PlayMode::init_compiler() {
 	Object* wurmp = makeObject("WURMP", "tank", Team::TEAM_ENEMY);
 	wurmp->start_position = glm::vec2(6.f, 5.f);
 	wurmp->addAction("ATTACK", attack_function, 1.5f * turn_duration());
-	wurmp->addAction("DEFEND", defend_function, 1.5f * turn_duration());
 	wurmp->addProperty("HEALTH_MAX", 200);
 	wurmp->addProperty("HEALTH", 200);
 	wurmp->addProperty("DEFENSE", 0);
@@ -923,8 +892,6 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			level_won = false;
 			level_lost = false;
 			turn_done = true;
-			get_action_string() = "";
-			get_effect_string() = "You aborted the level.";
 			reset_level();
 			clear_animations();
 			return true;
@@ -935,7 +902,6 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	if (evt.type == SDL_KEYDOWN) {
 		if(evt.key.keysym.sym == SDLK_RETURN) {
 			if (lshift.pressed || rshift.pressed) {
-				std::cout << "Submitted!\n";
 				player_exe = player_compiler.compile(text_buffer);
 				if (player_exe == nullptr) {
 					compile_failed = true;
@@ -1142,33 +1108,20 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 void PlayMode::execute_player_statement() {
 	float time = player_statement->duration;
+	execution_line_index = (int)player_statement->line_num;
+	enemy_execution_line_index = -1;
+	execution_result = ExecutionResult::NONE;
 	if (player_time >= time) {
-		std::cout << "Executing statement.\n";
 		auto obj = player_units.begin();
 		auto tgt = enemy_units[current_level].begin();
 		if (player_statement->type == Compiler::ACTION_STATEMENT) {
 			Compiler::ActionStatement *action_statement = dynamic_cast<Compiler::ActionStatement *>(player_statement);
 			obj = std::find(player_units.begin(), player_units.end(), action_statement->object);
-			if (action_statement->has_target) {
-				Object* target = action_statement->getRealTarget();
-				tgt = std::find(enemy_units[current_level].begin(), enemy_units[current_level].end(), target);
-				// Could be that it's a heal action
-				if (tgt == enemy_units[current_level].end()) {
-					tgt = std::find(player_units.begin(), player_units.end(), target);
-				}
-			}
-		} else {
-			get_action_string() = "You are thinking...";
 		}
-		if (obj == player_units.end()) {
-			get_action_string() = "You can't control the enemy!";
-		} else if (tgt == enemy_units[current_level].end() || tgt == player_units.end()) {
-			get_action_string() = "That target isn't here right now.";
-		} else {
-			player_statement->execute();
+		execution_result = ExecutionResult::FAILURE;
+		if (obj != player_units.end() && player_statement->execute()) {
+			execution_result = ExecutionResult::SUCCESS;
 		}
-		execution_line_index = (int)player_statement->line_num;
-		enemy_execution_line_index = -1;
 		bool enemies_alive = false;
 		bool players_alive = false;
 		for (auto& enemy : enemy_units[current_level]) {
@@ -1184,14 +1137,12 @@ void PlayMode::execute_player_statement() {
 			}
 		}
 		if (!players_alive) {
-			get_effect_string() = "All player units have fallen...";
 			player_done = true;
 			enemy_done = true;
 			level_lost = true;
 			return;
 		}
 		if (!enemies_alive) {
-			get_effect_string() = "All enemy units have been slain!";
 			player_done = true;
 			enemy_done = true;
 			level_won = true;
@@ -1228,12 +1179,15 @@ void PlayMode::execute_player_statement() {
 
 void PlayMode::execute_enemy_statement() {
 	float time = enemy_statement->duration;
+	execution_line_index = -1;
+	enemy_execution_line_index = (int)enemy_statement->line_num;
+	execution_result = ExecutionResult::NONE;
 	if (enemy_time >= time) {
-		std::cout << "Executing statement.\n";
-		get_action_string() = "The enemy is thinking...";
-		enemy_statement->execute();
-		execution_line_index = -1;
-		enemy_execution_line_index = (int)enemy_statement->line_num;
+		if (enemy_statement->execute()) {
+			execution_result = ExecutionResult::SUCCESS;
+		} else {
+			execution_result = ExecutionResult::FAILURE;
+		}
 		bool enemies_alive = false;
 		bool players_alive = false;
 		for (auto& enemy : enemy_units[current_level]) {
@@ -1249,14 +1203,12 @@ void PlayMode::execute_enemy_statement() {
 			}
 		}
 		if (!players_alive) {
-			get_effect_string() = "All player units have fallen...";
 			player_done = true;
 			enemy_done = true;
 			level_lost = true;
 			return;
 		}
 		if (!enemies_alive) {
-			get_effect_string() = "All enemy units have been slain!";
 			player_done = true;
 			enemy_done = true;
 			level_won = true;
@@ -1292,10 +1244,8 @@ void PlayMode::execute_enemy_statement() {
 
 void PlayMode::take_turn() {
 	if (turn == Turn::PLAYER) {
-		std::cout << "Player taking turn.\n";
 		execute_player_statement();
 	} else {
-		std::cout << "Enemy taking turn.\n";
 		execute_enemy_statement();
 	}
 }
@@ -1405,12 +1355,9 @@ void PlayMode::update(float elapsed) {
 				turn_done = true;
 				execution_line_index = -1;
 				enemy_execution_line_index = -1;
-				get_action_string() = "";
 				if (!level_lost && !level_won) {
-					get_effect_string() = "Your code didn't solve the puzzle...";
 					reset_level();
 				} else {
-					get_effect_string() = "";
 					if (level_won) {
 						next_level();
 						level_won = false;
@@ -1747,9 +1694,19 @@ void PlayMode::render(){
 
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < text_buffer.size(); i++){
-		if (!player_done && (int)i == execution_line_index) {
-			pen_color = execute_line_color;
-		} else if (player_done && i == line_index) {
+		if ((int)i == execution_line_index) {
+			switch (execution_result) {
+			case ExecutionResult::SUCCESS:
+				pen_color = execute_success_color;
+				break;
+			case ExecutionResult::FAILURE:
+				pen_color = execute_failure_color;
+				break;
+			default:
+				pen_color = execute_normal_color;
+				break;
+			}
+		} else if (turn_done && i == line_index) {
 			pen_color = cur_line_color;
 		} else {
 			pen_color = default_line_color;
@@ -1758,9 +1715,6 @@ void PlayMode::render(){
 	}
 	if (compile_failed) {
 		drawText(player_compiler.error_message, glm::ivec2(error_pos.x + text_margin.x, error_pos.y + error_size.y + text_margin.y), error_size.x - 2 * text_margin.x);
-	} else {
-		//drawText(get_action_string(), glm::vec2(ScreenWidth / 2, 100), max_line_length);
-		//drawText(get_effect_string(), glm::vec2(ScreenWidth / 2, 50), max_line_length);
 	}
 	drawText(level_guidance[current_level], prompt_pos + glm::ivec2(0, prompt_size.y) + text_margin, prompt_size.x - 2 * text_margin.x);
 }
@@ -2098,8 +2052,18 @@ void PlayMode::drawEnemyCode() {
 
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < enemy_text_buffer.size(); i++){
-		if (!enemy_done && (int)i == enemy_execution_line_index) {
-			pen_color = execute_line_color;
+		if ((int)i == enemy_execution_line_index) {
+			switch (execution_result) {
+			case ExecutionResult::SUCCESS:
+				pen_color = execute_success_color;
+				break;
+			case ExecutionResult::FAILURE:
+				pen_color = execute_failure_color;
+				break;
+			default:
+				pen_color = execute_normal_color;
+				break;
+			}
 		} else {
 			pen_color = default_line_color;
 		}

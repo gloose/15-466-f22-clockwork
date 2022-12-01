@@ -100,7 +100,9 @@ struct PlayMode : Mode {
 	static inline glm::u8vec4 default_color = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
 	static inline glm::u8vec4 alt_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
 	static inline glm::u8vec4 cur_line_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
-	static inline glm::u8vec4 execute_line_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
+	static inline glm::u8vec4 execute_normal_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
+	static inline glm::u8vec4 execute_success_color = glm::u8vec4(0xc0, 0xff, 0xc0, 0xff);
+	static inline glm::u8vec4 execute_failure_color = glm::u8vec4(0xff, 0xc0, 0xc0, 0xff);
 	static inline glm::u8vec4 default_line_color = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
 	int scroll_x = 0;
 	int scroll_y = 0;
@@ -208,6 +210,11 @@ struct PlayMode : Mode {
 	std::vector< std::string > text_buffer;
 	std::vector< std::string > enemy_text_buffer;
 	int execution_line_index = -1;
+	enum ExecutionResult {
+		NONE,
+		SUCCESS,
+		FAILURE
+	} execution_result;
 	int enemy_execution_line_index = -1;
 	size_t max_line_length = 400;
 	size_t max_line_chars = 40;

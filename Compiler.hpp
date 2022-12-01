@@ -52,7 +52,7 @@ struct Compiler {
         Statement(Compiler* compiler);
         virtual ~Statement();
         virtual Statement* next();
-        virtual void execute();
+        virtual bool execute();
         virtual void reset();
     };
 
@@ -64,7 +64,7 @@ struct Compiler {
 
         ActionStatement(Compiler* compiler);
         Statement* next();
-        void execute();
+        bool execute();
         Object* getRealTarget();
     };
 
@@ -83,7 +83,7 @@ struct Compiler {
 
         IfStatement(Compiler* compiler);
         Statement* next();
-        void execute();
+        bool execute();
         void reset();
     };
 
@@ -95,7 +95,7 @@ struct Compiler {
 
         WhileStatement(Compiler* compiler);
         Statement* next();
-        void execute();
+        bool execute();
         void reset();
     };
 

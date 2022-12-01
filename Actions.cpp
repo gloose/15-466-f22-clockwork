@@ -1,8 +1,5 @@
 #include "Actions.hpp"
 
-std::string action_string = "";
-std::string effect_string = "";
-
 int calc_damage(int damage, Object* target) {
 	return (int)std::round(damage * (100 - target->property("DEFENSE")) / 100.);
 }
@@ -12,9 +9,6 @@ void attack(int damage, Object* target) {
 	if (target->property("HEALTH") <= 0) {
 		target->property("ALIVE") = 0;
 		add_animation(new DeathAnimation(target));
-		effect_string = target->name + " has been killed.";
-	} else {
-		effect_string = target->name + " has " + std::to_string(target->property("HEALTH")) + " health.";
 	}
 }
 
@@ -25,7 +19,6 @@ bool check_burn(Object* user) {
 		if (user->property("HEALTH") <= 0) {
 			user->property("ALIVE") = 0;
 			add_animation(new DeathAnimation(user));
-			effect_string = user->name + " died to burn damage.";
 			return true;
 		} else {
 			add_animation(new EnergyAnimation(EnergyType::BURN, user));
@@ -38,7 +31,6 @@ bool check_freeze(Object* user) {
 	if (user->property("FROZEN") == 1) {
 		user->property("FREEZE_COUNTDOWN")--;
 		if (user->property("FREEZE_COUNTDOWN") == 0 && user->property("ALIVE") != 0) {
-			effect_string = user->name + " was frozen and could not move.";
 			user->property("FREEZE_COUNTDOWN") = 3;
 			add_animation(new EnergyAnimation(EnergyType::FREEZE, user));
 			return true;
@@ -47,125 +39,134 @@ bool check_freeze(Object* user) {
 	return false;
 }
 
-void attack_function(Compiler* compiler, Object* user, Object* target) {
+void attack_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+		*result = false;
 		return;
 	}
 	int damage = user->property("POWER");
-	action_string = user->name + " attacked " + target->name + " for " + std::to_string(calc_damage(damage, target)) + " damage.";
 	add_animation(new MoveAnimation(user, target));
 	attack(damage, target);
+	*result = true;
 }
 
-void gunner_attack_function(Compiler* compiler, Object* user, Object* target) {
+void gunner_attack_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+		*result = false;
 		return;
 	}
 	int damage = user->property("POWER");
-	action_string = user->name + " attacked " + target->name + " for " + std::to_string(calc_damage(damage, target)) + " damage.";
 	add_animation(new BoltAnimation(user, target));
 	attack(damage, target);
+	*result = true;
 }
 
-void defend_function(Compiler* compiler, Object* user, Object* target) {
+void freeze_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
-		return;
-	}
-	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
-		return;
-	}
-	action_string = user->name + " defended " + target->name + ".";
-	target->property("DEFENDED") = 1;
-	user->property("DEFENDING") = 1;
-}
-
-void freeze_function(Compiler* compiler, Object* user, Object* target) {
-	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+		*result = false;
 		return;
 	}
 	if (target->property("FROZEN") == 0) {
 		add_animation(new EnergyAnimation(EnergyType::FREEZE, target));
 		target->property("FROZEN") = 1;
 		target->property("FREEZE_COUNTDOWN") = 3;
-		action_string = user->name + " froze " + target->name + ".";
+		*result = true;
 	} else {
-		action_string = target->name + " is already frozen.";
+		*result = false;
 	}
 }
 
-void burn_function(Compiler* compiler, Object* user, Object* target) {
+void burn_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+		*result = false;
 		return;
 	}
 	if (target->name == "FLAMMY") {
+		*result = false;
 		return;
 	}
-	action_string = user->name + " burned " + target->name + ".";
-	add_animation(new EnergyAnimation(EnergyType::BURN, target));
-	target->property("BURNED") = 1;
+	if (target->property("BURNED") == 0) {
+		add_animation(new EnergyAnimation(EnergyType::BURN, target));
+		target->property("BURNED") = 1;
+		*result = true;
+	} else {
+		*result = false;
+	}
 }
 
-void heal_function(Compiler* compiler, Object* user, Object* target) {
+void heal_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+		*result = false;
 		return;
 	}
-	action_string = user->name + " healed " + target->name + ".";
 	add_animation(new EnergyAnimation(EnergyType::HEAL, target));
 	if (target->property("HEALTH_MAX") - target->property("HEALTH") < 20) {
 		target->property("HEALTH") = target->property("HEALTH_MAX");
 	} else {
 		target->property("HEALTH") += 20;
 	}
-	effect_string = target->name + " has " + std::to_string(target->property("HEALTH")) + " health.";
+	*result = true;
 }
 
-void full_heal_function(Compiler* compiler, Object* user, Object* target) {
+void full_heal_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+		*result = false;
 		return;
 	}
-	action_string = user->name + " full healed " + target->name + ".";
 	add_animation(new EnergyAnimation(EnergyType::HEAL, target));
 	target->property("HEALTH") = target->property("HEALTH_MAX");
-	effect_string = target->name + " has " + std::to_string(target->property("HEALTH")) + " health.";
+	*result = true;
 }
 
-void burn_heal_function(Compiler* compiler, Object* user, Object* target) {
+void burn_heal_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0) {
+		*result = false;
 		return;
 	}
-	action_string = user->name + " burn healed " + target->name + ".";
 	add_animation(new EnergyAnimation(EnergyType::HEAL, target));
 	if (target->property("BURNED")) {
 		target->property("BURNED") = 0;
+		*result = true;
+	} else {
+		*result = false;
 	}
 }
 
-void shoot_function(Compiler* compiler, Object* user, Object* target) {
+void shoot_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+		*result = false;
 		return;
 	}
 	
@@ -173,17 +174,19 @@ void shoot_function(Compiler* compiler, Object* user, Object* target) {
 		add_animation(new ShootAnimation(target));
 		attack(user->property("POWER"), target);
 		user->property("ARROWS")--;
-		action_string = user->name + " shot " + target->name + " for " + std::to_string(user->property("POWER")) + " damage, and has " + std::to_string(user->property("ARROWS")) + " arrows remaining.";
+		*result = true;
 	} else {
-		action_string = user->name + " tried to shoot " + target->name + ", but was out of arrows!";
+		*result = false;
 	}
 }
 
-void shockwave_function(Compiler* compiler, Object* user, Object* target) {
+void shockwave_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0) {
+		*result = false;
 		return;
 	}
 	add_animation(new WaveAnimation(user, compiler));
@@ -196,26 +199,32 @@ void shockwave_function(Compiler* compiler, Object* user, Object* target) {
 			compiler->players[i]->property("HEALTH") = 10;
 		}
 	}
+	*result = true;
 }
 
-void kill_function(Compiler* compiler, Object* user, Object* target) {
+void kill_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0 || target->property("ALIVE") == 0 || user == target) {
+		*result = false;
 		return;
 	}
 	target->property("HEALTH") = 0;
 	target->property("ALIVE") = 0;
 	add_animation(new MoveAnimation(user, target));
 	add_animation(new DeathAnimation(target));
+	*result = true;
 }
 
-void annihilate_function(Compiler* compiler, Object* user, Object* target) {
+void annihilate_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0) {
+		*result = false;
 		return;
 	}
 	add_animation(new WaveAnimation(user, compiler));
@@ -232,13 +241,16 @@ void annihilate_function(Compiler* compiler, Object* user, Object* target) {
 			add_animation(new DeathAnimation(compiler->players[i]));
 		}
 	}
+	*result = true;
 }
 
-void destroy_function(Compiler* compiler, Object* user, Object* target) {
+void destroy_function(Compiler* compiler, Object* user, Object* target, bool* result) {
 	if (check_burn(user) || check_freeze(user)) {
+		*result = false;
 		return;
 	}
 	if (user->property("ALIVE") == 0) {
+		*result = false;
 		return;
 	}
 	add_animation(new WaveAnimation(user, compiler));
@@ -251,7 +263,5 @@ void destroy_function(Compiler* compiler, Object* user, Object* target) {
 			attack(50, compiler->players[i]);
 		}
 	}
+	*result = true;
 }
-
-std::string& get_action_string() { return action_string; }
-std::string& get_effect_string() { return effect_string; }

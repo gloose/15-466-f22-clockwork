@@ -680,8 +680,9 @@ Compiler::Statement* Compiler::Statement::next() {
 }
 
 // Statement superclass doesn't implement execute
-void Compiler::Statement::execute() {
+bool Compiler::Statement::execute() {
     assert(false && "Statement::execute must be overridden by child class");
+    return false;
 }
 
 // Reset a statement so it can be used again
@@ -700,8 +701,10 @@ Compiler::Statement* Compiler::ActionStatement::next() {
 }
 
 // Execute action statement by calling the action function with arguments object, target
-void Compiler::ActionStatement::execute() {
-    func(compiler, object, getRealTarget());
+bool Compiler::ActionStatement::execute() {
+    bool result;
+    func(compiler, object, getRealTarget(), &result);
+    return result;
 }
 
 Object* Compiler::ActionStatement::getRealTarget() {
@@ -760,7 +763,7 @@ Compiler::Statement* Compiler::IfStatement::next() {
 }
 
 // Execute just the conditional line and set the truth value
-void Compiler::IfStatement::execute() {
+bool Compiler::IfStatement::execute() {
     // Check truth of initial condition
     truth = condition.isTrue();
 
@@ -779,7 +782,9 @@ void Compiler::IfStatement::execute() {
         reset();
         current_line = 1;
         truth = true;
+        return true;
     }
+    return false;
 }
 
 // Reset if statement and all lines inside of it
@@ -827,7 +832,7 @@ Compiler::Statement* Compiler::WhileStatement::next() {
 }
 
 // Execute just the conditional line and set the truth value
-void Compiler::WhileStatement::execute() {
+bool Compiler::WhileStatement::execute() {
     // Check truth of initial condition
     truth = condition.isTrue();
 
@@ -846,7 +851,9 @@ void Compiler::WhileStatement::execute() {
         reset();
         current_line = 1;
         truth = true;
+        return true;
     }
+    return false;
 }
 
 // Reset while statement and all lines inside of it
