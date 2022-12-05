@@ -158,7 +158,11 @@ bool Animation::update(float update_time) {
 	return false;
 }
 
-MoveAnimation::MoveAnimation(Object* source, Object* target) {
+Animation::Animation(float duration) {
+	this->duration = std::min(duration, turn_length);
+}
+
+MoveAnimation::MoveAnimation(Object* source, Object* target, float duration) : Animation(duration) {
 	start_position = source->getStartPosition();
 	target_position = target->getStartPosition();
 	type = AnimationType::MOVE;
@@ -169,7 +173,7 @@ MoveAnimation::MoveAnimation(Object* source, Object* target) {
 	health_target = target;
 }
 
-ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(ranger_object, target) {
+ShootAnimation::ShootAnimation(Object* target, float duration) : MoveAnimation(ranger_object, target, duration) {
 	start_position += arrow_offset;
 	transform = arrow_transform;
 	// TODO: Some trig magic to rotate the arrow to face the enemy.
@@ -178,7 +182,7 @@ ShootAnimation::ShootAnimation(Object* target) : MoveAnimation(ranger_object, ta
 	sound_playing = true;
 }
 
-BoltAnimation::BoltAnimation(Object* source, Object* target) : MoveAnimation(source, target) {
+BoltAnimation::BoltAnimation(Object* source, Object* target, float duration) : MoveAnimation(source, target, duration) {
 	type = AnimationType::BOLT;
 	start_position.x -= 1.0f;
 	transform = bolt_transform;
@@ -186,7 +190,7 @@ BoltAnimation::BoltAnimation(Object* source, Object* target) : MoveAnimation(sou
 	sound_playing = true;
 }
 
-DeathAnimation::DeathAnimation(Object* victim) {
+DeathAnimation::DeathAnimation(Object* victim) : Animation(turn_duration()) {
 	start_position = victim->getStartPosition();
 	type = AnimationType::DEATH;
 	id = animation_id++;
@@ -214,7 +218,7 @@ DeathAnimation::DeathAnimation(Object* victim) {
 	delta = end_quat - start_quat;
 }
 
-EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
+EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target, float duration) : Animation(duration) {
 	start_position = target->getStartPosition();
 	type = AnimationType::ENERGY;
 	id = animation_id++;
@@ -240,7 +244,7 @@ EnergyAnimation::EnergyAnimation(EnergyType nrg, Object* target) {
 	elapsed_time = 0.0f;
 }
 
-WaveAnimation::WaveAnimation(Object* target, Compiler *input_compiler) {
+WaveAnimation::WaveAnimation(Object* target, Compiler *input_compiler, float duration) : Animation(duration) {
 	start_position = target->getStartPosition();
 	wave_target = target;
 	type = AnimationType::WAVE;
@@ -257,16 +261,16 @@ WaveAnimation::WaveAnimation(Object* target, Compiler *input_compiler) {
 
 bool MoveAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	if (elapsed_time <= turn_length / 2.0f) {
-		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_length / 2.0f));
+	if (elapsed_time <= duration / 2.0f) {
+		transform->position = start_position + (target_position - start_position) * (elapsed_time / (duration / 2.0f));
 		return true;
-	} else if (elapsed_time < turn_length) {
+	} else if (elapsed_time < duration) {
 		if (!sound_playing) {
 			health_target->updateHealth();
 			play(*attack_sample);
 			sound_playing = true;
 		}
-		transform->position = target_position + (start_position - target_position) * (elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f);
+		transform->position = target_position + (start_position - target_position) * (elapsed_time - (duration / 2.0f)) / (duration / 2.0f);
 		return true;
 	} else {
 		transform->position = start_position;
@@ -276,8 +280,8 @@ bool MoveAnimation::update(float update_time) {
 
 bool ShootAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	if (elapsed_time <= turn_length / 2.0f) {
-		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_length / 2.0f));
+	if (elapsed_time <= duration / 2.0f) {
+		transform->position = start_position + (target_position - start_position) * (elapsed_time / (duration / 2.0f));
 		return true;
 	} else {
 		health_target->updateHealth();
@@ -289,8 +293,8 @@ bool ShootAnimation::update(float update_time) {
 
 bool BoltAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	if (elapsed_time <= turn_length / 2.0f) {
-		transform->position = start_position + (target_position - start_position) * (elapsed_time / (turn_length / 2.0f));
+	if (elapsed_time <= duration / 2.0f) {
+		transform->position = start_position + (target_position - start_position) * (elapsed_time / (duration / 2.0f));
 		return true;
 	} else {
 		health_target->updateHealth();
@@ -303,15 +307,15 @@ bool BoltAnimation::update(float update_time) {
 // Note, define a constant to be some downward translation that will move a character offscreen. I'll call it 0.5 units for now.
 bool DeathAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	if (elapsed_time < (turn_length / 2.0f)) {
+	if (elapsed_time < (duration / 2.0f)) {
 		return true;
-	} else if ((turn_length / 2.0f) <= elapsed_time && elapsed_time < turn_length) {
-		transform->position.z = start_position.z - 4.0f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
-		transform->rotation = target->start_rotation + delta * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+	} else if ((duration / 2.0f) <= elapsed_time && elapsed_time < duration) {
+		transform->position.z = start_position.z - 4.0f * ((elapsed_time - (duration / 2.0f)) / (duration / 2.0f));
+		transform->rotation = target->start_rotation + delta * ((elapsed_time - (duration / 2.0f)) / (duration / 2.0f));
 		if (target->team == Team::TEAM_PLAYER) {
-			transform->position.x = start_position.x - 2.0f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+			transform->position.x = start_position.x - 2.0f * ((elapsed_time - (duration / 2.0f)) / (duration / 2.0f));
 		} else if (target->team == Team::TEAM_ENEMY) {
-			transform->position.x = start_position.x - 2.0f * ((elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f));
+			transform->position.x = start_position.x - 2.0f * ((elapsed_time - (duration / 2.0f)) / (duration / 2.0f));
 		}
 		return true;
 	} else {
@@ -324,11 +328,11 @@ bool DeathAnimation::update(float update_time) {
 // Note, define a constant to be some scale that will make an energy ball approximately the size of a character. I'll call it 2 for now.
 bool EnergyAnimation::update(float update_time) {
 	elapsed_time += update_time;
-	transform->position = energy_target->getStartPosition();
-	if (elapsed_time <= turn_length / 2.0f) {
-		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time / (turn_length / 2.0f));
+	transform->position = energy_target->transform->position;
+	if (elapsed_time <= duration / 2.0f) {
+		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time / (duration / 2.0f));
 		return true;
-	} else if (elapsed_time < turn_length) {
+	} else if (elapsed_time < duration) {
 		if (!sound_playing) {
 			sound_playing = true;
 			switch (energy_type) {
@@ -346,7 +350,7 @@ bool EnergyAnimation::update(float update_time) {
 				break;
 			}
 		}
-		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) - glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time - (turn_length / 2.0f)) / (turn_length / 2.0f);
+		transform->scale = glm::vec3(2.0f, 2.0f, 2.0f) - glm::vec3(2.0f, 2.0f, 2.0f) * (elapsed_time - (duration / 2.0f)) / (duration / 2.0f);
 		return true;
 	} else {
 		transform->position = offscreen_position();
@@ -357,9 +361,9 @@ bool EnergyAnimation::update(float update_time) {
 bool WaveAnimation::update(float update_time) {
 	elapsed_time += update_time;
 	transform->position = wave_target->getStartPosition();
-	if (elapsed_time < turn_length) {
-		transform->scale = glm::vec3(25.0f, 25.0f, 10.0f) * (elapsed_time / turn_length);
-		if (elapsed_time >= turn_length / 2.0f && !wave_hit) {
+	if (elapsed_time < duration) {
+		transform->scale = glm::vec3(25.0f, 25.0f, 10.0f) * (elapsed_time / duration);
+		if (elapsed_time >= duration / 2.0f && !wave_hit) {
 			wave_hit = true;
 			if (wave_target->team == Team::TEAM_PLAYER) {
 				for (size_t i = 0; i < compiler->enemies.size(); i++) {

@@ -99,10 +99,10 @@ struct PlayMode : Mode {
 	int font_size = 16;
 	static inline glm::u8vec4 default_color = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
 	static inline glm::u8vec4 alt_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
-	static inline glm::u8vec4 cur_line_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
-	static inline glm::u8vec4 execute_normal_color = glm::u8vec4(0xff, 0xff, 0xc0, 0xff);
-	static inline glm::u8vec4 execute_success_color = glm::u8vec4(0xc0, 0xff, 0xc0, 0xff);
-	static inline glm::u8vec4 execute_failure_color = glm::u8vec4(0xff, 0xc0, 0xc0, 0xff);
+	static inline glm::u8vec4 cur_line_color = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
+	static inline glm::u8vec4 execute_normal_color = glm::u8vec4(0xff, 0xff, 0x80, 0xff);
+	static inline glm::u8vec4 execute_success_color = glm::u8vec4(0x80, 0xff, 0x80, 0xff);
+	static inline glm::u8vec4 execute_failure_color = glm::u8vec4(0xff, 0x80, 0x80, 0xff);
 	static inline glm::u8vec4 default_line_color = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
 	int scroll_x = 0;
 	int scroll_y = 0;
@@ -159,6 +159,11 @@ struct PlayMode : Mode {
 	Object* caster;
 	Object* ranger;
 	Object* healer;
+
+	int first_brawler_level = 0;
+	int first_caster_level = 1;
+	int first_healer_level = 4;
+	int first_ranger_level = 5;
 
 	glm::ivec2 error_pos = glm::ivec2(10, 10);
 	glm::ivec2 error_size = glm::ivec2(400, 80);
@@ -231,6 +236,8 @@ struct PlayMode : Mode {
 	bool game_start = false;
 	bool game_end = false;
 	Sound::Sample *ambient_sample;
+	std::shared_ptr<Sound::PlayingSample> bgm_playing_sample;
+	bool music_muted = false;
 	
 	Object* dungeon_scene;
 	Object* cave_scene;

@@ -703,7 +703,7 @@ Compiler::Statement* Compiler::ActionStatement::next() {
 // Execute action statement by calling the action function with arguments object, target
 bool Compiler::ActionStatement::execute() {
     bool result;
-    func(compiler, object, getRealTarget(), &result);
+    func(compiler, object, getRealTarget(), &result, base_duration);
     return result;
 }
 

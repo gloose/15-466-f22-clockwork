@@ -13,7 +13,7 @@ struct Compiler;
 
 struct Object;
 
-typedef void (*ActionFunction)(Compiler*, Object*, Object*, bool*);
+typedef void (*ActionFunction)(Compiler*, Object*, Object*, bool*, float);
 
 struct Action {
     ActionFunction func;

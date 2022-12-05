@@ -150,7 +150,7 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	rshift.pressed = false;
 	//TODO: begining of the ambient sample
 	ambient_sample = new Sound::Sample(data_path("Sounds/ambient.wav"));
-	loop(*ambient_sample);
+	bgm_playing_sample = loop(*ambient_sample);
 }
 
 Object* PlayMode::makeObject(std::string name, std::string model_name, Team team) {
@@ -248,13 +248,13 @@ void PlayMode::create_levels() {
 	level_guidance.push_back("Uh oh, enemy3 will survive a hit... After typing the line to have the brawler attack, press enter to move to the next line. Then have the brawler attack enemy3 again. Press shift + enter to submit both lines.");
 	level_guidance.push_back("Enemy4 has a powerful attack coming up! The caster can also \"freeze\" enemies, making them unable to move every third turn. Freeze enemy4 and then attack him five times with the brawler. If you get tired of typing, just enter the first few letters of a word and let autocompletion take care of the rest!");
 	level_guidance.push_back("Enemy5 will take three hits, and he does a lot of damage! If you just attack him, you'll lose. After the brawler attacks once, use the \"healer\" to \"heal\" the \"brawler\". Then have the brawler finish him off.");
-	level_guidance.push_back("Your last unit is an ranger, who can attack faster than the brawler but has limited ammo! Try having the \"ranger\" \"shoot\" enemy6 twice before he has a chance to attack!");
-	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the brawler attack enemy7, and then type \"end\" below the last line to end the loop. If this fight is too slow for your taste, try holding ctrl to speed things up!");
+	level_guidance.push_back("Your last unit is a ranger, who can attack faster than the brawler but has limited ammo! Try having the \"ranger\" \"shoot\" enemy6 twice before he has a chance to attack!");
+	level_guidance.push_back("Enemy7 has a lot of health. It would take a lot of lines to beat him... You can use loops! Type \"while (true)\" and hit enter, have the brawler attack enemy7, and then type \"end\" below the last line to end the loop. While loops are extremely useful, but be careful: all condition checks, like the one on the WHILE line, take 1/8 of a turn to execute. You can hold CTRL to speed up the fight, or press ESC to end it.");
 	level_guidance.push_back("You can also check properties. Try shooting enemy8 \"while (ranger.arrows > 0)\", and then use the brawler afterwards. Try typing just 'RANGER.' (or 'ENEMY8.', 'BRAWLER.', etc.) and check out the full property list in the info box; see if you can guess how many arrows and attacks it will take to score a kill!");
-	level_guidance.push_back("If statements work the same way. Try checking \"if (brawler.health < 100)\" before healing him, then repeatedly attack enemy9. Remember the \"end\"! You can also chain conditions with \"IF (this)\" \"AND (that)\", with the AND on a new line. OR works too.");
+	level_guidance.push_back("If statements work the same way. Try checking \"if (brawler.health < 100)\" before healing him, then repeatedly attack enemy9 (100 is the brawler's maximum health, but this is not true of all units; have a look at the property window). Remember the \"end\"! You can also chain conditions with \"IF (this)\" \"AND (that)\", with the AND on a new line. OR works too.");
 	level_guidance.push_back("Alright, time to test everything you've learned! Enemy10 is tough, but you can do it!");
 	level_guidance.push_back("Gunners are very powerful! Be careful of Vrop's attacks.");
-	level_guidance.push_back("Speedsters like Grum can attack multiple times in a row! Make sure your code is efficient.");
+	level_guidance.push_back("Speedsters like Grum can attack multiple times in a row! Make sure your code is efficient. If you want to know just how fast Grum's attacks are, type 'GRUM.' to check his action info!");
 	level_guidance.push_back("Tanks take a lot of damage. Be patient and make sure your code is robust enough to last a while against Yormun.");
 	level_guidance.push_back("Not all monsters are the same. Gunner VropVrop is even more powerful!");
 	level_guidance.push_back("You can face multiple enemies at once! Make sure your code handles both Fargoth and Rupol.");
@@ -843,19 +843,7 @@ void PlayMode::init_compiler() {
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
-	if (game_end) {
-		return false;
-	} else if (!game_start) {
-		if (evt.type == SDL_KEYDOWN) {
-			if (evt.key.keysym.sym == SDLK_RETURN) {
-				game_start = true;
-				return true;
-			}
-		}
-		return false;
-	}
 	if (evt.type == SDL_KEYDOWN) {
-		// font_size = 16;
 		if (evt.key.keysym.sym == SDLK_LCTRL) {
 			lctrl.pressed = true;
 			return true;
@@ -883,6 +871,28 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			rshift.pressed = false;
 			return true;
 		}
+	}
+
+	if (evt.type == SDL_KEYDOWN && (lctrl.pressed || rctrl.pressed) && evt.key.keysym.sym == SDLK_m) {
+		music_muted = !music_muted;
+		if (music_muted) {
+			bgm_playing_sample->set_volume(0.f);
+		} else {
+			bgm_playing_sample->set_volume(1.f);
+		}
+		return true;
+	}
+
+	if (game_end) {
+		return false;
+	} else if (!game_start) {
+		if (evt.type == SDL_KEYDOWN) {
+			if (evt.key.keysym.sym == SDLK_RETURN) {
+				game_start = true;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	if (!turn_done) {
@@ -1265,6 +1275,9 @@ void PlayMode::reset_level() {
 	}
 	reset_energy();
 	clear_animations();
+	turn_time = 0.f;
+	execution_line_index = -1;
+	enemy_execution_line_index = -1;
 }
 
 void PlayMode::next_level() {
@@ -1291,10 +1304,41 @@ void PlayMode::next_level() {
 	// Compiler should recognize only those objects that exist in this level
 	player_compiler.clearObjects();
 	enemy_compiler.clearObjects();
+	/*
 	for (Object *u : player_units) {
 		player_compiler.addObject(u);
 		enemy_compiler.addObject(u);
 	}
+	*/
+	if (current_level >= first_brawler_level) {
+		player_compiler.addObject(brawler);
+		enemy_compiler.addObject(brawler);
+		brawler->start_position = glm::vec2(-6.f, -6.f);
+	} else {
+		brawler->start_position = glm::vec2(100.f, 0.f);
+	}
+	if (current_level >= first_caster_level) {
+		player_compiler.addObject(caster);
+		enemy_compiler.addObject(caster);
+		caster->start_position = glm::vec2(-6.f, 6.f);
+	} else {
+		caster->start_position = glm::vec2(100.f, 0.f);
+	}
+	if (current_level >= first_healer_level) {
+		player_compiler.addObject(healer);
+		enemy_compiler.addObject(healer);
+		healer->start_position = glm::vec2(-6.f, -2.f);
+	} else {
+		healer->start_position = glm::vec2(100.f, 0.f);
+	}
+	if (current_level >= first_ranger_level) {
+		player_compiler.addObject(ranger);
+		enemy_compiler.addObject(ranger);
+		ranger->start_position = glm::vec2(-6.f, 2.f);
+	} else {
+		ranger->start_position = glm::vec2(100.f, 0.f);
+	}
+
 	for (Object* u : enemy_units[current_level]) {
 		player_compiler.addObject(u);
 		enemy_compiler.addObject(u);
@@ -1338,8 +1382,21 @@ void PlayMode::update(float elapsed) {
 	if (!turn_done) {
 		if (!player_done || !enemy_done) {
 			if (turn_time <= 0.0f) {
-				take_turn();
 				turn_time = turn_duration();
+				if (turn == Turn::PLAYER && player_statement != nullptr) {
+					if (player_time >= player_statement->duration) {
+						turn_time = std::min(player_statement->base_duration, turn_duration());
+					} else {
+						turn_time = 0.5f;
+					}
+				} else if (turn == Turn::ENEMY && enemy_statement != nullptr) {
+					if (enemy_time >= enemy_statement->duration) {
+						turn_time = std::min(enemy_statement->base_duration, turn_duration());
+					} else {
+						turn_time = 0.5f;
+					}
+				}
+				take_turn();
 			} else {
 				if (lctrl.pressed && rctrl.pressed) {
 					turn_time -= elapsed * 100.f;
@@ -1693,7 +1750,7 @@ void PlayMode::render(){
 
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < text_buffer.size(); i++){
-		if ((int)i == execution_line_index) {
+		if (!turn_done && (int)i == execution_line_index) {
 			switch (execution_result) {
 			case ExecutionResult::SUCCESS:
 				pen_color = execute_success_color;
@@ -2051,7 +2108,7 @@ void PlayMode::drawEnemyCode() {
 
 	glm::u8vec4 pen_color = default_line_color;
 	for(size_t i = 0; i < enemy_text_buffer.size(); i++){
-		if ((int)i == enemy_execution_line_index) {
+		if (!turn_done && (int)i == enemy_execution_line_index) {
 			switch (execution_result) {
 			case ExecutionResult::SUCCESS:
 				pen_color = execute_success_color;

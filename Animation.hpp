@@ -45,12 +45,14 @@ struct Animation {
 	Scene::Transform* transform;
 	AnimationType type;
 	size_t id;
+	float duration = 0.f;
 	bool sound_playing;
+	Animation(float duration);
 	bool update(float update_time);
 };
 
 struct MoveAnimation : Animation {
-	MoveAnimation(Object* source, Object* target);
+	MoveAnimation(Object* source, Object* target, float duration);
 	Object* health_target;
 	bool update(float update_time);
 	glm::vec3 target_position;
@@ -64,19 +66,19 @@ struct DeathAnimation : Animation {
 };
 
 struct EnergyAnimation : Animation {
-	EnergyAnimation(EnergyType nrg, Object *target);
+	EnergyAnimation(EnergyType nrg, Object *target, float duration);
 	Object* energy_target;
 	EnergyType energy_type;
 	bool update(float update_time);
 };
 
 struct ShootAnimation : MoveAnimation {
-	ShootAnimation(Object* target);
+	ShootAnimation(Object* target, float duration);
 	bool update(float update_time);
 };
 
 struct WaveAnimation : Animation {
-	WaveAnimation(Object* target, Compiler* input_compiler);
+	WaveAnimation(Object* target, Compiler* input_compiler, float duration);
 	Object* wave_target;
 	bool wave_hit;
 	Compiler* compiler;
@@ -84,7 +86,7 @@ struct WaveAnimation : Animation {
 };
 
 struct BoltAnimation : MoveAnimation {
-	BoltAnimation(Object* source, Object* target);
+	BoltAnimation(Object* source, Object* target, float duration);
 	bool update(float update_time);
 };
 
