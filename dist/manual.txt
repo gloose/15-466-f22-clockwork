@@ -1,0 +1,43 @@
+[Story]
+
+Thousands of years in the future, society has evolved to live in harmony with robots. But one day, an evil mastermind activates a secret code that turns all the robots evil. Using them along with an army of monsters, he threatens to enslave the land. Luckily, four heroic robots were having trouble connecting to the Wi-Fi during that time and were unaffected. Using these four robots, your goal is to fight off the evil army and save the world. To do this, you will write code in a simple language we’ve designed to control the robots.
+
+[How the Game Works]
+
+On the left side of the screen, you'll see a box with the enemy's code. This is what the enemy is planning to do. Use this to think about your strategy. Below that is another box for your code. This box works exactly like a text editor. You an use enter to create a new line break, arrow keys to move around, and backspace to delete text or move to the previous line. When you are satisfied with your code, hit shift + enter. A tutorial will guide you through what code to type. 
+
+Each line of code has an associated "length." Conditional checks have length 0.25, and action statements have varying lengths, with some faster and some slower. Say the line has length L. When execution begins, the game starts with the player's first line and grants the player 1 turn. If L > 1, then the value of L will be reduced from L to L - 1, and then the player's turn will end. If L < 1, then the line is successfully executed, and either the condition will be checked or the action will be performed. Now, the player has 1 - L turns remaining. The game will move on to the player's next code statement and then repeat the process. If the player still has enough time, execute it, and if not, end the turn. When the player's turn ends, the enemy gets their turn with the exact same rules. The game will go back and forth from player to enemy until all lines have been executed or one team loses all of their units.
+
+If a level is taking a long time to execute, the CTRL key will speed up the game 10x. If you really want to speed run it, holding both CTRL keys will stack to 100x. If you land in an infinite loop or realize that you made a stupid mistake and don't want to wait for execution to end, the ESC key will abort the level and bring you back into the text editing mode. If a level ends, every object's properties will be reset to their original value, and dead units will be brought back to life. If a level ends with the player losing, the same level can be replayed at no cost, and if a level ends with the player winning, the player moves on to the next level. There are 30 levels to beat in order to win the game.
+
+[Language Specification]
+
+The tutorial in the first 10 levels will walk you through everything you need to know to play the game, but in case you want to know the coding syntax all up front, this section is for you.
+
+There are three types of things in this game: objects, actions, and properties. The basic line of code is object.action(object). This is known as an Action Statement. For the sake of example, we'll make it brawler.attack(enemy). If you simply type the letter b, autofill will recommend the rest of the word. Enter or tab will accept the autofill, or you can type another symbol like period or parentheses, and then the autofill will be accepted followed by the special character you typed. 
+
+Upon typing brawer., a property box will appear by the brawler giving you a list of its actions and properties, as well as some information about them like how long they take. That way, if you aren't sure what your options are, you'll receive advice. Then, just like with before, autofill will recommend attack as soon as you type the letter a. Finally, autofill will recommend enemy after e, and then you can submit.
+
+An If Statement is of the form:
+
+IF (condition)
+
+[list of Action Statements]
+
+END
+
+The condition can be many things. First, it can be a constant. IF (1) is valid syntax. Any nonzero constant will return true. Second, it can be a property, as a property will evaluate to a constant. IF (brawler.health) will evaluate to true as long as the health is not zero. Third, it can be a comparison. IF (1 == 1) and IF (1 <= 2) are both valid syntax, as are the equivalents if you substitute the constants with properties. A While Statement works the exact same way, with WHILE (condition) [statements] END. Nested IF/WHILE statements are fine, as long as you remember all of the ENDs. 
+
+You are also allowed to use AND and OR in conditionals. This is the syntax:
+
+IF (condition1)
+
+AND (condition2)
+
+OR (condition3)
+
+[statements]
+
+END
+
+In other words, each conjunction/disjunction should be on its own line and have its own set of parentheses. Each statement should also be on its own line. Whitespace doesn't matter, but line breaks do. Finally, there are two objects, RANDOM_ENEMY and RANDOM_PLAYER, that you can use if you'd like to include randomness in your code. Keep in mind that in order to avoid a runtime error, these objects do not have properties or actions and can only be the object inside an action. 
