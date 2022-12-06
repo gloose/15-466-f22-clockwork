@@ -150,7 +150,6 @@ PlayMode::PlayMode() : scene(*character_scene) {
 	rshift.pressed = false;
 	//TODO: begining of the ambient sample
 	ambient_sample = new Sound::Sample(data_path("Sounds/ambient.wav"));
-	bgm_playing_sample = loop(*ambient_sample);
 }
 
 Object* PlayMode::makeObject(std::string name, std::string model_name, Team team) {
@@ -888,6 +887,7 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	} else if (!game_start) {
 		if (evt.type == SDL_KEYDOWN) {
 			if (evt.key.keysym.sym == SDLK_RETURN) {
+				bgm_playing_sample = loop(*ambient_sample);
 				game_start = true;
 				return true;
 			}
