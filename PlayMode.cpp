@@ -2207,7 +2207,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		int y = 450;
 		scene.draw(*camera);
 		//not working cannot set font size
-		glm::ivec2 new_pos = drawTextLarge("CLOCKWORK", glm::ivec2(x,y), 500, 54, default_color, false);
+		glm::ivec2 new_pos = drawTextLarge("Code Quest", glm::ivec2(x,y), 500, 54, default_color, false);
 		drawText("PRESS ENTER", glm::ivec2(new_pos.x + 500, 100), 500);
 	}
 

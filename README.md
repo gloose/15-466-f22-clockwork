@@ -112,6 +112,7 @@ In general, the player and the enemy take turns executing one line of code at a 
 ## Sources:
 
 Font: [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono)
+Some models and sounds: see dist/attribution.txt
 
 This game was built with [NEST](NEST.md).
 
